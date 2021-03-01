@@ -2,7 +2,7 @@
 
 Key | Value
 ------------ | -------------
- Date: | March 2nd 2021 
+ Date: | March 9th 2021 
  Time: | TBD 
  Moderator:| DontPanicBurns 
  Location: | discord server 

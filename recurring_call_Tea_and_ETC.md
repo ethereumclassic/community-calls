@@ -6,11 +6,10 @@
 
 Stevan Lohja is inviting you to a scheduled Zoom meeting.
 
-Topic: Afternoon Tea and ETC meetup
-Time: This is a recurring meeting Meet anytime
+Topic: **Afternoon Tea and ETC meetup**
 
-Join Zoom Meeting
-https://us02web.zoom.us/j/84888164918?pwd=cmpUak9tZ1N5akZrUGlReWNWSjJydz09
+Join Zoom Meeting: **https://us02web.zoom.us/j/84888164918?pwd=cmpUak9tZ1N5akZrUGlReWNWSjJydz09**
 
-Meeting ID: 848 8816 4918
-Passcode: sudoetc
+Meeting ID: **848 8816 4918**
+
+Passcode: **sudoetc**

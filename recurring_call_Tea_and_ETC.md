@@ -6,13 +6,11 @@
 
 Stevan Lohja is inviting you to a scheduled Zoom meeting.
 
-Topic: Afternoon Tea and ETC
-
-Time:  Apr 13, 2021 07:00 AM Central Time (US and Canada)
+Topic: Afternoon Tea and ETC meetup
+Time: This is a recurring meeting Meet anytime
 
 Join Zoom Meeting
-https://us04web.zoom.us/j/73748804363?pwd=VGJ2VmFxRmhFR2tRdWd0MTBnMUhWQT09
+https://us02web.zoom.us/j/84888164918?pwd=cmpUak9tZ1N5akZrUGlReWNWSjJydz09
 
-Meeting ID: 737 4880 4363
-
+Meeting ID: 848 8816 4918
 Passcode: sudoetc

@@ -1,18 +1,15 @@
 # Afternoon Tea and ETC
 
-**This is a recurring event. The next tea time is Apr 6, 2021 01:00 PM Central Time (US and Canada)**
+**This is a recurring event. The next tea time is Apr 13, 2021 07:00 AM Central Time (US and Canada)**
 
 ![tea](https://cdn.vox-cdn.com/thumbor/ttQXQU3gDonx6ljifwQQcoUR9Ug=/1200x0/filters:no_upscale()/cdn.vox-cdn.com/uploads/chorus_asset/file/629484/Screen_Shot_2014-08-07_at_8.29.47_AM.0.png)
 
 Stevan Lohja is inviting you to a scheduled Zoom meeting.
 
-Topic: Afternoon Tea and ETC
+Topic: **Afternoon Tea and ETC meetup**
 
-Time:  Apr 6, 2021 01:00 PM Central Time (US and Canada)
+Join Zoom Meeting: **https://us02web.zoom.us/j/84888164918?pwd=cmpUak9tZ1N5akZrUGlReWNWSjJydz09**
 
-Join Zoom Meeting
-https://us04web.zoom.us/j/73748804363?pwd=VGJ2VmFxRmhFR2tRdWd0MTBnMUhWQT09
+Meeting ID: **848 8816 4918**
 
-Meeting ID: 737 4880 4363
-
-Passcode: sudoetc
+Passcode: **sudoetc**

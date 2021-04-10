@@ -2,7 +2,7 @@
 
 **This is a recurring event. The next tea time is Apr 13, 2021 07:00 AM Central Time (US and Canada)**
 
-![tea](https://cdn.vox-cdn.com/thumbor/ttQXQU3gDonx6ljifwQQcoUR9Ug=/1200x0/filters:no_upscale()/cdn.vox-cdn.com/uploads/chorus_asset/file/629484/Screen_Shot_2014-08-07_at_8.29.47_AM.0.png)
+<img src="img/afternoon_tea_and_etc.jpeg" alt="afternoon tea and etc" width="420px">
 
 Stevan Lohja is inviting you to a scheduled Zoom meeting.
 

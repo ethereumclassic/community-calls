@@ -1,6 +1,6 @@
 # Afternoon Tea and ETC
 
-**This is a recurring event. The next tea time is Apr 13, 2021 07:00 AM Central Time (US and Canada)**
+**This is a recurring event. The next tea time is Apr 20, 2021 12:00 PM Central Time (US and Canada)**
 
 <img src="img/afternoon_tea_and_etc.jpeg" alt="afternoon tea and etc" width="420px">
 

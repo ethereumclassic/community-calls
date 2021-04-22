@@ -1,10 +1,10 @@
 # Afternoon Tea and ETC
 
-**This is a recurring event. The next tea time is Apr 20, 2021 12:00 PM Central Time (US and Canada)**
+Mark your calendars! The next tea time is **Apr 27, 2021 12:00 UTC**
 
 <img src="img/afternoon_tea_and_etc.jpeg" alt="afternoon tea and etc" width="420px">
 
-Stevan Lohja is inviting you to a scheduled Zoom meeting.
+Tea and ETC is an online Ethereum Classic meetup open to the public. Anyone is welcomed to join to talk ETC, crypto, and have open discussion! Use the meeting details below to join:
 
 Topic: **Afternoon Tea and ETC meetup**
 

@@ -1,6 +1,6 @@
 # Afternoon Tea and ETC
 
-Mark your calendars! The next tea time is **Apr 27, 2021 12:00 UTC**
+Mark your calendars! The next tea time is **May 11, 2021 07:00 UTC**.
 
 <img src="img/afternoon_tea_and_etc.jpeg" alt="afternoon tea and etc" width="420px">
 

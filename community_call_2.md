@@ -7,7 +7,7 @@ Key | Value
  Location: | discord server 
  Length: | 30+ minutes 
 
-Agenda
+## Agenda
 
 - Check In 
 - Introductions (start at 1505)
@@ -15,16 +15,18 @@ Agenda
 - New Website
 - Open Discussion
 
----
+## Staus
 
 Call Complete and Lasted 50 Minutes
 
-Notes
+## Notes
 
-- Create marketing videos
+- Need to create marketing/educational videos
+- Need to create apps/use cases for ETC
 - Showed new website WIP
 - Idea to showcase ETC creators on website to encourage content creation
-- Discussed Treasury
+- Discussed Treasury Withdrawl and 2nd Proposal planned by COOP
+- Remarks on how ETC ecosystem is growing rapidly and organically in recent months
 - Discussed Alternative Grants Systems
 - Will create a reposity to brainstorm ideas for ETC community DAO
-- Do call again next week
+- Do call again next week, same time same place

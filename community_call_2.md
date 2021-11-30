@@ -30,5 +30,6 @@ Key | Value
 - Discussed Treasury Withdrawl and 2nd Proposal planned by COOP
 - Remarks on how ETC ecosystem is growing rapidly and organically in recent months
 - Discussed Alternative Grants Systems
+- Need some kind of vetting system for apps to stop scams
 - Will create a reposity to brainstorm ideas for ETC community DAO
 - Do call again next week, same time same place

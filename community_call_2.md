@@ -17,7 +17,9 @@ Key | Value
 
 ## Staus
 
-Call Complete and Lasted 50 Minutes
+- Call Completed
+- Lasted 50 Minutes
+- ~7 Attendees
 
 ## Notes
 

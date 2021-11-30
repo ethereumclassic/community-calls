@@ -15,4 +15,16 @@ Agenda
 - New Website
 - Open Discussion
 
-Let's try and do this weekly on Tuesday
+---
+
+Call Complete and Lasted 50 Minutes
+
+Notes
+
+- Create marketing videos
+- Showed new website WIP
+- Idea to showcase ETC creators on website to encourage content creation
+- Discussed Treasury
+- Discussed Alternative Grants Systems
+- Will create a reposity to brainstorm ideas for ETC community DAO
+- Do call again next week

@@ -10,7 +10,9 @@ You can join The ETC Discord by visiting ethereumclassic.org/discord, this chat 
 
 These calls are recorded and uploaded to youtube, where you can subscribe, like and share.
 
-- Today we have a open discussion..
+[If housekeeping] Before we start I just wanted to mention...
+
+- Today we have a open discussion...
 - Today we are joined by special guest XXX to discuss YYY. We have been collecting questions from the community this week and have a few lined up, but there will be opportunity later on to ask questions directly if you are joining us in the voice chat.
 
 ## Outro

@@ -17,6 +17,8 @@ These calls are recorded and uploaded to youtube, where you can subscribe, like 
 
 ## Outro
 
+[remember to check #community-call-notes channel]
+
 So that concludes this week's call, thank you to those who contributed and for listening and sharing.
 
 If we didn't cover something you'd like to discuss, you can always submit your questions and topic suggestions in the #community-calls channel and we can bring it up in a future talk.

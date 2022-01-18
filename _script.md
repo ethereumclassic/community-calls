@@ -13,7 +13,7 @@ These calls are recorded and uploaded to youtube, where you can subscribe, like 
 [If housekeeping] Before we start I just wanted to mention a bit of housekeeping... ... Now, without further a-do... 
 
 - Today we have a open discussion...
-- Today we are joined by special guest XXX to discuss YYY. We have been collecting questions from the community this week and have a few lined up, but there will be opportunity later on to ask questions directly if you are joining us in the voice chat.
+- Today we are joined by special guest XXX to discuss YYY as well as various other ETC related topics. We have been collecting questions from the community this week and have a few lined up, but there will be opportunity later on to ask questions directly if you are joining us in the voice chat.
 
 ## Outro
 

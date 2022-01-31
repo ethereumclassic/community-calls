@@ -6,8 +6,8 @@ Every week on a Tuesday we get together to chat about ETC.
 
 ## Recorded Calls
 
-- [009 2022.01.18 Q&A with Code Burns: Multisig Fund](https://www.youtube.com/watch?v=GlRpBhsN7Ck
-)
+- [010 2022.01.25 DAO Approaches, Obelus, The SHA3 Debate Continues...](https://www.youtube.com/watch?v=6DRZEaKkpb4)
+- [009 2022.01.18 Q&A with Code Burns: Multisig Fund](https://www.youtube.com/watch?v=GlRpBhsN7Ck)
 - [008 2022.01.11 The Merge Opportunities, SHA3, Mystique Merged, Soteria](https://www.youtube.com/watch?v=Kirnjy04PkY)
 - [007 2022.01.04 Hebe, App Audits, Mutisig Test, Call Access, Website](https://www.youtube.com/watch?v=qnfoGh6UZyM)
 - [006 2021.12.28 Development Tiers, Roadmap, Erigon, Corporates, SHA3](https://www.youtube.com/watch?v=hLeaPLoTYOE)

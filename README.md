@@ -6,6 +6,7 @@ Every week on a Tuesday we get together to chat about ETC.
 
 ## Recorded Calls
 
+- [011 2022.02.01 SHA3 Next Steps, ETCDAO Rising](https://www.youtube.com/watch?v=ad_grFagA5k)
 - [010 2022.01.25 DAO Approaches, Obelus, The SHA3 Debate Continues...](https://www.youtube.com/watch?v=6DRZEaKkpb4)
 - [009 2022.01.18 Q&A with Code Burns: Multisig Fund](https://www.youtube.com/watch?v=GlRpBhsN7Ck)
 - [008 2022.01.11 The Merge Opportunities, SHA3, Mystique Merged, Soteria](https://www.youtube.com/watch?v=Kirnjy04PkY)

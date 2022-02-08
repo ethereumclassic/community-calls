@@ -2,15 +2,7 @@
 
 Hello and welcome to Ethereum Classic Community Call number [N] on the [Day] of [Month], 202[X].
 
-ETC Community Calls is a weekly voice chat that happens on the Ethereum Classic Discord Server every Tuesday, usually at 1500 UTC.
-
-The content of these calls is decided by the ETC community, each week anyone can submit questions and topic suggestions about anything related to Ethereum Classic.
-
-You can join The ETC Discord by visiting ethereumclassic.org/discord, this chat is held in the #community-calls channel.
-
-These calls are recorded and uploaded to youtube, where you can subscribe, like and share.
-
-[If housekeeping] Before we start I just wanted to mention a bit of housekeeping... ... Now, without further a-do... 
+[If housekeeping/announcements] Before we start I just wanted to mention a bit of housekeeping... ... Now, without further a-do... 
 
 - Today we have a open discussion...
 - Today we are joined by special guest XXX to discuss YYY as well as various other ETC related topics. We have been collecting questions from the community this week and have a few lined up, but there will be opportunity later on to ask questions directly if you are joining us in the voice chat.

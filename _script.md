@@ -5,7 +5,7 @@ Hello and welcome to Ethereum Classic Community Call number [N] on the [Day] of 
 [If housekeeping/announcements] Before we start I just wanted to mention a bit of housekeeping... ... Now, without further a-do... 
 
 - Today we have a open discussion...
-- Today we are joined by special guest XXX to discuss YYY as well as various other ETC related topics. We have been collecting questions from the community this week and have a few lined up, but there will be opportunity later on to ask questions directly if you are joining us in the voice chat.
+- Today we are joined by special guest XXX to discuss YYY as well as various other ETC related topics. We have been collecting questions from the community this week and have a few lined up, but there will be opportunity later on to ask questions directly if you are joining us in the voice chat, or you can post a question in the #community-calls channel.
 
 ## Outro
 

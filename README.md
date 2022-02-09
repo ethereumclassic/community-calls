@@ -2,7 +2,11 @@
 
 # ETC Community Calls
 
-Every week on a Tuesday we get together to chat about ETC.
+Every week on a Tuesday we get together to chat about ETC. All are welcome.
+
+The ETC Discord can be joined at https://ethereumclassic.org/discord
+
+Please join us in the #community-calls channel to ask questions or bring up topics.
 
 ## Recorded Calls
 

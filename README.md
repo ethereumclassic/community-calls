@@ -12,6 +12,7 @@ Please join us in the #community-calls channel to ask questions or bring up topi
 
 [Ethereum Classic Community Calls Youtube Channel](https://www.youtube.com/channel/UCp07VPnC1ejyAp5gMvvA4dw/videos)
 
+- [014 2022.02.22 Dev Call 22, DAO Hacker Unmasked, New Website, Conference Plans](https://www.youtube.com/watch?v=UD7t7qMNoyk)
 - [013 2022.02.15 The SHA3 Debate Continues, Hybrid PoW](https://www.youtube.com/watch?v=HQ9IKu3PVkA)
 - [012 2022.02.08 Q&A with Afri, ETCDAO Gigs, Uncle Rate](https://www.youtube.com/watch?v=GCBv1VCN2tE)
 - [011 2022.02.01 SHA3 Next Steps, ETCDAO Rising](https://www.youtube.com/watch?v=ad_grFagA5k)

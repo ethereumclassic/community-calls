@@ -12,7 +12,7 @@ Please join us in the #community-calls channel to ask questions or bring up topi
 
 [Ethereum Classic Community Calls Youtube Channel](https://www.youtube.com/channel/UCp07VPnC1ejyAp5gMvvA4dw/videos)
 
-- [017 2022.03.22 The Fithening, Fixed Supply, Complexity](https://www.youtube.com/watch?v=zMdr7GpZI9s)
+- [018 2022.03.22 The Fithening, Fixed Supply, Complexity](https://www.youtube.com/watch?v=zMdr7GpZI9s)
 - [017 2022.03.15 Proof of Stake Discussion, Community Updates](https://www.youtube.com/watch?v=Gbaa9TLXW9Y)
 - [016 2022.03.08 Principles and Philosophy with Donald McIntyre](https://www.youtube.com/watch?v=PQG0kD_67No)
 - [015 2022.03.01 Reaching Rough Consensus](https://www.youtube.com/watch?v=llM1So2jB5k)

@@ -1,4 +1,6 @@
-<p align="center"><img src="https://github.com/ethereumclassic/community-calls/raw/main/etc_cc_logo.png" width="200" height="200"></p>
+<div align="center">
+  
+<img src="https://github.com/ethereumclassic/community-calls/raw/main/etc_cc_logo.png" width="200" height="200">
 
 # ETC Community Calls
 
@@ -11,3 +13,7 @@ Please join us in the #community-calls channel to ask questions or bring up topi
 ## Recorded Calls
 
 [Ethereum Classic Community Calls Youtube Channel](https://www.youtube.com/channel/UCp07VPnC1ejyAp5gMvvA4dw/videos)
+
+  
+</div>
+

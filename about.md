@@ -1,0 +1,3 @@
+# About ETCCC
+
+This is a placeholder for more content...

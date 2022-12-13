@@ -1,35 +1,53 @@
 import { Link } from "gatsby";
 import { GatsbyImage, getImage } from "gatsby-plugin-image";
 import React from "react";
-import "twin.macro";
+import tw from "twin.macro";
+import ALink from "./aLink";
 
 import DateTime from "./dateTime";
 import GeneratedBanner from "./generatedBanner";
 
-const ExistingImageBanner = ({ episode }) => {
+const ExistingImageBanner = ({ episode, thumb }) => {
   return (
-    <div tw="bg-stone-900">
+    <div css={[tw`bg-slate-100`, thumb && tw`hover:bg-slate-200`]}>
       <GatsbyImage image={getImage(episode.frontmatter.image)} tw="-m-0.5" />
-      <div tw="flex text-white p-3">
-        <div tw="flex-auto">{episode.frontmatter.name}</div>
-        <div>
-          <DateTime {...episode.frontmatter} local={false} />
+      <div
+        css={[
+          tw`flex text-slate-700 p-3`,
+          thumb && tw`flex-col text-sm text-center hover:text-slate-800`,
+        ]}
+      >
+        <div tw="flex-auto">
+          <div tw="font-bold">{episode.frontmatter.name}</div>
+          {!thumb && (
+            <div>
+              <ALink href={episode.frontmatter.link}>
+                {episode.frontmatter.location}
+              </ALink>
+            </div>
+          )}
+        </div>
+        <div css={[!thumb && tw`text-right`]}>
+          <DateTime
+            {...episode.frontmatter}
+            short={thumb}
+            css={[!thumb && tw`font-bold`]}
+          />
+          {!thumb && <DateTime {...episode.frontmatter} local={true} />}
         </div>
       </div>
     </div>
   );
 };
 
-const EpisodeBanner = ({ episode }) => {
-  // if we have the image, return it at the right resolution
+const EpisodeBanner = ({ episode, thumb }) => {
   return (
-    <div tw="drop-shadow-xl rounded-2xl overflow-hidden">
+    <div tw="overflow-hidden">
       {episode.frontmatter.image ? (
-        <ExistingImageBanner {...{ episode }} />
+        <ExistingImageBanner {...{ episode, thumb }} />
       ) : (
-        <GeneratedBanner {...{ episode }} />
+        <GeneratedBanner {...{ episode, thumb }} />
       )}
-      {/* <pre>{JSON.stringify(episode, null, 2)}</pre> */}
     </div>
   );
 };

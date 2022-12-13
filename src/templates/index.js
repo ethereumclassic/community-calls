@@ -4,7 +4,7 @@ import { Helmet } from "react-helmet";
 import "twin.macro";
 
 import Layout from "../components/layout";
-import EpisodeCell from "../components/episodeCell";
+import EpisodeBanner from "../components/episodeBanner";
 
 const IndexPage = ({ data }) => {
   console.log("data", data);
@@ -17,9 +17,15 @@ const IndexPage = ({ data }) => {
           dangerouslySetInnerHTML={{ __html: data.md.html }}
         />
       </main>
-      <div tw="grid grid-cols-5 gap-2">
+      <div tw="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
         {data.episodes.nodes.map((episode) => (
-          <EpisodeCell id={episode.id} episode={episode} />
+          <Link
+            id={episode.id}
+            to={episode.fields.slug}
+            tw="rounded-lg overflow-hidden shadow-md"
+          >
+            <EpisodeBanner {...{ episode, thumb: true }} />
+          </Link>
         ))}
       </div>
     </Layout>
@@ -29,31 +35,6 @@ const IndexPage = ({ data }) => {
 export default IndexPage;
 
 export const pageQuery = graphql`
-  fragment EpisodeSummary on MarkdownRemark {
-    id
-    fields {
-      slug
-      episode
-    }
-    frontmatter {
-      date(formatString: "YYYY.MM.DD")
-      time
-      location
-      name
-    }
-    frontmatter {
-      image {
-        childImageSharp {
-          gatsbyImageData(
-            placeholder: BLURRED
-            width: 256
-            aspectRatio: 1.78
-            transformOptions: { cropFocus: CENTER }
-          )
-        }
-      }
-    }
-  }
   query ($id: String!) {
     site {
       siteMetadata {
@@ -69,7 +50,18 @@ export const pageQuery = graphql`
       filter: { frontmatter: { date: { ne: null } } }
     ) {
       nodes {
-        ...EpisodeSummary
+        frontmatter {
+          image {
+            childImageSharp {
+              gatsbyImageData(
+                width: 256
+                aspectRatio: 1.78
+                transformOptions: { cropFocus: CENTER }
+              )
+            }
+          }
+        }
+        ...EpisodeMeta
       }
     }
   }

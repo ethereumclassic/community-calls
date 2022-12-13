@@ -43,44 +43,43 @@ const ManyTimeZones = ({ dt, ...props }) => {
 
 // TODO add dropdown for common timezones?
 
-const DateTime = ({ date, time, many, local, timeOnly, ...props }) => {
+const DateTime = ({ date, time, many, local, timeOnly, short, ...props }) => {
   const dt = getDateTime({ date, time }, true);
+  // TODO move to another component
   if (many) {
     return <ManyTimeZones dt={dt} {...props} />;
   }
   const dtLocal = getDateTime({ date, time }, false);
   const isSameTimezone = dt.zone == dtLocal.zone;
   const isSameDate = dt.day == dtLocal.day;
-  if (local && !isSameTimezone) {
-    return (
-      <>
-        {dtLocal.toLocaleString({
-          ...(!isSameDate && {
-            day: "numeric",
-            month: "long",
-          }),
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: false,
-          timeZoneName: "shortGeneric",
-        })}
-      </>
-    );
+  if (local && isSameTimezone) {
+    return null;
   }
   return (
-    <>
-      {dt.toLocaleString({
-        ...(!timeOnly && {
-          year: "numeric",
-          day: "numeric",
-          month: "long",
-        }),
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-        timeZoneName: "short",
-      })}
-    </>
+    <div {...props}>
+      {local
+        ? dtLocal.toLocaleString({
+            ...(!isSameDate && {
+              day: "numeric",
+              month: short ? "short" : "long",
+            }),
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+            timeZoneName: "longGeneric",
+          })
+        : dt.toLocaleString({
+            ...(!timeOnly && {
+              year: "numeric",
+              day: "numeric",
+              month: short ? "short" : "long",
+            }),
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+            timeZoneName: "short",
+          })}
+    </div>
   );
 };
 

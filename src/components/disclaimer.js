@@ -13,7 +13,7 @@ const Disclaimer = () => {
     }
   `);
   return (
-    <div tw="bg-amber-100 rounded-xl p-5 text-amber-900 my-10 shadow-md">
+    <div tw="bg-amber-100 p-5 text-amber-900">
       <b>Disclaimer:</b> {site.meta.disclaimer}
     </div>
   );

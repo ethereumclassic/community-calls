@@ -8,7 +8,15 @@ import PrevNext from "../components/prevNext";
 import EpisodeBanner from "../components/episodeBanner";
 import Disclaimer from "../components/disclaimer";
 
-const IndexPage = ({ data }) => {
+const Card = ({ children, ...props }) => {
+  return (
+    <div tw="overflow-hidden rounded-2xl shadow-lg mb-14" {...props}>
+      {children}
+    </div>
+  );
+};
+
+const EpisodePage = ({ data }) => {
   const { episode, prev, next, site } = data;
   return (
     <Layout>
@@ -18,25 +26,66 @@ const IndexPage = ({ data }) => {
       </div>
       <PrevNext {...{ episode, prev, next }} />
       <main>
-        <EpisodeBanner episode={episode} />
-        <Disclaimer />
-        <div tw="bg-slate-50 m-auto py-10 sm:px-5 md:px-20 rounded-2xl shadow-lg mb-20">
-          <div tw="text-slate-300 text-2xl font-bold">Notes</div>
+        <Card>
+          <EpisodeBanner episode={episode} />
+        </Card>
+        <Card>
+          <Disclaimer />
+        </Card>
+        <Card tw="bg-white py-10 px-5 md:px-20">
           <article
             tw="prose max-w-none prose-slate"
             dangerouslySetInnerHTML={{ __html: episode.html }}
           />
-        </div>
+        </Card>
       </main>
     </Layout>
   );
 };
 
-export default IndexPage;
+export default EpisodePage;
 
 // TODO prev next
 
 export const pageQuery = graphql`
+  fragment EpisodeMeta on MarkdownRemark {
+    fields {
+      slug
+      episode
+    }
+    frontmatter {
+      name
+      guests
+      description
+      date(formatString: "YYYY-MM-DD")
+      time
+      location
+      link
+      tagline
+      host
+      cohost
+      recording {
+        name
+        link
+      }
+      offlineChat {
+        time
+        location
+        link
+      }
+      images {
+        childImageSharp {
+          id
+          gatsbyImageData(
+            aspectRatio: 1
+            transformOptions: { trim: 5 }
+            width: 256
+          )
+        }
+      }
+    }
+  }
+
   query ($id: String!, $prev: Int, $next: Int) {
     site {
       meta: siteMetadata {
@@ -45,52 +94,20 @@ export const pageQuery = graphql`
     }
     episode: markdownRemark(id: { eq: $id }) {
       html
-      fields {
-        slug
-        episode
-      }
       frontmatter {
-        name
-        guests
-        description
-        date(formatString: "YYYY-MM-DD")
-        time
-        location
-        tagline
-        link
-        recording {
-          name
-          link
-        }
-        host
-        cohost
         image {
           childImageSharp {
             gatsbyImageData(width: 900, transformOptions: { cropFocus: CENTER })
           }
         }
-        images {
-          childImageSharp {
-            gatsbyImageData(
-              aspectRatio: 1
-              transformOptions: { trim: 5 }
-              width: 256
-            )
-            id
-          }
-        }
-        offlineChat {
-          time
-          location
-          link
-        }
       }
+      ...EpisodeMeta
     }
     prev: markdownRemark(fields: { episode: { eq: $prev } }) {
-      ...EpisodeSummary
+      ...EpisodeMeta
     }
     next: markdownRemark(fields: { episode: { eq: $next } }) {
-      ...EpisodeSummary
+      ...EpisodeMeta
     }
   }
 `;

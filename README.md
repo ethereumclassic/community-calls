@@ -4,7 +4,7 @@
 
 # ETC Community Calls
 
-Every week on a Tuesday, usually at 1500 UTC, we get together to chat about ETC. All are welcome.
+Every week on a Tuesday, usually at 15:00 UTC, we get together to chat about ETC. All are welcome.
 
 The ETC Discord can be joined at https://ethereumclassic.org/discord
 

@@ -1,0 +1,71 @@
+---
+interface Props {
+  number: number;
+  description?: string;
+  date?: Date;
+  slug: string;
+  youtube?: string;
+  index?: number;
+}
+
+const { number, description, date, slug, youtube, index = 0 } = Astro.props;
+
+const formatDate = (d: Date) => {
+  return d.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};
+---
+
+<a
+  href={`/calls/${slug}`}
+  class="group block terminal-card rounded-lg overflow-hidden transition-all duration-300 border-glow-hover opacity-0 animate-fade-in-up"
+  style={`animation-delay: ${Math.min(index * 50, 500)}ms`}
+>
+  <!-- Content -->
+  <div class="p-4">
+    <!-- Header row: number + recording badge -->
+    <div class="flex items-center justify-between mb-2">
+      <span class="text-2xl font-display text-etc-green group-hover:text-etc-green/80 transition-colors">
+        #{number}
+      </span>
+      {youtube && (
+        <span class="badge-recording px-2 py-0.5 rounded text-[9px]">
+          REC
+        </span>
+      )}
+    </div>
+
+    <!-- Description as main title -->
+    {description ? (
+      <h3 class="font-mono text-sm text-gray-300 group-hover:text-gray-100 transition-colors line-clamp-2 mb-3">
+        {description}
+      </h3>
+    ) : (
+      <h3 class="font-mono text-sm text-gray-500 mb-3">
+        Community Call
+      </h3>
+    )}
+
+    <!-- Date -->
+    {date && (
+      <time class="text-xs font-mono text-gray-500">
+        {formatDate(date)}
+      </time>
+    )}
+  </div>
+
+  <!-- Bottom accent line -->
+  <div class="h-px bg-gradient-to-r from-transparent via-etc-green/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+</a>
+
+<style>
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+</style>

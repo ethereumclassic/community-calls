@@ -1,0 +1,48 @@
+---
+import { ViewTransitions } from 'astro:transitions';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+
+// Fontsource imports - fonts are bundled locally for better performance
+import '@fontsource-variable/jetbrains-mono';
+import '@fontsource/instrument-serif/400.css';
+import '@fontsource/instrument-serif/400-italic.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'ETC Community Calls - Weekly community discussions about Ethereum Classic' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0a0a0c" />
+    <link rel="icon" type="image/png" href="/etc_cc_logo.png" />
+    <title>{title}</title>
+    <ViewTransitions />
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <!-- Ambient glow effects -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+      <!-- Top left glow -->
+      <div class="absolute -top-40 -left-40 w-96 h-96 bg-etc-green/5 rounded-full blur-[120px]"></div>
+      <!-- Bottom right glow -->
+      <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-etc-green/5 rounded-full blur-[120px]"></div>
+    </div>
+
+    <Header />
+    <main class="flex-1 relative z-10">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <slot />
+      </div>
+    </main>
+    <Footer />
+  </body>
+</html>

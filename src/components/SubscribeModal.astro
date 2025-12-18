@@ -11,7 +11,7 @@ const icsUrl = siteConfig.icsUrl;
 const rssUrl = siteConfig.rssUrl;
 ---
 
-<dialog id={modalId} class="modal">
+<dialog id={modalId} class="modal subscribe-modal">
   <div class="modal-box bg-surface border border-etc-green/20 max-w-lg max-h-[90vh] overflow-y-auto">
     <form method="dialog">
       <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-gray-400 hover:text-gray-200">
@@ -264,7 +264,7 @@ const rssUrl = siteConfig.rssUrl;
       </form>
     </div>
   </div>
-  <form method="dialog" class="modal-backdrop">
+  <form method="dialog" class="modal-backdrop bg-black/50 backdrop-blur-sm">
     <button>close</button>
   </form>
 </dialog>
@@ -343,3 +343,9 @@ const rssUrl = siteConfig.rssUrl;
     }
   });
 </script>
+
+<style>
+  .subscribe-modal::backdrop {
+    background: transparent;
+  }
+</style>

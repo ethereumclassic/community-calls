@@ -18,7 +18,7 @@ const isUpcoming = call.data.date ? call.data.date > new Date() : false;
 
 <header class="mb-10">
   <!-- Status badge -->
-  <div class="flex items-center gap-3 mb-4">
+  <div class="flex items-center gap-3 mb-4 h-[26px]">
     {
       call.data.youtube ? (
         <span class="inline-flex items-center gap-2 px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-etc-green/80 border border-etc-green/20 rounded-full">
@@ -37,12 +37,12 @@ const isUpcoming = call.data.date ? call.data.date > new Date() : false;
 
   <!-- Title -->
   {callNumber === 0 ? (
-    <h1 class="font-display text-4xl md:text-5xl text-gray-100 mb-4">
+    <h1 class="font-display text-5xl md:text-6xl text-white mb-4">
       {call.data.description}
     </h1>
   ) : (
     <>
-      <h1 class="font-display text-4xl md:text-5xl text-gray-100 mb-4">
+      <h1 class="font-display text-5xl md:text-6xl text-white mb-4">
         Ethereum Classic Community Call #{callNumber}
       </h1>
 

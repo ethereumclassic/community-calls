@@ -45,12 +45,12 @@ export default function UpcomingBadge({ date, time }: Props) {
     return () => clearInterval(interval);
   }, [date, time]);
 
-  // Don't render anything until mounted on client
-  if (!mounted) return null;
   if (!isUpcoming) return null;
 
   return (
-    <span className="inline-flex items-center gap-2 px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-orange-400/80 border border-orange-400/20 rounded-full">
+    <span
+      className={`inline-flex items-center gap-2 px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-orange-400/80 border border-orange-400/20 rounded-full transition-opacity duration-300 ${mounted ? 'opacity-100' : 'opacity-0'}`}
+    >
       <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
       Upcoming
     </span>

@@ -3,11 +3,11 @@ description: Afternoon Tea and ETC
 date: 2021-05-11
 time: 0700 UTC
 location: Zoom
-link: https://us02web.zoom.us/j/84888164918?pwd=cmpUak9tZ1N5akZrUGlReWNWSjJydz09
+joinLink: https://us02web.zoom.us/j/84888164918?pwd=cmpUak9tZ1N5akZrUGlReWNWSjJydz09
 special: true
 ---
 
-![Afternoon Tea and ETC](/img/afternoon_tea_and_etc.jpeg)
+![Afternoon Tea and ETC](./afternoon_tea_and_etc.jpeg)
 
 Tea and ETC is an online Ethereum Classic meetup open to the public. Anyone is welcomed to join to talk ETC, crypto, and have open discussion!
 

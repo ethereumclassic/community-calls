@@ -5,6 +5,8 @@ import PageLayout from "./PageLayout.astro";
 import TimezoneBar from "../components/TimezoneBar.astro";
 import TerminalCard from "../components/TerminalCard.astro";
 import AnimatedContainer from "../components/AnimatedContainer.astro";
+import GreenRoom from "../components/GreenRoom.astro";
+import UpcomingBadge from "../components/UpcomingBadge";
 import { formatFullDate, formatShortDate } from "../lib/dates";
 
 interface Props {
@@ -15,16 +17,16 @@ interface Props {
 
 const { call, prevCall, nextCall } = Astro.props;
 
-// Use computed fields directly
+// Use computed fields from loader
 const callNumber = call.data.callNumber!;
 const youtubeId = call.data.youtubeId;
 
 const baseTitle = `ETC Community Call ${callNumber}`;
 const title = call.data.description
   ? `${baseTitle} - ${call.data.description}`
-  : call.data.title || call.data.name || baseTitle;
+  : baseTitle;
 
-// Prev/next navigation info using computed fields
+// Prev/next navigation info
 const prevNumber = prevCall?.data.callNumber;
 const nextNumber = nextCall?.data.callNumber;
 const prevSlug = prevCall?.data.slug;
@@ -87,31 +89,45 @@ const nextTooltip = nextCall
 
     <!-- Header -->
     <header class="mb-10">
-      <!-- Call number badge -->
+      <!-- Status badge -->
       <div class="flex items-center gap-3 mb-4">
         {
-          call.data.youtube && (
+          call.data.youtube ? (
             <span class="inline-flex items-center gap-2 px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-etc-green/80 border border-etc-green/20 rounded-full">
               <span class="w-1.5 h-1.5 rounded-full bg-etc-green animate-pulse-glow" />
               Recorded
             </span>
+          ) : call.data.date && call.data.time && (
+            <UpcomingBadge
+              client:only="react"
+              date={call.data.date.toISOString()}
+              time={call.data.time}
+            />
           )
         }
       </div>
 
       <!-- Title -->
-      <h1 class="font-display text-4xl md:text-5xl text-gray-100 mb-4">
-        Ethereum Classic Community Call #{callNumber}
-      </h1>
+      {callNumber === 0 ? (
+        <h1 class="font-display text-4xl md:text-5xl text-gray-100 mb-4">
+          {call.data.description}
+        </h1>
+      ) : (
+        <>
+          <h1 class="font-display text-4xl md:text-5xl text-gray-100 mb-4">
+            Ethereum Classic Community Call #{callNumber}
+          </h1>
 
-      <!-- Description -->
-      {
-        call.data.description && (
-          <p class="text-xl font-mono text-gray-400 mb-6">
-            {call.data.description}
-          </p>
-        )
-      }
+          <!-- Description -->
+          {
+            call.data.description && (
+              <p class="text-xl font-mono text-gray-400 mb-6">
+                {call.data.description}
+              </p>
+            )
+          }
+        </>
+      )}
 
       <!-- Meta info -->
       <div class="flex flex-wrap items-center gap-4 text-sm font-mono">
@@ -142,6 +158,17 @@ const nextTooltip = nextCall
 
       <!-- Timezone Display -->
       {call.data.time && <TimezoneBar time={call.data.time} />}
+
+      <!-- Green Room -->
+      {call.data.greenRoom && (
+        <div class="mt-6">
+          <GreenRoom
+            time={call.data.greenRoom.time}
+            location={call.data.greenRoom.location}
+            joinLink={call.data.greenRoom.joinLink}
+          />
+        </div>
+      )}
     </header>
 
     <!-- YouTube Embed -->
@@ -166,46 +193,29 @@ const nextTooltip = nextCall
       )
     }
 
-    <!-- Host Info -->
+    <!-- Hosts -->
     {
-      (call.data.host || call.data.cohost) && (
+      call.data.hosts && call.data.hosts.length > 0 && (
         <AnimatedContainer as="section" delay={300} class="mb-10">
           <TerminalCard class="p-5">
             <div class="flex flex-wrap gap-6">
-              {call.data.host && (
+              {call.data.hosts.map((host, index) => (
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 rounded-full bg-etc-green/10 border border-etc-green/20 flex items-center justify-center">
                     <span class="text-etc-green text-sm font-mono">
-                      {call.data.host.charAt(0)}
+                      {host.charAt(0)}
                     </span>
                   </div>
                   <div>
                     <div class="text-[10px] font-mono uppercase tracking-wider text-gray-500">
-                      Host
+                      {index === 0 ? "Host" : "Co-host"}
                     </div>
                     <div class="text-sm font-mono text-gray-200">
-                      {call.data.host}
+                      {host}
                     </div>
                   </div>
                 </div>
-              )}
-              {call.data.cohost && (
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-etc-green/10 border border-etc-green/20 flex items-center justify-center">
-                    <span class="text-etc-green text-sm font-mono">
-                      {call.data.cohost.charAt(0)}
-                    </span>
-                  </div>
-                  <div>
-                    <div class="text-[10px] font-mono uppercase tracking-wider text-gray-500">
-                      Co-host
-                    </div>
-                    <div class="text-sm font-mono text-gray-200">
-                      {call.data.cohost}
-                    </div>
-                  </div>
-                </div>
-              )}
+              ))}
             </div>
           </TerminalCard>
         </AnimatedContainer>

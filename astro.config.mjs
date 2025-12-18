@@ -2,6 +2,8 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import icon from 'astro-icon';
+import react from '@astrojs/react';
+import rehypeExternalLinks from 'rehype-external-links';
 
 // https://astro.build/config
 export default defineConfig({
@@ -10,7 +12,13 @@ export default defineConfig({
   vite: {
     plugins: [tailwindcss()]
   },
+  markdown: {
+    rehypePlugins: [
+      [rehypeExternalLinks, { target: '_blank', rel: ['noopener', 'noreferrer'] }]
+    ]
+  },
   integrations: [
+    react(),
     icon({
       include: {
         // Brand icons

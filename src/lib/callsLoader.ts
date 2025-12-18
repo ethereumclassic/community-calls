@@ -56,10 +56,8 @@ export function callsLoader(options: {
       // First, let the base loader populate the store
       await baseLoader.load(context);
 
-      // Now iterate and update each entry with computed fields
-      const entries = [...context.store.entries()];
-
-      for (const [id, entry] of entries) {
+      // Now iterate and mutate each entry's data with computed fields
+      for (const [id, entry] of context.store.entries()) {
         if (!entry.data) continue;
 
         const data = entry.data as Record<string, unknown>;
@@ -91,22 +89,11 @@ export function callsLoader(options: {
           ? dateValue.toISOString().split('T')[0].replace(/-/g, '')
           : '';
 
-        // Delete old entry and set new one with computed fields
-        context.store.delete(id);
-        context.store.set({
-          id,
-          data: {
-            ...data,
-            callNumber,
-            youtubeId,
-            slug,
-            uid: `etccc-${callNumber}-${dateStr}@cc.ethereumclassic.org`,
-          },
-          body: entry.body,
-          rendered: entry.rendered,
-          digest: entry.digest,
-          filePath: entry.filePath,
-        });
+        // Mutate the data object directly - don't delete/recreate the entry
+        data.callNumber = callNumber;
+        data.youtubeId = youtubeId;
+        data.slug = slug;
+        data.uid = `etccc-${callNumber}-${dateStr}@cc.ethereumclassic.org`;
       }
     },
     schema: baseLoader.schema,

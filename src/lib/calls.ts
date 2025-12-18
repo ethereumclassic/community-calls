@@ -17,7 +17,7 @@ export function sortCallsByDate(
 }
 
 /**
- * Sort calls by call number (uses computed callNumber field)
+ * Sort calls by call number (uses computed callNumber field from loader)
  */
 export function sortCallsByNumber(
   calls: Call[],

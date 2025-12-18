@@ -1,53 +1,14 @@
-import type { CallLike } from './types';
+import type { CollectionEntry } from 'astro:content';
 
-/**
- * Extract call number from filename
- */
-function getCallNumberFromFilename(id: string): number {
-  const match = id.match(/_(\d+)\.md$/);
-  return match ? parseInt(match[1], 10) : 0;
-}
-
-/**
- * Extract call number from frontmatter or filename
- */
-export function getCallNumber(call: { id: string; data: { number?: number } }): number {
-  if (call.data.number) return call.data.number;
-  return getCallNumberFromFilename(call.id);
-}
-
-/**
- * Generate URL slug from call data
- */
-export function getSlug(call: CallLike): string {
-  const date = call.data.date;
-  const num = call.data.number || getCallNumberFromFilename(call.id);
-  const desc = call.data.description;
-
-  if (date && desc) {
-    const dateStr = date.toISOString().split('T')[0];
-    const slugDesc = desc.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    return `${dateStr}-${num}-${slugDesc}`;
-  }
-  return call.id.replace('.md', '');
-}
-
-/**
- * Filter out addendum and recurring call files
- */
-export function filterValidCalls<T extends { id: string }>(calls: T[]): T[] {
-  return calls.filter(call =>
-    !call.id.includes('addendum') && !call.id.includes('recurring')
-  );
-}
+type Call = CollectionEntry<'calls'>;
 
 /**
  * Sort calls by date (newest first by default)
  */
-export function sortCallsByDate<T extends { data: { date?: Date } }>(
-  calls: T[],
+export function sortCallsByDate(
+  calls: Call[],
   order: 'asc' | 'desc' = 'desc'
-): T[] {
+): Call[] {
   return [...calls].sort((a, b) => {
     const dateA = a.data.date ? new Date(a.data.date).getTime() : 0;
     const dateB = b.data.date ? new Date(b.data.date).getTime() : 0;
@@ -56,24 +17,17 @@ export function sortCallsByDate<T extends { data: { date?: Date } }>(
 }
 
 /**
- * Sort calls by call number
+ * Sort calls by call number (uses computed callNumber field)
  */
-export function sortCallsByNumber<T extends { id: string; data: { number?: number } }>(
-  calls: T[],
+export function sortCallsByNumber(
+  calls: Call[],
   order: 'asc' | 'desc' = 'asc'
-): T[] {
+): Call[] {
   return [...calls].sort((a, b) => {
-    const numA = getCallNumber(a);
-    const numB = getCallNumber(b);
+    const numA = a.data.callNumber ?? 0;
+    const numB = b.data.callNumber ?? 0;
     return order === 'asc' ? numA - numB : numB - numA;
   });
-}
-
-/**
- * Get the URL path for a call
- */
-export function getCallUrl(call: CallLike): string {
-  return `/calls/${getSlug(call)}`;
 }
 
 /**
@@ -97,12 +51,4 @@ export function escapeICS(str: string): string {
     .replace(/;/g, '\\;')
     .replace(/,/g, '\\,')
     .replace(/\n/g, '\\n');
-}
-
-/**
- * Generate UID for ICS event
- */
-export function generateUID(callNumber: number, date: Date): string {
-  const dateStr = date.toISOString().split('T')[0].replace(/-/g, '');
-  return `etccc-${callNumber}-${dateStr}@cc.ethereumclassic.org`;
 }

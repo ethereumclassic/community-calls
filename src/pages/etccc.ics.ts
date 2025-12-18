@@ -1,15 +1,15 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { siteConfig } from '../lib/config';
-import { getCallNumber, getSlug, filterValidCalls, sortCallsByDate, escapeICS, generateUID } from '../lib/calls';
+import { sortCallsByDate, escapeICS } from '../lib/calls';
 import { formatICSDate, parseUTCTime } from '../lib/dates';
 
 export const GET: APIRoute = async () => {
   const allCalls = await getCollection('calls');
 
-  // Filter out addendum and recurring files, keep only dated calls
+  // Filter out special calls, keep only dated calls
   const calls = sortCallsByDate(
-    filterValidCalls(allCalls).filter(call => call.data.date)
+    allCalls.filter(call => !call.data.special && call.data.date)
   );
 
   const now = new Date();
@@ -17,7 +17,7 @@ export const GET: APIRoute = async () => {
 
   // Generate VEVENT for each call
   const events = calls.map(call => {
-    const callNumber = getCallNumber(call);
+    const callNumber = call.data.callNumber!;
     const date = call.data.date!;
     const time = call.data.time;
 
@@ -35,7 +35,7 @@ export const GET: APIRoute = async () => {
     endDate.setUTCHours(endDate.getUTCHours() + 2);
 
     const summary = `ETC Community Call #${callNumber}${call.data.description ? `: ${call.data.description}` : ''}`;
-    const slug = getSlug(call);
+    const slug = call.data.slug!;
     const url = `${siteConfig.url}/calls/${slug}`;
 
     let description = `Ethereum Classic Community Call #${callNumber}`;
@@ -51,7 +51,7 @@ export const GET: APIRoute = async () => {
 
     return [
       'BEGIN:VEVENT',
-      `UID:${generateUID(callNumber, startDate)}`,
+      `UID:${call.data.uid}`,
       `DTSTAMP:${nowFormatted}`,
       `DTSTART:${formatICSDate(startDate)}`,
       `DTEND:${formatICSDate(endDate)}`,

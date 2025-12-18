@@ -1,37 +1,37 @@
 ---
 import { getCollection } from 'astro:content';
 import { Icon } from 'astro-icon/components';
-import Layout from '../layouts/Layout.astro';
+import PageLayout from '../layouts/PageLayout.astro';
 import CallCard from '../components/CallCard.astro';
-import TerminalCard from '../components/ui/TerminalCard.astro';
-import AnimatedContainer from '../components/ui/AnimatedContainer.astro';
-import Button from '../components/ui/Button.astro';
-import Badge from '../components/ui/Badge.astro';
-import { getCallNumber, getSlug, filterValidCalls, sortCallsByDate } from '../lib/calls';
+import TerminalCard from '../components/TerminalCard.astro';
+import AnimatedContainer from '../components/AnimatedContainer.astro';
+import Button from '../components/Button.astro';
+import { sortCallsByDate } from '../lib/calls';
 import { formatFullDate } from '../lib/dates';
 import { siteConfig } from '../lib/config';
 
 const allCalls = await getCollection('calls');
 const now = Date.now();
 
-// Filter out addendum files and sort by date (newest first)
-const filteredCalls = sortCallsByDate(filterValidCalls(allCalls));
+// Separate regular and special calls
+const regularCalls = sortCallsByDate(allCalls.filter(call => !call.data.special));
+const specialCalls = sortCallsByDate(allCalls.filter(call => call.data.special));
 
-// Separate upcoming and past calls
-const upcomingCalls = filteredCalls.filter(call => call.data.date && call.data.date.getTime() > now);
-const pastCalls = filteredCalls.filter(call => !call.data.date || call.data.date.getTime() <= now);
+// Separate upcoming and past regular calls
+const upcomingCalls = regularCalls.filter(call => call.data.date && call.data.date.getTime() > now);
+const pastCalls = regularCalls.filter(call => !call.data.date || call.data.date.getTime() <= now);
 
 // Get the next upcoming call (soonest)
 const nextCall = upcomingCalls.length > 0
   ? sortCallsByDate(upcomingCalls, 'asc')[0]
   : null;
 
-// Stats
-const totalCalls = filteredCalls.length;
-const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
+// Stats (only count regular calls)
+const totalCalls = regularCalls.length;
+const recordedCalls = regularCalls.filter(c => c.data.youtube).length;
 ---
 
-<Layout title="ETC Community Calls">
+<PageLayout title="ETC Community Calls">
   <!-- Hero Section -->
   <section class="relative min-h-[70vh] flex items-center justify-center -mt-8 mb-16">
     <!-- Decorative elements -->
@@ -144,7 +144,7 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
   {nextCall && (
     <section class="mb-16">
       <a
-        href={`/calls/${getSlug(nextCall)}`}
+        href={`/calls/${nextCall.data.slug}`}
         class="block terminal-card upcoming-card rounded-xl overflow-hidden transition-all duration-300 group"
       >
         <!-- Header bar -->
@@ -157,7 +157,7 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
             <span class="text-xs font-mono uppercase tracking-widest text-amber">Upcoming Call</span>
           </div>
           <span class="px-3 py-1 text-xs font-mono uppercase tracking-wider bg-amber/20 text-amber rounded-full">
-            #{getCallNumber(nextCall)}
+            #{nextCall.data.callNumber}
           </span>
         </div>
 
@@ -241,16 +241,28 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {pastCalls.map((call, index) => (
         <CallCard
-          number={getCallNumber(call)}
+          number={call.data.callNumber}
           description={call.data.description}
           date={call.data.date}
           time={call.data.time}
           location={call.data.location}
-          slug={getSlug(call)}
+          slug={call.data.slug!}
           youtube={call.data.youtube}
           index={index}
         />
       ))}
+      {specialCalls.map((call, index) => (
+        <CallCard
+          description={call.data.description}
+          date={call.data.date}
+          time={call.data.time}
+          location={call.data.location}
+          slug={call.data.slug!}
+          youtube={call.data.youtube}
+          index={pastCalls.length + index}
+          special={true}
+        />
+      ))}
     </div>
   </section>
-</Layout>
+</PageLayout>

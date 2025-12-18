@@ -1,8 +1,8 @@
 import { defineCollection, z } from 'astro:content';
-import { glob } from 'astro/loaders';
+import { callsLoader } from './lib/callsLoader';
 
 const calls = defineCollection({
-  loader: glob({ pattern: '**/*.md', base: './calls' }),
+  loader: callsLoader({ pattern: '**/*.md', base: './calls' }),
   schema: z.object({
     title: z.string().optional(),
     name: z.string().optional(),
@@ -20,11 +20,19 @@ const calls = defineCollection({
     cohost: z.string().optional(),
     guests: z.string().optional(),
     images: z.array(z.string()).optional(),
-    offlineChat: z.object({
-      time: z.string(),
-      location: z.string(),
-      link: z.string().url().optional(),
-    }).optional(),
+    offlineChat: z
+      .object({
+        time: z.string(),
+        location: z.string(),
+        link: z.string().url().optional(),
+      })
+      .optional(),
+    special: z.boolean().optional(),
+    // Computed fields (added by loader)
+    callNumber: z.number().optional(),
+    youtubeId: z.string().nullable().optional(),
+    slug: z.string().optional(),
+    uid: z.string().optional(),
   }),
 });
 

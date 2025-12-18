@@ -1,239 +1,43 @@
 ---
 import { getCollection, render } from "astro:content";
-import { Icon } from "astro-icon/components";
-import Layout from "../../layouts/Layout.astro";
-import TimezoneBar from "../../components/TimezoneBar.astro";
-import TerminalCard from "../../components/ui/TerminalCard.astro";
-import AnimatedContainer from "../../components/ui/AnimatedContainer.astro";
-import { getCallNumber, getSlug, filterValidCalls, sortCallsByNumber } from "../../lib/calls";
-import { formatFullDate, formatShortDate } from "../../lib/dates";
+import CallLayout from "../../layouts/CallLayout.astro";
+import { sortCallsByNumber } from "../../lib/calls";
 
 export async function getStaticPaths() {
   const allCalls = await getCollection("calls");
 
-  // Filter out addendum pages and recurring call info, then sort by call number
-  const sortedCalls = sortCallsByNumber(filterValidCalls(allCalls));
+  // Regular calls get prev/next navigation
+  const regularCalls = allCalls.filter((call) => !call.data.special);
+  const sortedRegularCalls = sortCallsByNumber(regularCalls);
 
-  return sortedCalls.map((call, index) => ({
-    params: { slug: getSlug(call) },
-    props: {
-      call,
-      prevCall: index > 0 ? sortedCalls[index - 1] : null,
-      nextCall: index < sortedCalls.length - 1 ? sortedCalls[index + 1] : null,
-    },
-  }));
+  // Generate paths for all calls
+  const allPaths = allCalls.map((call) => {
+    // Only regular calls get prev/next navigation
+    if (call.data.special) {
+      return {
+        params: { slug: call.data.slug },
+        props: { call, prevCall: null, nextCall: null },
+      };
+    }
+
+    const index = sortedRegularCalls.findIndex((c) => c.id === call.id);
+    return {
+      params: { slug: call.data.slug },
+      props: {
+        call,
+        prevCall: index > 0 ? sortedRegularCalls[index - 1] : null,
+        nextCall: index < sortedRegularCalls.length - 1 ? sortedRegularCalls[index + 1] : null,
+      },
+    };
+  });
+
+  return allPaths;
 }
 
 const { call, prevCall, nextCall } = Astro.props;
 const { Content } = await render(call);
-
-const callNumber = getCallNumber(call);
-const baseTitle = `ETC Community Call ${callNumber}`;
-const title = call.data.description
-  ? `${baseTitle} - ${call.data.description}`
-  : call.data.title || call.data.name || baseTitle;
-
-// Extract YouTube video ID for embed
-const getYouTubeId = (url: string) => {
-  const match = url.match(
-    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&?]+)/,
-  );
-  return match ? match[1] : null;
-};
-
-const youtubeId = call.data.youtube ? getYouTubeId(call.data.youtube) : null;
-
-// Prev/next navigation info
-const prevNumber = prevCall ? getCallNumber(prevCall) : null;
-const nextNumber = nextCall ? getCallNumber(nextCall) : null;
-const prevSlug = prevCall ? getSlug(prevCall) : null;
-const nextSlug = nextCall ? getSlug(nextCall) : null;
-const prevDate = prevCall?.data.date
-  ? formatShortDate(prevCall.data.date)
-  : null;
-const nextDate = nextCall?.data.date
-  ? formatShortDate(nextCall.data.date)
-  : null;
-const prevDesc = prevCall?.data.description || "";
-const nextDesc = nextCall?.data.description || "";
-
-// Build tooltip text
-const prevTooltip = prevCall
-  ? `Call ${prevNumber}${prevDate ? ` • ${prevDate}` : ""}${prevDesc ? `\n${prevDesc}` : ""}`
-  : "";
-const nextTooltip = nextCall
-  ? `Call ${nextNumber}${nextDate ? ` • ${nextDate}` : ""}${nextDesc ? `\n${nextDesc}` : ""}`
-  : "";
 ---
 
-<Layout title={title} description={call.data.description}>
-  <AnimatedContainer as="article" delay={100} class="max-w-4xl mx-auto">
-    <!-- Navigation Bar -->
-    <nav class="flex items-center justify-between mb-8">
-      <a
-        href="/"
-        class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-gray-500 hover:text-etc-green transition-colors group"
-      >
-        <Icon name="lucide:chevron-left" class="icon-sm transform group-hover:-translate-x-1 transition-transform" />
-        Archive
-      </a>
-      {
-        (prevSlug || nextSlug) && (
-          <div class="flex items-center gap-1 text-sm font-mono bg-surface-elevated/50 rounded-lg px-1 py-1 border border-etc-green/10">
-            {prevSlug && (
-              <a
-                href={`/calls/${prevSlug}`}
-                class="px-3 py-1 text-gray-300 hover:text-etc-green hover:bg-etc-green/10 rounded transition-colors"
-                title={prevTooltip}
-              >
-                &larr; {prevNumber}
-              </a>
-            )}
-            {prevSlug && nextSlug && <span class="text-gray-600">|</span>}
-            {nextSlug && (
-              <a
-                href={`/calls/${nextSlug}`}
-                class="px-3 py-1 text-gray-300 hover:text-etc-green hover:bg-etc-green/10 rounded transition-colors"
-                title={nextTooltip}
-              >
-                {nextNumber} &rarr;
-              </a>
-            )}
-          </div>
-        )
-      }
-    </nav>
-
-    <!-- Header -->
-    <header class="mb-10">
-      <!-- Call number badge -->
-      <div class="flex items-center gap-3 mb-4">
-        {
-          call.data.youtube && (
-            <span class="inline-flex items-center gap-2 px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-etc-green/80 border border-etc-green/20 rounded-full">
-              <span class="w-1.5 h-1.5 rounded-full bg-etc-green animate-pulse-glow" />
-              Recorded
-            </span>
-          )
-        }
-      </div>
-
-      <!-- Title -->
-      <h1 class="font-display text-4xl md:text-5xl text-gray-100 mb-4">
-        Ethereum Classic Community Call #{callNumber}
-      </h1>
-
-      <!-- Description -->
-      {
-        call.data.description && (
-          <p class="text-xl font-mono text-gray-400 mb-6">
-            {call.data.description}
-          </p>
-        )
-      }
-
-      <!-- Meta info -->
-      <div class="flex flex-wrap items-center gap-4 text-sm font-mono">
-        {
-          call.data.date && (
-            <span class="text-gray-400">
-              <span class="text-etc-green/60">date:</span>{" "}
-              {formatFullDate(call.data.date)}
-            </span>
-          )
-        }
-        {
-          call.data.time && (
-            <span class="text-gray-400">
-              <span class="text-etc-green/60">time:</span> {call.data.time}
-            </span>
-          )
-        }
-        {
-          call.data.location && (
-            <span class="text-gray-400">
-              <span class="text-etc-green/60">location:</span>{" "}
-              {call.data.location}
-            </span>
-          )
-        }
-      </div>
-
-      <!-- Timezone Display -->
-      {call.data.time && <TimezoneBar time={call.data.time} />}
-    </header>
-
-    <!-- YouTube Embed -->
-    {
-      youtubeId && (
-        <AnimatedContainer as="section" delay={200} class="mb-10">
-          <TerminalCard showDots title={`rec_${call.data.date?.toISOString().split("T")[0].replace(/-/g, "")}_${String(callNumber).padStart(3, "0")}.mp4`}>
-            <div class="aspect-video">
-              <iframe
-                width="100%"
-                height="100%"
-                src={`https://www.youtube.com/embed/${youtubeId}`}
-                title={title}
-                frameborder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowfullscreen
-                class="border-0"
-              />
-            </div>
-          </TerminalCard>
-        </AnimatedContainer>
-      )
-    }
-
-    <!-- Host Info -->
-    {
-      (call.data.host || call.data.cohost) && (
-        <AnimatedContainer as="section" delay={300} class="mb-10">
-          <TerminalCard class="p-5">
-            <div class="flex flex-wrap gap-6">
-              {call.data.host && (
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-etc-green/10 border border-etc-green/20 flex items-center justify-center">
-                    <span class="text-etc-green text-sm font-mono">
-                      {call.data.host.charAt(0)}
-                    </span>
-                  </div>
-                  <div>
-                    <div class="text-[10px] font-mono uppercase tracking-wider text-gray-500">
-                      Host
-                    </div>
-                    <div class="text-sm font-mono text-gray-200">
-                      {call.data.host}
-                    </div>
-                  </div>
-                </div>
-              )}
-              {call.data.cohost && (
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-etc-green/10 border border-etc-green/20 flex items-center justify-center">
-                    <span class="text-etc-green text-sm font-mono">
-                      {call.data.cohost.charAt(0)}
-                    </span>
-                  </div>
-                  <div>
-                    <div class="text-[10px] font-mono uppercase tracking-wider text-gray-500">
-                      Co-host
-                    </div>
-                    <div class="text-sm font-mono text-gray-200">
-                      {call.data.cohost}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          </TerminalCard>
-        </AnimatedContainer>
-      )
-    }
-
-    <!-- Main Content -->
-    <AnimatedContainer as="section" delay={400} class="prose prose-lg prose-invert max-w-none">
-      <Content />
-    </AnimatedContainer>
-  </AnimatedContainer>
-</Layout>
+<CallLayout call={call} prevCall={prevCall} nextCall={nextCall}>
+  <Content />
+</CallLayout>

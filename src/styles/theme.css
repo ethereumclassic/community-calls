@@ -13,6 +13,12 @@
   --color-etc-green-glow: #a0ffc8;
   --color-etc-green-subtle: rgba(122, 238, 168, 0.1);
 
+  /* Special/White accent */
+  --color-special: #e8e8e8;
+  --color-special-dim: #b8b8b8;
+  --color-special-glow: #ffffff;
+  --color-special-subtle: rgba(232, 232, 232, 0.1);
+
   /* Dark Foundation */
   --color-void: #0a0a0c;
   --color-surface: #111114;

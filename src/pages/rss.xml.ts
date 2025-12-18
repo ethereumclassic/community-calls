@@ -1,23 +1,23 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { siteConfig } from '../lib/config';
-import { getCallNumber, getSlug, filterValidCalls, sortCallsByDate, escapeXml } from '../lib/calls';
+import { sortCallsByDate, escapeXml } from '../lib/calls';
 import { formatRfc822 } from '../lib/dates';
 
 export const GET: APIRoute = async () => {
   const allCalls = await getCollection('calls');
 
-  // Filter and sort calls (newest first), only include dated calls
+  // Filter out special calls and sort (newest first), only include dated calls
   const calls = sortCallsByDate(
-    filterValidCalls(allCalls).filter(call => call.data.date)
+    allCalls.filter(call => !call.data.special && call.data.date)
   ).slice(0, 50); // Limit to 50 most recent
 
   const now = new Date();
   const latestDate = calls[0]?.data.date || now;
 
   const items = calls.map(call => {
-    const callNumber = getCallNumber(call);
-    const slug = getSlug(call);
+    const callNumber = call.data.callNumber!;
+    const slug = call.data.slug!;
     const url = `${siteConfig.url}/calls/${slug}`;
     const title = `ETC Community Call #${callNumber}${call.data.description ? `: ${call.data.description}` : ''}`;
     const pubDate = call.data.date ? formatRfc822(call.data.date) : formatRfc822(now);

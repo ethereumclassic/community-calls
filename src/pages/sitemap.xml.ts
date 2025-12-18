@@ -1,15 +1,15 @@
 import type { APIRoute } from 'astro';
 import { getCollection } from 'astro:content';
 import { siteConfig } from '../lib/config';
-import { getSlug, filterValidCalls, sortCallsByDate } from '../lib/calls';
+import { sortCallsByDate } from '../lib/calls';
 import { formatISODate } from '../lib/dates';
 
 export const GET: APIRoute = async () => {
   const allCalls = await getCollection('calls');
 
-  // Filter out addendum and recurring files, only include dated calls
+  // Filter out special calls, only include dated calls
   const calls = sortCallsByDate(
-    filterValidCalls(allCalls).filter(call => call.data.date)
+    allCalls.filter(call => !call.data.special && call.data.date)
   );
 
   const today = formatISODate(new Date());
@@ -25,7 +25,7 @@ export const GET: APIRoute = async () => {
   </url>`,
     // Individual call pages
     ...calls.map(call => {
-      const slug = getSlug(call);
+      const slug = call.data.slug!;
       const lastmod = call.data.date ? formatISODate(call.data.date) : today;
       const isUpcoming = call.data.date && call.data.date.getTime() > Date.now();
 

@@ -6,19 +6,9 @@ export type Call = CollectionEntry<'calls'>;
 // Extracted call data type for utility functions
 export type CallData = Call['data'];
 
-// Minimal call interface for utility functions
-export interface CallLike {
-  id: string;
-  data: {
-    number?: number;
-    date?: Date;
-    description?: string;
-  };
-}
-
 // Props interfaces for components
 export interface CallCardProps {
-  number: number;
+  number?: number;
   description?: string;
   date?: Date;
   time?: string;
@@ -26,6 +16,7 @@ export interface CallCardProps {
   slug: string;
   youtube?: string;
   index?: number;
+  special?: boolean;
 }
 
 export interface LayoutProps {

@@ -50,7 +50,7 @@ const isUpcoming = call.data.date ? call.data.date > new Date() : false;
     {call.data.description}
   </h1>
   <!-- Meta info -->
-  <div class="flex flex-wrap items-center gap-4 text-lg font-mono">
+  <div class="flex flex-wrap items-center gap-4 text-sm md:text-lg font-mono">
     {
       call.data.date && (
         <span class="text-gray-400">

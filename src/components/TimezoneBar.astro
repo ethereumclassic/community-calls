@@ -61,9 +61,9 @@ const rightZones = timezones.filter(tz => tz.offset > 0 || (tz.offset === 0 && !
 ---
 
 {utcTime && (
-  <div class="timezone-bar mt-4 -mx-12 sm:-mx-16 lg:-mx-20">
+  <div class="timezone-bar mt-4 md:-mx-12 lg:-mx-20">
     <!-- Desktop: Horizontal scrollable bar -->
-    <div class="hidden md:block overflow-x-auto scrollbar-thin pb-2 px-12 sm:px-16 lg:px-20 timezone-mask">
+    <div class="hidden md:block overflow-x-auto scrollbar-thin pb-2 px-12 lg:px-20 timezone-mask">
       <div class="flex items-center justify-center gap-1 text-xs font-mono min-w-max">
         <!-- Left side zones -->
         {leftZones.map((tz) => {

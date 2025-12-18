@@ -364,6 +364,10 @@ h1, h2, h3, h4, h5, h6, .font-display {
   text-decoration: none;
   border-bottom: 1px solid var(--color-etc-green-dim);
   transition: all 0.2s ease;
+  /* Wrap long URLs to prevent layout overflow on mobile */
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 }
 
 .prose a:hover {

@@ -10,11 +10,11 @@
    ═══════════════════════════════════════════════════════════════════ */
 
 @theme {
-  /* Core ETC Palette */
-  --color-etc-green: #3ab83a;
-  --color-etc-green-dim: #2a8a2a;
-  --color-etc-green-glow: #4de64d;
-  --color-etc-green-subtle: rgba(58, 184, 58, 0.1);
+  /* Core ETC Palette - Pastel Green */
+  --color-etc-green: #6fcf97;
+  --color-etc-green-dim: #4aa472;
+  --color-etc-green-glow: #8fe8b3;
+  --color-etc-green-subtle: rgba(111, 207, 151, 0.1);
 
   /* Dark Foundation */
   --color-void: #0a0a0c;
@@ -23,9 +23,9 @@
   --color-surface-hover: #1f1f24;
 
   /* Terminal Accents */
-  --color-phosphor: #3ab83a;
+  --color-phosphor: #6fcf97;
   --color-amber: #ffb627;
-  --color-terminal-dim: rgba(58, 184, 58, 0.6);
+  --color-terminal-dim: rgba(111, 207, 151, 0.6);
 
   /* Typography - using Fontsource local fonts */
   --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
@@ -137,14 +137,14 @@ h1, h2, h3, h4, h5, h6, .font-display {
     rgba(24, 24, 28, 0.9) 0%,
     rgba(17, 17, 20, 0.95) 100%
   );
-  border: 1px solid rgba(58, 184, 58, 0.15);
+  border: 1px solid rgba(111, 207, 151, 0.15);
   backdrop-filter: blur(10px);
 }
 
 /* Terminal-style card */
 .terminal-card {
   background: var(--color-surface);
-  border: 1px solid rgba(58, 184, 58, 0.2);
+  border: 1px solid rgba(111, 207, 151, 0.2);
   position: relative;
 }
 
@@ -295,11 +295,11 @@ h1, h2, h3, h4, h5, h6, .font-display {
   --b2: 17 17 20;
   --b3: 24 24 28;
   --bc: 232 232 232;
-  --p: 58 184 58;
+  --p: 111 207 151;
   --pc: 10 10 12;
   --s: 255 182 39;
   --sc: 10 10 12;
-  --a: 58 184 58;
+  --a: 111 207 151;
   --ac: 10 10 12;
   --n: 31 31 36;
   --nc: 200 200 200;
@@ -329,7 +329,7 @@ h1, h2, h3, h4, h5, h6, .font-display {
   --tw-prose-bold: #e8e8e8;
   --tw-prose-code: var(--color-etc-green);
   --tw-prose-pre-bg: var(--color-surface);
-  --tw-prose-hr: rgba(58, 184, 58, 0.2);
+  --tw-prose-hr: rgba(111, 207, 151, 0.2);
 }
 
 .prose h1, .prose h2, .prose h3 {
@@ -356,7 +356,7 @@ h1, h2, h3, h4, h5, h6, .font-display {
 }
 
 .prose pre {
-  border: 1px solid rgba(58, 184, 58, 0.2);
+  border: 1px solid rgba(111, 207, 151, 0.2);
 }
 
 /* ═══════════════════════════════════════════════════════════════════

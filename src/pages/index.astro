@@ -4,15 +4,25 @@ import Layout from '../layouts/Layout.astro';
 import CallCard from '../components/CallCard.astro';
 
 const allCalls = await getCollection('calls');
+const now = Date.now();
 
 // Filter out addendum files and sort by date (newest first)
-const calls = allCalls
+const filteredCalls = allCalls
   .filter(call => !call.id.includes('addendum') && !call.id.includes('recurring'))
   .sort((a, b) => {
     const dateA = a.data.date ? new Date(a.data.date).getTime() : 0;
     const dateB = b.data.date ? new Date(b.data.date).getTime() : 0;
     return dateB - dateA;
   });
+
+// Separate upcoming and past calls
+const upcomingCalls = filteredCalls.filter(call => call.data.date && call.data.date.getTime() > now);
+const pastCalls = filteredCalls.filter(call => !call.data.date || call.data.date.getTime() <= now);
+
+// Get the next upcoming call (soonest)
+const nextCall = upcomingCalls.length > 0
+  ? upcomingCalls.sort((a, b) => (a.data.date?.getTime() || 0) - (b.data.date?.getTime() || 0))[0]
+  : null;
 
 // Helper to extract call number from filename (fallback)
 const getCallNumberFromFilename = (id: string) => {
@@ -21,13 +31,13 @@ const getCallNumberFromFilename = (id: string) => {
 };
 
 // Get call number from frontmatter or filename
-const getCallNumber = (call: typeof calls[0]) => {
+const getCallNumber = (call: typeof filteredCalls[0]) => {
   if (call.data.number) return call.data.number;
   return getCallNumberFromFilename(call.id);
 };
 
 // Generate slug from call data
-const getSlug = (call: typeof calls[0]) => {
+const getSlug = (call: typeof filteredCalls[0]) => {
   const date = call.data.date;
   const num = getCallNumber(call);
   const desc = call.data.description;
@@ -42,9 +52,19 @@ const getSlug = (call: typeof calls[0]) => {
   return call.id.replace('.md', '');
 };
 
+// Format date for upcoming call
+const formatFullDate = (d: Date) => {
+  return d.toLocaleDateString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  });
+};
+
 // Stats
-const totalCalls = calls.length;
-const recordedCalls = calls.filter(c => c.data.youtube).length;
+const totalCalls = filteredCalls.length;
+const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
 ---
 
 <Layout title="ETC Community Calls">
@@ -63,7 +83,7 @@ const recordedCalls = calls.filter(c => c.data.youtube).length;
       <!-- Logo with glow -->
       <div class="relative inline-block mb-8 animate-float">
         <img
-          src="/etc_cc_logo.png"
+          src="/etc-logo.svg"
           alt="ETC Community Calls"
           class="w-28 h-28 md:w-36 md:h-36 mx-auto animate-pulse-glow"
         />
@@ -78,14 +98,13 @@ const recordedCalls = calls.filter(c => c.data.youtube).length;
       </div>
 
       <!-- Main title -->
-      <h1 class="font-display text-5xl md:text-7xl lg:text-8xl text-gray-100 mb-6 opacity-0 animate-fade-in-up" style="animation-delay: 200ms">
-        Community<br/>
-        <span class="text-glow">Calls</span>
+      <h1 class="font-display text-5xl md:text-7xl lg:text-8xl text-gray-100 mb-6 opacity-0 animate-fade-in-up whitespace-nowrap" style="animation-delay: 200ms">
+        Community <span class="text-glow">Calls</span>
       </h1>
 
       <!-- Subtitle -->
       <p class="text-lg md:text-xl font-mono text-gray-400 max-w-2xl mx-auto mb-10 opacity-0 animate-fade-in-up" style="animation-delay: 300ms">
-        Weekly open discussions about development,
+        Regular open discussions about development,
         <span class="text-etc-green/80">ECIPs</span>, and the future of
         <span class="text-etc-green/80">Ethereum Classic</span>
       </p>
@@ -130,15 +149,6 @@ const recordedCalls = calls.filter(c => c.data.youtube).length;
       </div>
     </div>
 
-    <!-- Scroll indicator -->
-    <div class="absolute bottom-8 left-1/2 -translate-x-1/2 opacity-0 animate-fade-in" style="animation-delay: 800ms">
-      <div class="flex flex-col items-center gap-2 text-gray-500">
-        <span class="text-[10px] font-mono uppercase tracking-widest">Scroll</span>
-        <svg class="w-4 h-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/>
-        </svg>
-      </div>
-    </div>
   </section>
 
   <!-- About Section -->
@@ -193,6 +203,76 @@ const recordedCalls = calls.filter(c => c.data.youtube).length;
     </div>
   </section>
 
+  <!-- Upcoming Call Hero -->
+  {nextCall && (
+    <section class="mb-16">
+      <a
+        href={`/calls/${getSlug(nextCall)}`}
+        class="block terminal-card rounded-xl overflow-hidden border-2 border-amber/30 hover:border-amber/50 transition-all duration-300 group"
+      >
+        <!-- Header bar -->
+        <div class="flex items-center justify-between px-6 py-4 bg-amber/10 border-b border-amber/20">
+          <div class="flex items-center gap-3">
+            <span class="relative flex h-3 w-3">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-3 w-3 bg-amber"></span>
+            </span>
+            <span class="text-xs font-mono uppercase tracking-widest text-amber">Upcoming Call</span>
+          </div>
+          <span class="px-3 py-1 text-xs font-mono uppercase tracking-wider bg-amber/20 text-amber rounded-full">
+            #{getCallNumber(nextCall)}
+          </span>
+        </div>
+
+        <!-- Content -->
+        <div class="p-6 md:p-8">
+          <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+            <div class="flex-1">
+              <h2 class="font-display text-3xl md:text-4xl text-gray-100 group-hover:text-amber transition-colors mb-3">
+                {nextCall.data.description || 'Community Call'}
+              </h2>
+              <div class="flex flex-wrap items-center gap-4 text-sm font-mono text-gray-400">
+                {nextCall.data.date && (
+                  <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-amber/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                    {formatFullDate(nextCall.data.date)}
+                  </span>
+                )}
+                {nextCall.data.time && (
+                  <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-amber/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    {nextCall.data.time}
+                  </span>
+                )}
+                {nextCall.data.location && (
+                  <span class="flex items-center gap-2">
+                    <svg class="w-4 h-4 text-amber/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    {nextCall.data.location}
+                  </span>
+                )}
+              </div>
+            </div>
+            <div class="flex-shrink-0">
+              <span class="inline-flex items-center gap-2 px-6 py-3 bg-amber text-void font-mono text-sm font-semibold uppercase tracking-wider rounded-lg group-hover:bg-amber/90 transition-colors">
+                View Details
+                <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </span>
+            </div>
+          </div>
+        </div>
+      </a>
+    </section>
+  )}
+
   <!-- Calls Archive -->
   <section>
     <div class="flex items-center justify-between mb-8">
@@ -200,12 +280,12 @@ const recordedCalls = calls.filter(c => c.data.youtube).length;
         <span class="text-etc-green/60">//</span> Archive
       </h2>
       <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">
-        {calls.length} calls
+        {pastCalls.length} calls
       </span>
     </div>
 
     <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-      {calls.map((call, index) => (
+      {pastCalls.map((call, index) => (
         <CallCard
           number={getCallNumber(call)}
           description={call.data.description}

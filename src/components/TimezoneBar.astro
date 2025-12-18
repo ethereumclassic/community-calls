@@ -1,0 +1,206 @@
+---
+interface Props {
+  time: string; // Format: "1500 UTC"
+}
+
+const { time } = Astro.props;
+
+// Parse the UTC time from the format "1500 UTC"
+const parseUTCTime = (timeStr: string): { hours: number; minutes: number } | null => {
+  const match = timeStr.match(/^(\d{2})(\d{2})\s*UTC$/i);
+  if (!match) return null;
+  return {
+    hours: parseInt(match[1], 10),
+    minutes: parseInt(match[2], 10),
+  };
+};
+
+const utcTime = parseUTCTime(time);
+
+// Timezone offsets from UTC (in hours, positive = ahead of UTC)
+const timezones = [
+  { city: 'Los Angeles', offset: -8, abbr: 'PST' },
+  { city: 'New York', offset: -5, abbr: 'EST' },
+  { city: 'UTC', offset: 0, abbr: 'UTC', isCenter: true },
+  { city: 'London', offset: 0, abbr: 'GMT' },
+  { city: 'Berlin', offset: 1, abbr: 'CET' },
+  { city: 'Dubai', offset: 4, abbr: 'GST' },
+  { city: 'Bangkok', offset: 7, abbr: 'ICT' },
+  { city: 'Shanghai', offset: 8, abbr: 'CST' },
+  { city: 'Tokyo', offset: 9, abbr: 'JST' },
+  { city: 'Sydney', offset: 11, abbr: 'AEDT' },
+];
+
+// Calculate time for each timezone
+const calculateTime = (offset: number): { time: string; dayOffset: number } => {
+  if (!utcTime) return { time: '--:--', dayOffset: 0 };
+  let hours = utcTime.hours + offset;
+  const minutes = utcTime.minutes;
+  let dayOffset = 0;
+
+  // Handle day wraparound
+  if (hours >= 24) {
+    hours -= 24;
+    dayOffset = 1;
+  }
+  if (hours < 0) {
+    hours += 24;
+    dayOffset = -1;
+  }
+
+  return {
+    time: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`,
+    dayOffset,
+  };
+};
+
+// Split timezones for left/right of UTC on desktop
+const leftZones = timezones.filter(tz => tz.offset < 0);
+const centerZone = timezones.find(tz => tz.isCenter);
+const rightZones = timezones.filter(tz => tz.offset > 0 || (tz.offset === 0 && !tz.isCenter));
+---
+
+{utcTime && (
+  <div class="timezone-bar mt-4 -mx-12 sm:-mx-16 lg:-mx-20">
+    <!-- Desktop: Horizontal scrollable bar -->
+    <div class="hidden md:block overflow-x-auto scrollbar-thin pb-2 px-12 sm:px-16 lg:px-20 timezone-mask">
+      <div class="flex items-center justify-center gap-1 text-xs font-mono min-w-max">
+        <!-- Left side zones -->
+        {leftZones.map((tz) => {
+          const { time, dayOffset } = calculateTime(tz.offset);
+          return (
+            <div class="flex items-center gap-1.5 px-2 py-1 rounded bg-surface/50 border border-etc-green/5 hover:border-etc-green/20 transition-colors flex-shrink-0">
+              <span class="text-gray-500">{tz.city}</span>
+              <span class="text-gray-300">{time}</span>
+              {dayOffset !== 0 && (
+                <span class="text-[9px] text-amber/80">{dayOffset > 0 ? '+1' : '-1'}</span>
+              )}
+            </div>
+          );
+        })}
+
+        <!-- Center: UTC -->
+        {centerZone && (
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-etc-green/10 border border-etc-green/30 mx-2 flex-shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-etc-green animate-pulse-glow"></span>
+            <span class="text-etc-green font-semibold">{centerZone.abbr}</span>
+            <span class="text-etc-green font-bold">{calculateTime(centerZone.offset).time}</span>
+          </div>
+        )}
+
+        <!-- Right side zones -->
+        {rightZones.map((tz) => {
+          const { time, dayOffset } = calculateTime(tz.offset);
+          return (
+            <div class="flex items-center gap-1.5 px-2 py-1 rounded bg-surface/50 border border-etc-green/5 hover:border-etc-green/20 transition-colors flex-shrink-0">
+              <span class="text-gray-500">{tz.city}</span>
+              <span class="text-gray-300">{time}</span>
+              {dayOffset !== 0 && (
+                <span class="text-[9px] text-amber/80">{dayOffset > 0 ? '+1' : '-1'}</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+
+    <!-- Mobile: Dropdown -->
+    <div class="md:hidden">
+      <details class="timezone-dropdown">
+        <summary class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-etc-green/10 border border-etc-green/30 cursor-pointer list-none select-none">
+          <span class="w-1.5 h-1.5 rounded-full bg-etc-green animate-pulse-glow"></span>
+          <span class="text-etc-green font-mono text-sm font-semibold">UTC</span>
+          <span class="text-etc-green font-mono text-sm font-bold">{calculateTime(0).time}</span>
+          <svg class="w-4 h-4 text-etc-green/60 transition-transform duration-200 dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </summary>
+        <div class="mt-2 p-2 rounded-lg bg-surface border border-etc-green/10 space-y-1">
+          {timezones.filter(tz => !tz.isCenter).map((tz) => {
+            const { time, dayOffset } = calculateTime(tz.offset);
+            return (
+              <div class="flex items-center justify-between px-3 py-2 rounded bg-surface-elevated/50 hover:bg-surface-hover transition-colors">
+                <div class="flex items-center gap-2">
+                  <span class="text-[10px] font-mono text-gray-500 w-10">{tz.abbr}</span>
+                  <span class="text-sm font-mono text-gray-400">{tz.city}</span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="text-sm font-mono text-gray-200 font-semibold">{time}</span>
+                  {dayOffset !== 0 && (
+                    <span class="text-[10px] font-mono text-amber/80">{dayOffset > 0 ? '+1' : '-1'}</span>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </details>
+    </div>
+  </div>
+)}
+
+<style>
+  .timezone-dropdown[open] .dropdown-arrow {
+    transform: rotate(180deg);
+  }
+
+  .timezone-dropdown summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .timezone-dropdown summary::marker {
+    display: none;
+    content: '';
+  }
+
+  /* Thin scrollbar for timezone bar - hidden by default */
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 2px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 1px;
+    transition: background 0.2s ease;
+  }
+
+  .scrollbar-thin:hover::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--color-etc-green-dim) 40%, transparent);
+  }
+
+  .scrollbar-thin:hover::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in srgb, var(--color-etc-green) 50%, transparent);
+  }
+
+  /* Firefox */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+  }
+
+  .scrollbar-thin:hover {
+    scrollbar-color: color-mix(in srgb, var(--color-etc-green-dim) 40%, transparent) transparent;
+  }
+
+  /* Edge fade mask */
+  .timezone-mask {
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 40px,
+      black calc(100% - 40px),
+      transparent
+    );
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      black 40px,
+      black calc(100% - 40px),
+      transparent
+    );
+  }
+</style>

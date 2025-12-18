@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from 'astro:content';
 import Layout from '../../layouts/Layout.astro';
+import TimezoneBar from '../../components/TimezoneBar.astro';
 
 // Helper to extract call number from filename (fallback)
 const getCallNumberFromFilename = (id: string) => {
@@ -128,23 +129,21 @@ const nextTooltip = nextCall ? `Call ${nextNumber}${nextDate ? ` • ${nextDate}
         </svg>
         Archive
       </a>
-      <div class="flex items-center gap-1 text-sm font-mono bg-surface-elevated/50 rounded-lg px-1 py-1 border border-etc-green/10">
-        {prevSlug ? (
-          <a href={`/calls/${prevSlug}`} class="px-3 py-1 text-gray-300 hover:text-etc-green hover:bg-etc-green/10 rounded transition-colors" title={prevTooltip}>
-            &larr; {prevNumber}
-          </a>
-        ) : (
-          <span class="px-3 py-1 text-gray-600">&larr;</span>
-        )}
-        <span class="text-gray-600">|</span>
-        {nextSlug ? (
-          <a href={`/calls/${nextSlug}`} class="px-3 py-1 text-gray-300 hover:text-etc-green hover:bg-etc-green/10 rounded transition-colors" title={nextTooltip}>
-            {nextNumber} &rarr;
-          </a>
-        ) : (
-          <span class="px-3 py-1 text-gray-600">&rarr;</span>
-        )}
-      </div>
+      {(prevSlug || nextSlug) && (
+        <div class="flex items-center gap-1 text-sm font-mono bg-surface-elevated/50 rounded-lg px-1 py-1 border border-etc-green/10">
+          {prevSlug && (
+            <a href={`/calls/${prevSlug}`} class="px-3 py-1 text-gray-300 hover:text-etc-green hover:bg-etc-green/10 rounded transition-colors" title={prevTooltip}>
+              &larr; {prevNumber}
+            </a>
+          )}
+          {prevSlug && nextSlug && <span class="text-gray-600">|</span>}
+          {nextSlug && (
+            <a href={`/calls/${nextSlug}`} class="px-3 py-1 text-gray-300 hover:text-etc-green hover:bg-etc-green/10 rounded transition-colors" title={nextTooltip}>
+              {nextNumber} &rarr;
+            </a>
+          )}
+        </div>
+      )}
     </nav>
 
     <!-- Header -->
@@ -185,11 +184,16 @@ const nextTooltip = nextCall ? `Call ${nextNumber}${nextDate ? ` • ${nextDate}
           </span>
         )}
         {call.data.location && (
-          <span class="px-2 py-0.5 text-xs bg-surface-elevated rounded border border-etc-green/10 text-gray-400">
-            {call.data.location}
+          <span class="text-gray-400">
+            <span class="text-etc-green/60">location:</span> {call.data.location}
           </span>
         )}
       </div>
+
+      <!-- Timezone Display -->
+      {call.data.time && (
+        <TimezoneBar time={call.data.time} />
+      )}
     </header>
 
     <!-- YouTube Embed -->
@@ -200,7 +204,7 @@ const nextTooltip = nextCall ? `Call ${nextNumber}${nextDate ? ` • ${nextDate}
             <span class="w-2 h-2 rounded-full bg-red-500/60"></span>
             <span class="w-2 h-2 rounded-full bg-amber/60"></span>
             <span class="w-2 h-2 rounded-full bg-etc-green/60"></span>
-            <span class="ml-3 text-[10px] font-mono text-gray-500">recording.mp4</span>
+            <span class="ml-3 text-[10px] font-mono text-gray-500">rec_{call.data.date?.toISOString().split('T')[0].replace(/-/g, '')}_{String(callNumber).padStart(3, '0')}.mp4</span>
           </div>
           <div class="aspect-video">
             <iframe

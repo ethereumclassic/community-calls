@@ -1,8 +1,11 @@
 ---
-import { siteConfig } from '../lib/config';
+import { siteConfig } from "../lib/config";
 ---
 
-<header class="sticky top-0 z-50 backdrop-blur-xl bg-void/80 border-b border-etc-green/10" transition:persist>
+<header
+  class="sticky top-0 z-50 backdrop-blur-xl bg-void/80 border-b border-etc-green/10"
+  transition:persist
+>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <nav class="flex items-center justify-between h-16">
       <!-- Logo & Title -->
@@ -13,22 +16,24 @@ import { siteConfig } from '../lib/config';
             alt="ETC"
             class="h-8 w-8 sm:h-9 sm:w-9 transition-transform duration-300 group-hover:scale-110"
           />
-          <div class="absolute inset-0 bg-etc-green/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div
+            class="absolute inset-0 bg-etc-green/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          >
+          </div>
         </div>
         <div class="flex flex-col">
-          <span class="text-sm font-mono font-semibold tracking-wide text-etc-green">Ethereum Classic</span>
-          <span class="text-xs sm:text-sm font-mono text-white -mt-0.5">Community Calls</span>
+          <span class="text-sm font-mono font-semibold tracking-wide"
+            >Ethereum Classic</span
+          >
+          <span class="text-xs sm:text-sm font-mono -mt-0.5 text-etc-green"
+            >Community Calls</span
+          >
         </div>
       </a>
 
       <!-- Desktop Navigation -->
       <div class="hidden md:flex items-center gap-1">
-        <a
-          href="/"
-          class="nav-link"
-        >
-          Archive
-        </a>
+        <a href="/" class="nav-link"> Archive </a>
         <button
           type="button"
           onclick="document.getElementById('subscribe-modal-global').showModal()"
@@ -53,32 +58,52 @@ import { siteConfig } from '../lib/config';
         aria-label="Toggle menu"
         id="mobile-menu-button"
       >
-        <svg class="w-6 h-6" id="menu-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+        <svg
+          class="w-6 h-6"
+          id="menu-icon"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 6h16M4 12h16M4 18h16"></path>
         </svg>
-        <svg class="w-6 h-6 hidden" id="close-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        <svg
+          class="w-6 h-6 hidden"
+          id="close-icon"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12"></path>
         </svg>
       </button>
     </nav>
-
   </div>
-
 </header>
 
 <!-- Mobile menu backdrop -->
-<div class="md:hidden fixed inset-0 top-16 bg-black/50 backdrop-blur-sm z-40 opacity-0 pointer-events-none transition-opacity duration-200" id="mobile-menu-backdrop"></div>
+<div
+  class="md:hidden fixed inset-0 top-16 bg-black/50 backdrop-blur-sm z-40 opacity-0 pointer-events-none transition-opacity duration-200"
+  id="mobile-menu-backdrop"
+>
+</div>
 
 <!-- Mobile Navigation (floating) -->
-<div class="md:hidden fixed left-0 right-0 top-16 bg-void border-b border-etc-green/10 z-50 opacity-0 pointer-events-none -translate-y-2 transition-all duration-200" id="mobile-menu">
+<div
+  class="md:hidden fixed left-0 right-0 top-16 bg-void border-b border-etc-green/10 z-50 opacity-0 pointer-events-none -translate-y-2 transition-all duration-200"
+  id="mobile-menu"
+>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
     <div class="flex flex-col gap-1">
-      <a
-        href="/"
-        class="nav-link-mobile"
-      >
-        Archive
-      </a>
+      <a href="/" class="nav-link-mobile"> Archive </a>
       <button
         type="button"
         id="mobile-subscribe-btn"
@@ -99,42 +124,58 @@ import { siteConfig } from '../lib/config';
 </div>
 
 <script>
-  const menuButton = document.getElementById('mobile-menu-button');
-  const mobileMenu = document.getElementById('mobile-menu');
-  const menuBackdrop = document.getElementById('mobile-menu-backdrop');
-  const menuIcon = document.getElementById('menu-icon');
-  const closeIcon = document.getElementById('close-icon');
+  const menuButton = document.getElementById("mobile-menu-button");
+  const mobileMenu = document.getElementById("mobile-menu");
+  const menuBackdrop = document.getElementById("mobile-menu-backdrop");
+  const menuIcon = document.getElementById("menu-icon");
+  const closeIcon = document.getElementById("close-icon");
 
   function openMenu() {
-    mobileMenu?.classList.remove('opacity-0', 'pointer-events-none', '-translate-y-2');
-    mobileMenu?.classList.add('opacity-100', 'pointer-events-auto', 'translate-y-0');
-    menuBackdrop?.classList.remove('opacity-0', 'pointer-events-none');
-    menuBackdrop?.classList.add('opacity-100', 'pointer-events-auto');
-    menuIcon?.classList.add('hidden');
-    closeIcon?.classList.remove('hidden');
+    mobileMenu?.classList.remove(
+      "opacity-0",
+      "pointer-events-none",
+      "-translate-y-2",
+    );
+    mobileMenu?.classList.add(
+      "opacity-100",
+      "pointer-events-auto",
+      "translate-y-0",
+    );
+    menuBackdrop?.classList.remove("opacity-0", "pointer-events-none");
+    menuBackdrop?.classList.add("opacity-100", "pointer-events-auto");
+    menuIcon?.classList.add("hidden");
+    closeIcon?.classList.remove("hidden");
   }
 
   function closeMenu() {
-    mobileMenu?.classList.add('opacity-0', 'pointer-events-none', '-translate-y-2');
-    mobileMenu?.classList.remove('opacity-100', 'pointer-events-auto', 'translate-y-0');
-    menuBackdrop?.classList.add('opacity-0', 'pointer-events-none');
-    menuBackdrop?.classList.remove('opacity-100', 'pointer-events-auto');
-    menuIcon?.classList.remove('hidden');
-    closeIcon?.classList.add('hidden');
+    mobileMenu?.classList.add(
+      "opacity-0",
+      "pointer-events-none",
+      "-translate-y-2",
+    );
+    mobileMenu?.classList.remove(
+      "opacity-100",
+      "pointer-events-auto",
+      "translate-y-0",
+    );
+    menuBackdrop?.classList.add("opacity-0", "pointer-events-none");
+    menuBackdrop?.classList.remove("opacity-100", "pointer-events-auto");
+    menuIcon?.classList.remove("hidden");
+    closeIcon?.classList.add("hidden");
   }
 
   function toggleMenu() {
-    const isOpen = mobileMenu?.classList.contains('opacity-100');
+    const isOpen = mobileMenu?.classList.contains("opacity-100");
     isOpen ? closeMenu() : openMenu();
   }
 
-  menuButton?.addEventListener('click', toggleMenu);
-  menuBackdrop?.addEventListener('click', closeMenu);
+  menuButton?.addEventListener("click", toggleMenu);
+  menuBackdrop?.addEventListener("click", closeMenu);
 
   // Close menu and open subscribe modal
-  const mobileSubscribeBtn = document.getElementById('mobile-subscribe-btn');
-  mobileSubscribeBtn?.addEventListener('click', () => {
+  const mobileSubscribeBtn = document.getElementById("mobile-subscribe-btn");
+  mobileSubscribeBtn?.addEventListener("click", () => {
     closeMenu();
-    document.getElementById('subscribe-modal-global')?.showModal();
+    document.getElementById("subscribe-modal-global")?.showModal();
   });
 </script>

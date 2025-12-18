@@ -25,13 +25,11 @@ body::before {
   height: 100%;
   pointer-events: none;
   z-index: 9999;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.03) 2px,
-    rgba(0, 0, 0, 0.03) 4px
-  );
+  background: repeating-linear-gradient(0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 4px);
 }
 
 /* Grid background pattern */
@@ -55,7 +53,13 @@ body::after {
    TYPOGRAPHY BASE
    ───────────────────────────────────────────────────────────────── */
 
-h1, h2, h3, h4, h5, h6, .font-display {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-display {
   font-family: var(--font-display);
   font-weight: 400;
   letter-spacing: -0.01em;
@@ -111,8 +115,28 @@ h1, h2, h3, h4, h5, h6, .font-display {
   --tw-prose-hr: rgba(111, 207, 151, 0.2);
 }
 
-.prose h1, .prose h2, .prose h3 {
+.prose h1 {
   font-family: var(--font-display);
+  font-size: 3.25rem;
+  line-height: 1.2;
+}
+
+.prose h2 {
+  font-family: var(--font-display);
+  font-size: 2.75rem;
+  line-height: 1.25;
+}
+
+.prose h3 {
+  font-family: var(--font-display);
+  font-size: 2.375rem;
+  line-height: 1.3;
+}
+
+.prose h4 {
+  font-family: var(--font-display);
+  font-size: 2.125rem;
+  line-height: 1.4;
 }
 
 .prose a {

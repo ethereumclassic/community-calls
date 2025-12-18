@@ -25,40 +25,32 @@ const isUpcoming = call.data.date ? call.data.date > new Date() : false;
           <span class="w-1.5 h-1.5 rounded-full bg-etc-green animate-pulse-glow" />
           Recorded
         </span>
-      ) : call.data.date && call.data.time && (
-        <UpcomingBadge
-          client:only="react"
-          date={call.data.date.toISOString()}
-          time={call.data.time}
-        />
+      ) : (
+        call.data.date &&
+        call.data.time && (
+          <UpcomingBadge
+            client:only="react"
+            date={call.data.date.toISOString()}
+            time={call.data.time}
+          />
+        )
       )
     }
   </div>
 
   <!-- Title -->
-  {callNumber === 0 ? (
-    <h1 class="font-display text-5xl md:text-6xl text-white mb-4">
-      {call.data.description}
-    </h1>
-  ) : (
-    <>
-      <h1 class="font-display text-5xl md:text-6xl text-white mb-4">
+  {
+    callNumber !== 0 && (
+      <p class="text-lg font-mono text-gray-400 mb-4">
         Ethereum Classic Community Call #{callNumber}
-      </h1>
-
-      <!-- Description -->
-      {
-        call.data.description && (
-          <p class="text-xl font-mono text-gray-400 mb-6">
-            {call.data.description}
-          </p>
-        )
-      }
-    </>
-  )}
-
+      </p>
+    )
+  }
+  <h1 class="font-display text-5xl md:text-6xl text-white mb-4">
+    {call.data.description}
+  </h1>
   <!-- Meta info -->
-  <div class="flex flex-wrap items-center gap-4 text-sm font-mono">
+  <div class="flex flex-wrap items-center gap-4 text-lg font-mono">
     {
       call.data.date && (
         <span class="text-gray-400">
@@ -77,8 +69,7 @@ const isUpcoming = call.data.date ? call.data.date > new Date() : false;
     {
       call.data.location && (
         <span class="text-gray-400">
-          <span class="text-etc-green/60">location:</span>{" "}
-          {call.data.location}
+          <span class="text-etc-green/60">location:</span> {call.data.location}
         </span>
       )
     }
@@ -88,26 +79,29 @@ const isUpcoming = call.data.date ? call.data.date > new Date() : false;
   {call.data.time && <TimezoneBar time={call.data.time} />}
 
   <!-- Join Call Button & Green Room (only for upcoming calls) -->
-  {isUpcoming && ((call.data.joinLink && !call.data.youtube) || call.data.greenRoom) ? (
-    <div class="mt-6 flex flex-col md:flex-row md:items-center gap-4">
-      {call.data.joinLink && !call.data.youtube && (
-        <a
-          href={call.data.joinLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex items-center gap-3 px-6 py-3 bg-etc-green text-void font-mono text-sm font-semibold uppercase tracking-wider rounded-lg hover:bg-etc-green/90 transition-colors whitespace-nowrap"
-        >
-          <Icon name="lucide:video" class="icon-sm" />
-          Join Call
-        </a>
-      )}
-      {call.data.greenRoom && (
-        <GreenRoom
-          time={call.data.greenRoom.time}
-          location={call.data.greenRoom.location}
-          joinLink={call.data.greenRoom.joinLink}
-        />
-      )}
-    </div>
-  ) : null}
+  {
+    isUpcoming &&
+    ((call.data.joinLink && !call.data.youtube) || call.data.greenRoom) ? (
+      <div class="mt-6 flex flex-col md:flex-row md:items-center gap-4">
+        {call.data.joinLink && !call.data.youtube && (
+          <a
+            href={call.data.joinLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-3 px-6 py-3 bg-etc-green text-void font-mono text-sm font-semibold uppercase tracking-wider rounded-lg hover:bg-etc-green/90 transition-colors whitespace-nowrap"
+          >
+            <Icon name="lucide:video" class="icon-sm" />
+            Join Call
+          </a>
+        )}
+        {call.data.greenRoom && (
+          <GreenRoom
+            time={call.data.greenRoom.time}
+            location={call.data.greenRoom.location}
+            joinLink={call.data.greenRoom.joinLink}
+          />
+        )}
+      </div>
+    ) : null
+  }
 </header>

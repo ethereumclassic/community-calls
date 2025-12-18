@@ -3,6 +3,7 @@ import { ViewTransitions } from 'astro:transitions';
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import SubscribeModal from '../components/SubscribeModal.astro';
 
 // Fontsource imports - fonts are bundled locally for better performance
 import '@fontsource-variable/jetbrains-mono';
@@ -12,9 +13,53 @@ import '@fontsource/instrument-serif/400-italic.css';
 interface Props {
   title: string;
   description?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  publishedTime?: string;
 }
 
-const { title, description = 'ETC Community Calls - Weekly community discussions about Ethereum Classic' } = Astro.props;
+const siteUrl = 'https://cc.ethereumclassic.org';
+const siteName = 'ETC Community Calls';
+const defaultDescription = 'Regular open discussions about Ethereum Classic development, ECIPs, and the future of ETC.';
+
+const {
+  title,
+  description = defaultDescription,
+  ogImage,
+  ogType = 'website',
+  publishedTime,
+} = Astro.props;
+
+const canonicalUrl = new URL(Astro.url.pathname, siteUrl).href;
+const ogImageUrl = ogImage || `${siteUrl}/og.png`;
+
+// JSON-LD structured data
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": ogType === 'article' ? "Event" : "WebSite",
+  name: title,
+  description: description,
+  url: canonicalUrl,
+  ...(ogType === 'website' && {
+    publisher: {
+      "@type": "Organization",
+      name: siteName,
+      logo: {
+        "@type": "ImageObject",
+        url: `${siteUrl}/etc-logo.svg`
+      }
+    }
+  }),
+  ...(ogType === 'article' && publishedTime && {
+    startDate: publishedTime,
+    organizer: {
+      "@type": "Organization",
+      name: "Ethereum Classic Community"
+    },
+    eventAttendanceMode: "https://schema.org/OnlineEventAttendanceMode",
+    eventStatus: "https://schema.org/EventScheduled"
+  })
+};
 ---
 
 <!doctype html>
@@ -22,10 +67,46 @@ const { title, description = 'ETC Community Calls - Weekly community discussions
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary Meta Tags -->
+    <title>{title}</title>
+    <meta name="title" content={title} />
     <meta name="description" content={description} />
     <meta name="theme-color" content="#0a0a0c" />
+    <meta name="color-scheme" content="dark" />
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href={canonicalUrl} />
+
+    <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="/etc-logo.svg" />
-    <title>{title}</title>
+    <link rel="apple-touch-icon" href="/etc-logo.svg" />
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content={ogType === 'article' ? 'article' : 'website'} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:site_name" content={siteName} />
+    <meta property="og:locale" content="en_US" />
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content={canonicalUrl} />
+    <meta property="twitter:title" content={title} />
+    <meta property="twitter:description" content={description} />
+    <meta property="twitter:image" content={ogImageUrl} />
+
+    <!-- RSS Feed -->
+    <link rel="alternate" type="application/rss+xml" title={`${siteName} RSS Feed`} href={`${siteUrl}/rss.xml`} />
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
     <ViewTransitions />
   </head>
   <body class="min-h-screen flex flex-col">
@@ -44,5 +125,8 @@ const { title, description = 'ETC Community Calls - Weekly community discussions
       </div>
     </main>
     <Footer />
+
+    <!-- Global Subscribe Modal -->
+    <SubscribeModal modalId="subscribe-modal-global" />
   </body>
 </html>

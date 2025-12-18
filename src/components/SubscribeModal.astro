@@ -1,0 +1,374 @@
+---
+interface Props {
+  modalId: string;
+}
+
+const { modalId } = Astro.props;
+const icsUrl = 'https://cc.ethereumclassic.org/etccc.ics';
+const rssUrl = 'https://cc.ethereumclassic.org/rss.xml';
+---
+
+<dialog id={modalId} class="modal">
+  <div class="modal-box bg-surface border border-etc-green/20 max-w-lg max-h-[90vh] overflow-y-auto">
+    <form method="dialog">
+      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-gray-400 hover:text-gray-200">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </button>
+    </form>
+
+    <div class="flex items-center gap-3 mb-6">
+      <div class="p-2 rounded-lg bg-etc-green/10">
+        <svg class="w-6 h-6 text-etc-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+        </svg>
+      </div>
+      <h3 class="font-display text-xl text-gray-100">Stay Updated</h3>
+    </div>
+
+    <p class="font-mono text-sm text-gray-400 mb-6">
+      Never miss an ETC Community Call. Choose your preferred way to stay updated.
+    </p>
+
+    <!-- Tab buttons -->
+    <div class="flex gap-2 mb-6" role="tablist">
+      <button
+        type="button"
+        role="tab"
+        aria-selected="true"
+        class="tab-btn flex-1 px-4 py-2 text-xs font-mono uppercase tracking-wider rounded-lg transition-colors bg-etc-green/20 text-etc-green border border-etc-green/30 cursor-pointer"
+        data-tab="calendar"
+        id={`${modalId}-tab-calendar`}
+      >
+        <span class="flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          Calendar
+        </span>
+      </button>
+      <button
+        type="button"
+        role="tab"
+        aria-selected="false"
+        class="tab-btn flex-1 px-4 py-2 text-xs font-mono uppercase tracking-wider rounded-lg transition-colors bg-surface-elevated text-gray-400 border border-etc-green/10 hover:border-etc-green/20 cursor-pointer"
+        data-tab="rss"
+        id={`${modalId}-tab-rss`}
+      >
+        <span class="flex items-center justify-center gap-2">
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/>
+          </svg>
+          RSS Feed
+        </span>
+      </button>
+    </div>
+
+    <!-- Calendar Tab Content -->
+    <div class="tab-content block" data-content="calendar" id={`${modalId}-content-calendar`}>
+
+    <!-- URL Copy Section -->
+    <div class="mb-6">
+      <label class="block text-xs font-mono uppercase tracking-wider text-gray-500 mb-2">
+        Calendar URL
+      </label>
+      <div class="flex gap-2">
+        <input
+          type="text"
+          value={icsUrl}
+          readonly
+          id={`${modalId}-url`}
+          class="flex-1 input input-bordered bg-void border-etc-green/20 text-gray-300 font-mono text-sm focus:border-etc-green/40 focus:outline-none"
+        />
+        <button
+          type="button"
+          class="btn btn-square bg-etc-green/10 border-etc-green/20 hover:bg-etc-green/20 text-etc-green"
+          id={`${modalId}-copy`}
+          aria-label="Copy URL"
+        >
+          <svg class="w-5 h-5 copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+          </svg>
+          <svg class="w-5 h-5 check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Instructions -->
+    <div class="space-y-3">
+      <h4 class="text-sm font-mono uppercase tracking-wider text-gray-400">How to Subscribe</h4>
+
+      <details class="group">
+        <summary class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors">
+          <span class="flex items-center gap-3">
+            <span class="text-lg">📅</span>
+            <span class="font-mono text-sm text-gray-300">Google Calendar</span>
+          </span>
+          <svg class="w-4 h-4 text-gray-500 transform transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </summary>
+        <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
+          <ol class="list-decimal list-inside space-y-1">
+            <li>Open <a href="https://calendar.google.com" target="_blank" rel="noopener" class="text-etc-green hover:underline">Google Calendar</a></li>
+            <li>Click the <strong class="text-gray-300">+</strong> next to "Other calendars"</li>
+            <li>Select "From URL"</li>
+            <li>Paste the URL above and click "Add calendar"</li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors">
+          <span class="flex items-center gap-3">
+            <span class="text-lg">🍎</span>
+            <span class="font-mono text-sm text-gray-300">Apple Calendar</span>
+          </span>
+          <svg class="w-4 h-4 text-gray-500 transform transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </summary>
+        <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
+          <ol class="list-decimal list-inside space-y-1">
+            <li>Open the Calendar app</li>
+            <li>Go to <strong class="text-gray-300">File → New Calendar Subscription</strong></li>
+            <li>Paste the URL above and click "Subscribe"</li>
+            <li>Adjust settings and click "OK"</li>
+          </ol>
+        </div>
+      </details>
+
+      <details class="group">
+        <summary class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors">
+          <span class="flex items-center gap-3">
+            <span class="text-lg">📧</span>
+            <span class="font-mono text-sm text-gray-300">Outlook</span>
+          </span>
+          <svg class="w-4 h-4 text-gray-500 transform transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </summary>
+        <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
+          <ol class="list-decimal list-inside space-y-1">
+            <li>Open Outlook Calendar</li>
+            <li>Click <strong class="text-gray-300">Add calendar → Subscribe from web</strong></li>
+            <li>Paste the URL above</li>
+            <li>Name it "ETC Community Calls" and click "Import"</li>
+          </ol>
+        </div>
+      </details>
+    </div>
+
+    <div class="flex gap-2 mt-6">
+      <a
+        href="/etccc.ics"
+        download="etccc.ics"
+        class="btn btn-sm bg-surface-elevated border-etc-green/20 text-gray-300 hover:bg-surface-elevated/80 font-mono text-xs"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+        </svg>
+        Download ICS
+      </a>
+    </div>
+    </div>
+
+    <!-- RSS Tab Content -->
+    <div class="tab-content hidden" data-content="rss" id={`${modalId}-content-rss`}>
+      <!-- RSS URL Copy Section -->
+      <div class="mb-6">
+        <label class="block text-xs font-mono uppercase tracking-wider text-gray-500 mb-2">
+          RSS Feed URL
+        </label>
+        <div class="flex gap-2">
+          <input
+            type="text"
+            value={rssUrl}
+            readonly
+            id={`${modalId}-rss-url`}
+            class="flex-1 input input-bordered bg-void border-etc-green/20 text-gray-300 font-mono text-sm focus:border-etc-green/40 focus:outline-none"
+          />
+          <button
+            type="button"
+            class="btn btn-square bg-etc-green/10 border-etc-green/20 hover:bg-etc-green/20 text-etc-green"
+            id={`${modalId}-rss-copy`}
+            aria-label="Copy RSS URL"
+          >
+            <svg class="w-5 h-5 copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+            </svg>
+            <svg class="w-5 h-5 check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- RSS Instructions -->
+      <div class="space-y-3">
+        <h4 class="text-sm font-mono uppercase tracking-wider text-gray-400">Popular RSS Readers</h4>
+
+        <details class="group">
+          <summary class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors">
+            <span class="flex items-center gap-3">
+              <span class="text-lg">🦊</span>
+              <span class="font-mono text-sm text-gray-300">Feedly</span>
+            </span>
+            <svg class="w-4 h-4 text-gray-500 transform transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </summary>
+          <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
+            <ol class="list-decimal list-inside space-y-1">
+              <li>Open <a href="https://feedly.com" target="_blank" rel="noopener" class="text-etc-green hover:underline">Feedly</a></li>
+              <li>Click the <strong class="text-gray-300">+</strong> button to add content</li>
+              <li>Paste the RSS URL above</li>
+              <li>Click "Follow" to subscribe</li>
+            </ol>
+          </div>
+        </details>
+
+        <details class="group">
+          <summary class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors">
+            <span class="flex items-center gap-3">
+              <span class="text-lg">📰</span>
+              <span class="font-mono text-sm text-gray-300">Inoreader</span>
+            </span>
+            <svg class="w-4 h-4 text-gray-500 transform transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </summary>
+          <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
+            <ol class="list-decimal list-inside space-y-1">
+              <li>Open <a href="https://www.inoreader.com" target="_blank" rel="noopener" class="text-etc-green hover:underline">Inoreader</a></li>
+              <li>Click <strong class="text-gray-300">Add new → Feeds</strong></li>
+              <li>Paste the RSS URL and subscribe</li>
+            </ol>
+          </div>
+        </details>
+
+        <details class="group">
+          <summary class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors">
+            <span class="flex items-center gap-3">
+              <span class="text-lg">🌐</span>
+              <span class="font-mono text-sm text-gray-300">Browser Extension</span>
+            </span>
+            <svg class="w-4 h-4 text-gray-500 transform transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+            </svg>
+          </summary>
+          <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
+            <p class="mb-2">Install an RSS reader extension like:</p>
+            <ul class="list-disc list-inside space-y-1">
+              <li><a href="https://chrome.google.com/webstore/detail/rss-feed-reader/pnjaodmkngahhkoihejjehlcdlnohgmp" target="_blank" rel="noopener" class="text-etc-green hover:underline">RSS Feed Reader (Chrome)</a></li>
+              <li><a href="https://addons.mozilla.org/en-US/firefox/addon/feedbro/" target="_blank" rel="noopener" class="text-etc-green hover:underline">Feedbro (Firefox)</a></li>
+            </ul>
+          </div>
+        </details>
+      </div>
+
+      <div class="flex gap-2 mt-6">
+        <a
+          href="/rss.xml"
+          target="_blank"
+          rel="noopener"
+          class="btn btn-sm bg-surface-elevated border-etc-green/20 text-gray-300 hover:bg-surface-elevated/80 font-mono text-xs"
+        >
+          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/>
+          </svg>
+          Open RSS Feed
+        </a>
+      </div>
+    </div>
+
+    <div class="modal-action mt-6 border-t border-etc-green/10 pt-4">
+      <form method="dialog">
+        <button class="btn btn-sm bg-etc-green/10 border-etc-green/30 text-etc-green hover:bg-etc-green/20 font-mono text-xs">
+          Done
+        </button>
+      </form>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+
+<script is:inline>
+  // Use event delegation for robust handling across View Transitions
+  document.addEventListener('click', function(e) {
+    const target = e.target.closest('.tab-btn');
+    if (!target) return;
+
+    const modal = target.closest('dialog.modal');
+    if (!modal) return;
+
+    const tab = target.getAttribute('data-tab');
+    if (!tab) return;
+
+    // Update all tab buttons in this modal
+    modal.querySelectorAll('.tab-btn').forEach(btn => {
+      if (btn.getAttribute('data-tab') === tab) {
+        btn.classList.remove('bg-surface-elevated', 'text-gray-400', 'border-etc-green/10');
+        btn.classList.add('bg-etc-green/20', 'text-etc-green', 'border-etc-green/30');
+        btn.setAttribute('aria-selected', 'true');
+      } else {
+        btn.classList.add('bg-surface-elevated', 'text-gray-400', 'border-etc-green/10');
+        btn.classList.remove('bg-etc-green/20', 'text-etc-green', 'border-etc-green/30');
+        btn.setAttribute('aria-selected', 'false');
+      }
+    });
+
+    // Show/hide tab content
+    modal.querySelectorAll('.tab-content').forEach(content => {
+      if (content.getAttribute('data-content') === tab) {
+        content.classList.remove('hidden');
+        content.classList.add('block');
+      } else {
+        content.classList.remove('block');
+        content.classList.add('hidden');
+      }
+    });
+  });
+
+  // Copy button handler using event delegation
+  document.addEventListener('click', async function(e) {
+    const copyBtn = e.target.closest('[id$="-copy"]');
+    if (!copyBtn) return;
+
+    const modal = copyBtn.closest('dialog.modal');
+    if (!modal) return;
+
+    // Determine which URL input to copy from
+    const modalId = modal.id;
+    let inputId;
+    if (copyBtn.id.includes('-rss-copy')) {
+      inputId = `${modalId}-rss-url`;
+    } else {
+      inputId = `${modalId}-url`;
+    }
+
+    const urlInput = document.getElementById(inputId);
+    if (!urlInput || !(urlInput instanceof HTMLInputElement)) return;
+
+    const copyIcon = copyBtn.querySelector('.copy-icon');
+    const checkIcon = copyBtn.querySelector('.check-icon');
+
+    try {
+      await navigator.clipboard.writeText(urlInput.value);
+      copyIcon?.classList.add('hidden');
+      checkIcon?.classList.remove('hidden');
+      setTimeout(() => {
+        copyIcon?.classList.remove('hidden');
+        checkIcon?.classList.add('hidden');
+      }, 2000);
+    } catch (err) {
+      urlInput.select();
+      document.execCommand('copy');
+    }
+  });
+</script>

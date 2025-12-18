@@ -1,0 +1,11 @@
+# ETC Community Calls - robots.txt
+# https://cc.ethereumclassic.org
+
+User-agent: *
+Allow: /
+
+# Sitemaps
+Sitemap: https://cc.ethereumclassic.org/sitemap.xml
+
+# Crawl-delay (optional, for politeness)
+Crawl-delay: 1

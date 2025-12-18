@@ -122,6 +122,16 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
           </svg>
           Archive
         </a>
+        <button
+          type="button"
+          class="btn-etc-outline px-8 py-3 rounded-lg inline-flex items-center gap-2"
+          onclick="document.getElementById('subscribe-modal-global').showModal()"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          Subscribe
+        </button>
         <a
           href="https://www.youtube.com/@ETCCommunityCalls"
           target="_blank"
@@ -205,6 +215,10 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
               </li>
               <li class="flex items-start gap-2">
                 <span class="text-etc-green mt-1">→</span>
+                <span><button type="button" onclick="document.getElementById('subscribe-modal-global').showModal()" class="text-etc-green hover:underline cursor-pointer">Subscribe to our calendar</button> for reminders</span>
+              </li>
+              <li class="flex items-start gap-2">
+                <span class="text-etc-green mt-1">→</span>
                 <span>Recordings published on YouTube</span>
               </li>
             </ul>
@@ -284,6 +298,41 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
     </section>
   )}
 
+  <!-- Subscribe Banner -->
+  <section class="mb-16">
+    <div class="terminal-card rounded-xl overflow-hidden border-etc-green/20">
+      <div class="p-6 md:p-8">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+          <div class="flex items-start gap-4">
+            <div class="p-3 rounded-lg bg-etc-green/10 flex-shrink-0">
+              <svg class="w-6 h-6 text-etc-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-display text-xl text-gray-100 mb-2">Never Miss a Call</h3>
+              <p class="font-mono text-sm text-gray-400">
+                Subscribe to our calendar feed and get automatic updates for all upcoming ETC Community Calls directly in your calendar app.
+              </p>
+            </div>
+          </div>
+          <div class="flex-shrink-0">
+            <button
+              type="button"
+              class="btn-etc px-6 py-3 rounded-lg inline-flex items-center gap-2 whitespace-nowrap cursor-pointer"
+              onclick="document.getElementById('subscribe-modal-global').showModal()"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              Subscribe to Calendar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- Calls Archive -->
   <section id="archive">
     <div class="flex items-center justify-between mb-8">
@@ -291,7 +340,7 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
         <span class="text-etc-green/60">//</span> Archive
       </h2>
       <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">
-        {pastCalls.length} calls
+        {pastCalls.length} past calls
       </span>
     </div>
 

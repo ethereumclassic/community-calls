@@ -1,0 +1,206 @@
+---
+// OG Image page - for taking screenshots
+// Standard OG image size: 1200x630
+import '../styles/global.css';
+import '@fontsource-variable/jetbrains-mono';
+import '@fontsource/instrument-serif/400.css';
+import '@fontsource/instrument-serif/400-italic.css';
+---
+
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ETC Community Calls - OG Image</title>
+    <style>
+      /* Override body for fixed OG dimensions */
+      body {
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Remove scanline effect for clean screenshot */
+      body::before {
+        display: none;
+      }
+
+      .og-container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 60px;
+        padding: 60px 80px;
+        position: relative;
+        z-index: 10;
+      }
+
+      /* Background decorative elements */
+      .bg-pattern {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        opacity: 0.03;
+      }
+
+      .bg-pattern svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Logo section - matches hero exactly */
+      .logo-section {
+        position: relative;
+        flex-shrink: 0;
+        display: inline-block;
+      }
+
+      .logo-glow {
+        position: absolute;
+        inset: 0;
+        background: rgba(111, 207, 151, 0.2);
+        border-radius: 9999px;
+        filter: blur(48px);
+        transform: scale(1.5);
+      }
+
+      .logo {
+        position: relative;
+        width: 220px;
+        height: 220px;
+      }
+
+      /* Text section */
+      .text-section {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+      }
+
+      .og-title {
+        font-family: 'Instrument Serif', Georgia, serif;
+        font-weight: 400;
+        font-size: 72px;
+        line-height: 1.1;
+        letter-spacing: -0.01em;
+        color: #f3f4f6;
+        margin: 0 0 16px 0;
+      }
+
+      .og-title-glow {
+        color: var(--color-etc-green);
+        text-shadow:
+          0 0 10px var(--color-etc-green-glow),
+          0 0 20px var(--color-etc-green),
+          0 0 40px var(--color-etc-green-dim);
+      }
+
+      .og-subtitle {
+        font-family: 'JetBrains Mono Variable', ui-monospace, monospace;
+        font-size: 22px;
+        color: #9ca3af;
+        line-height: 1.5;
+        max-width: 600px;
+        margin: 0;
+      }
+
+      .og-subtitle .highlight {
+        color: rgba(111, 207, 151, 0.9);
+      }
+
+      /* Border decoration */
+      .border-frame {
+        position: absolute;
+        inset: 20px;
+        border: 1px solid rgba(111, 207, 151, 0.15);
+        border-radius: 12px;
+        pointer-events: none;
+      }
+
+      /* Corner accents */
+      .corner {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        border-color: var(--color-etc-green);
+        opacity: 0.4;
+      }
+
+      .corner-tl {
+        top: 20px;
+        left: 20px;
+        border-top: 2px solid;
+        border-left: 2px solid;
+      }
+
+      .corner-tr {
+        top: 20px;
+        right: 20px;
+        border-top: 2px solid;
+        border-right: 2px solid;
+      }
+
+      .corner-bl {
+        bottom: 20px;
+        left: 20px;
+        border-bottom: 2px solid;
+        border-left: 2px solid;
+      }
+
+      .corner-br {
+        bottom: 20px;
+        right: 20px;
+        border-bottom: 2px solid;
+        border-right: 2px solid;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Background pattern -->
+    <div class="bg-pattern">
+      <svg viewBox="0 0 1200 630" preserveAspectRatio="none">
+        <path d="M0,315 L300,315 L350,200 L850,200 L900,315 L1200,315" stroke="#6fcf97" stroke-width="2" fill="none"/>
+        <path d="M0,450 L200,450 L250,380 L450,380 L500,450 L1200,450" stroke="#6fcf97" stroke-width="2" fill="none"/>
+        <path d="M0,180 L150,180 L200,250 L400,250 L450,180 L600,180" stroke="#6fcf97" stroke-width="2" fill="none"/>
+      </svg>
+    </div>
+
+    <!-- Border frame -->
+    <div class="border-frame"></div>
+
+    <!-- Corner accents -->
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+
+    <!-- Main content -->
+    <div class="og-container">
+      <!-- Logo -->
+      <div class="logo-section">
+        <div class="logo-glow"></div>
+        <img src="/etc-logo.svg" alt="ETC Logo" class="logo" />
+      </div>
+
+      <!-- Text -->
+      <div class="text-section">
+        <h1 class="og-title">
+          <span>Ethereum Classic</span><br />
+          <span class="og-title-glow">Community Calls</span>
+        </h1>
+        <p class="og-subtitle">
+          Regular open discussions about development,
+          <span class="highlight">ECIPs</span>, and the future of
+          <span class="highlight">Ethereum Classic</span>
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

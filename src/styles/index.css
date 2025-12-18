@@ -1,0 +1,18 @@
+/* ═══════════════════════════════════════════════════════════════════
+   ETC COMMUNITY CALLS - DIGITAL HERITAGE THEME
+   A CRT-inspired dark aesthetic honoring the "Classic" in ETC
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Import Tailwind and plugins */
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+@plugin "daisyui" {
+  themes: dark --default;
+}
+
+/* Import organized stylesheets */
+@import "./theme.css";
+@import "./base.css";
+@import "./components.css";
+@import "./utilities.css";
+@import "./animations.css";

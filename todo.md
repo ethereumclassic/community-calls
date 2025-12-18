@@ -1,1 +1,3 @@
-recurring calls md
+- recurring calls
+- list speakers
+- POAPs for speakers

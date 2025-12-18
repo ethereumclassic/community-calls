@@ -1,19 +1,21 @@
 ---
 import { getCollection } from 'astro:content';
+import { Icon } from 'astro-icon/components';
 import Layout from '../layouts/Layout.astro';
 import CallCard from '../components/CallCard.astro';
+import TerminalCard from '../components/ui/TerminalCard.astro';
+import AnimatedContainer from '../components/ui/AnimatedContainer.astro';
+import Button from '../components/ui/Button.astro';
+import Badge from '../components/ui/Badge.astro';
+import { getCallNumber, getSlug, filterValidCalls, sortCallsByDate } from '../lib/calls';
+import { formatFullDate } from '../lib/dates';
+import { siteConfig } from '../lib/config';
 
 const allCalls = await getCollection('calls');
 const now = Date.now();
 
 // Filter out addendum files and sort by date (newest first)
-const filteredCalls = allCalls
-  .filter(call => !call.id.includes('addendum') && !call.id.includes('recurring'))
-  .sort((a, b) => {
-    const dateA = a.data.date ? new Date(a.data.date).getTime() : 0;
-    const dateB = b.data.date ? new Date(b.data.date).getTime() : 0;
-    return dateB - dateA;
-  });
+const filteredCalls = sortCallsByDate(filterValidCalls(allCalls));
 
 // Separate upcoming and past calls
 const upcomingCalls = filteredCalls.filter(call => call.data.date && call.data.date.getTime() > now);
@@ -21,46 +23,8 @@ const pastCalls = filteredCalls.filter(call => !call.data.date || call.data.date
 
 // Get the next upcoming call (soonest)
 const nextCall = upcomingCalls.length > 0
-  ? upcomingCalls.sort((a, b) => (a.data.date?.getTime() || 0) - (b.data.date?.getTime() || 0))[0]
+  ? sortCallsByDate(upcomingCalls, 'asc')[0]
   : null;
-
-// Helper to extract call number from filename (fallback)
-const getCallNumberFromFilename = (id: string) => {
-  const match = id.match(/_(\d+)\.md$/);
-  return match ? parseInt(match[1], 10) : 0;
-};
-
-// Get call number from frontmatter or filename
-const getCallNumber = (call: typeof filteredCalls[0]) => {
-  if (call.data.number) return call.data.number;
-  return getCallNumberFromFilename(call.id);
-};
-
-// Generate slug from call data
-const getSlug = (call: typeof filteredCalls[0]) => {
-  const date = call.data.date;
-  const num = getCallNumber(call);
-  const desc = call.data.description;
-
-  if (date && desc) {
-    const dateStr = date.toISOString().split('T')[0];
-    const slugDesc = desc.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    return `${dateStr}-${num}-${slugDesc}`;
-  }
-
-  // Fallback to filename without extension
-  return call.id.replace('.md', '');
-};
-
-// Format date for upcoming call
-const formatFullDate = (d: Date) => {
-  return d.toLocaleDateString('en-US', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
-};
 
 // Stats
 const totalCalls = filteredCalls.length;
@@ -83,22 +47,15 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
       <!-- Logo with glow -->
       <div class="relative inline-block mb-8 animate-float">
         <img
-          src="/etc-logo.svg"
+          src={siteConfig.assets.logo}
           alt="ETC Community Calls"
           class="w-28 h-28 md:w-36 md:h-36 mx-auto animate-pulse-glow"
         />
         <div class="absolute inset-0 bg-etc-green/20 rounded-full blur-2xl scale-150"></div>
       </div>
 
-      <!-- Terminal-style header -->
-      <!-- <div class="mb-6 opacity-0 animate-fade-in-up" style="animation-delay: 100ms">
-        <span class="inline-block px-3 py-1 text-[10px] font-mono uppercase tracking-[0.3em] text-etc-green/80 border border-etc-green/20 rounded-full">
-          Ethereum Classic
-        </span>
-      </div> -->
-
       <!-- Main title -->
-       
+
       <h1 class="font-display flex flex-col gap-4 text-5xl md:text-7xl lg:text-8xl text-gray-100 mb-6 opacity-0 animate-fade-in-up whitespace-nowrap" style="animation-delay: 200ms">
        <span>Ethereum Classic</span>
        <span class="text-glow">Community Calls</span>
@@ -107,57 +64,20 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
       <!-- Subtitle -->
       <p class="text-lg md:text-xl font-mono text-gray-400 max-w-2xl mx-auto mb-10 opacity-0 animate-fade-in-up" style="animation-delay: 300ms">
         Regular open discussions about development,
-        <span class="text-etc-green/80">ECIPs</span>, and the future of
-        <span class="text-etc-green/80">Ethereum Classic</span>
+        <a href="https://ecips.ethereumclassic.org" target="_blank" rel="noopener noreferrer" class="text-etc-green/80 hover:text-etc-green underline decoration-etc-green/50 hover:decoration-etc-green transition-colors">ECIPs</a>, and the future of
+        <a href="https://ethereumclassic.org" target="_blank" rel="noopener noreferrer" class="text-etc-green/80 hover:text-etc-green underline decoration-etc-green/50 hover:decoration-etc-green transition-colors">Ethereum Classic</a>
       </p>
 
       <!-- CTA Buttons -->
-      <div class="flex flex-wrap gap-4 justify-center opacity-0 animate-fade-in-up" style="animation-delay: 400ms">
-        <a
-          href="#archive"
-          class="btn-etc px-8 py-3 rounded-lg inline-flex items-center gap-2"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-          </svg>
-          Archive
-        </a>
-        <button
-          type="button"
-          class="btn-etc-outline px-8 py-3 rounded-lg inline-flex items-center gap-2"
-          onclick="document.getElementById('subscribe-modal-global').showModal()"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-          </svg>
-          Subscribe
-        </button>
-        <a
-          href="https://www.youtube.com/@ETCCommunityCalls"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="btn-etc-outline px-8 py-3 rounded-lg inline-flex items-center gap-2"
-        >
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-          </svg>
-          YouTube
-        </a>
-        <a
-          href="https://ethereumclassic.org/discord"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="btn-etc-outline px-8 py-3 rounded-lg inline-flex items-center gap-2"
-        >
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
-          </svg>
-          Discord
-        </a>
-      </div>
+      <AnimatedContainer delay={400} class="flex flex-wrap gap-4 justify-center">
+        <Button href="#archive" icon="lucide:archive">Archive</Button>
+        <Button variant="outline" icon="lucide:calendar" onclick="document.getElementById('subscribe-modal-global').showModal()">Subscribe</Button>
+        <Button variant="outline" href={siteConfig.social.youtube} target="_blank" rel="noopener noreferrer" icon="simple-icons:youtube">YouTube</Button>
+        <Button variant="outline" href={siteConfig.social.discord} target="_blank" rel="noopener noreferrer" icon="simple-icons:discord">Discord</Button>
+      </AnimatedContainer>
 
       <!-- Stats -->
-      <div class="flex justify-center gap-12 mt-12 opacity-0 animate-fade-in-up" style="animation-delay: 500ms">
+      <AnimatedContainer delay={500} class="flex justify-center gap-12 mt-12">
         <div class="text-center">
           <div class="text-3xl md:text-4xl font-display text-etc-green">{totalCalls}</div>
           <div class="text-xs font-mono uppercase tracking-wider text-gray-500 mt-1">Total Calls</div>
@@ -167,22 +87,14 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
           <div class="text-3xl md:text-4xl font-display text-etc-green">{recordedCalls}</div>
           <div class="text-xs font-mono uppercase tracking-wider text-gray-500 mt-1">Recordings</div>
         </div>
-      </div>
+      </AnimatedContainer>
     </div>
 
   </section>
 
   <!-- About Section -->
-  <section class="mb-16 opacity-0 animate-fade-in-up" style="animation-delay: 200ms">
-    <div class="terminal-card rounded-xl overflow-hidden">
-      <!-- Terminal header -->
-      <div class="flex items-center gap-2 px-4 py-3 bg-surface-elevated/50 border-b border-etc-green/10">
-        <span class="w-3 h-3 rounded-full bg-red-500/60"></span>
-        <span class="w-3 h-3 rounded-full bg-amber/60"></span>
-        <span class="w-3 h-3 rounded-full bg-etc-green/60"></span>
-        <span class="ml-4 text-xs font-mono text-gray-500">about.md</span>
-      </div>
-
+  <AnimatedContainer as="section" delay={200} class="mb-16">
+    <TerminalCard showDots title="about.md">
       <div class="p-6 md:p-8">
         <div class="grid md:grid-cols-2 gap-8">
           <div>
@@ -225,8 +137,8 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
           </div>
         </div>
       </div>
-    </div>
-  </section>
+    </TerminalCard>
+  </AnimatedContainer>
 
   <!-- Upcoming Call Hero -->
   {nextCall && (
@@ -259,26 +171,19 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
               <div class="flex flex-wrap items-center gap-4 text-sm font-mono text-gray-400">
                 {nextCall.data.date && (
                   <span class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-amber/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
+                    <Icon name="lucide:calendar" class="icon-sm text-amber/60" />
                     {formatFullDate(nextCall.data.date)}
                   </span>
                 )}
                 {nextCall.data.time && (
                   <span class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-amber/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
+                    <Icon name="lucide:clock" class="icon-sm text-amber/60" />
                     {nextCall.data.time}
                   </span>
                 )}
                 {nextCall.data.location && (
                   <span class="flex items-center gap-2">
-                    <svg class="w-4 h-4 text-amber/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
+                    <Icon name="lucide:map-pin" class="icon-sm text-amber/60" />
                     {nextCall.data.location}
                   </span>
                 )}
@@ -287,9 +192,7 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
             <div class="flex-shrink-0">
               <span class="inline-flex items-center gap-2 px-6 py-3 bg-amber text-void font-mono text-sm font-semibold uppercase tracking-wider rounded-lg group-hover:bg-amber/90 transition-colors">
                 View Details
-                <svg class="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                </svg>
+                <Icon name="lucide:chevron-right" class="icon-sm transform group-hover:translate-x-1 transition-transform" />
               </span>
             </div>
           </div>
@@ -300,14 +203,12 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
 
   <!-- Subscribe Banner -->
   <section class="mb-16">
-    <div class="terminal-card rounded-xl overflow-hidden border-etc-green/20">
+    <TerminalCard class="border-etc-green/20">
       <div class="p-6 md:p-8">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
           <div class="flex items-start gap-4">
             <div class="p-3 rounded-lg bg-etc-green/10 flex-shrink-0">
-              <svg class="w-6 h-6 text-etc-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-              </svg>
+              <Icon name="lucide:calendar" class="icon-lg text-etc-green" />
             </div>
             <div>
               <h3 class="font-display text-xl text-gray-100 mb-2">Never Miss a Call</h3>
@@ -317,20 +218,13 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
             </div>
           </div>
           <div class="flex-shrink-0">
-            <button
-              type="button"
-              class="btn-etc px-6 py-3 rounded-lg inline-flex items-center gap-2 whitespace-nowrap cursor-pointer"
-              onclick="document.getElementById('subscribe-modal-global').showModal()"
-            >
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-              </svg>
+            <Button icon="lucide:bell" onclick="document.getElementById('subscribe-modal-global').showModal()" class="whitespace-nowrap px-6">
               Subscribe to Calendar
-            </button>
+            </Button>
           </div>
         </div>
       </div>
-    </div>
+    </TerminalCard>
   </section>
 
   <!-- Calls Archive -->

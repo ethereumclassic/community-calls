@@ -1,28 +1,27 @@
 ---
+import { Icon } from 'astro-icon/components';
+import { siteConfig } from '../lib/config';
+
 interface Props {
   modalId: string;
 }
 
 const { modalId } = Astro.props;
-const icsUrl = 'https://cc.ethereumclassic.org/etccc.ics';
-const rssUrl = 'https://cc.ethereumclassic.org/rss.xml';
+const icsUrl = siteConfig.icsUrl;
+const rssUrl = siteConfig.rssUrl;
 ---
 
 <dialog id={modalId} class="modal">
   <div class="modal-box bg-surface border border-etc-green/20 max-w-lg max-h-[90vh] overflow-y-auto">
     <form method="dialog">
       <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-gray-400 hover:text-gray-200">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
+        <Icon name="lucide:x" class="icon-md" />
       </button>
     </form>
 
     <div class="flex items-center gap-3 mb-6">
       <div class="p-2 rounded-lg bg-etc-green/10">
-        <svg class="w-6 h-6 text-etc-green" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
-        </svg>
+        <Icon name="lucide:bell" class="icon-lg text-etc-green" />
       </div>
       <h3 class="font-display text-xl text-gray-100">Stay Updated</h3>
     </div>
@@ -42,9 +41,7 @@ const rssUrl = 'https://cc.ethereumclassic.org/rss.xml';
         id={`${modalId}-tab-calendar`}
       >
         <span class="flex items-center justify-center gap-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-          </svg>
+          <Icon name="lucide:calendar" class="icon-sm" />
           Calendar
         </span>
       </button>
@@ -57,9 +54,7 @@ const rssUrl = 'https://cc.ethereumclassic.org/rss.xml';
         id={`${modalId}-tab-rss`}
       >
         <span class="flex items-center justify-center gap-2">
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/>
-          </svg>
+          <Icon name="lucide:rss" class="icon-sm" />
           RSS Feed
         </span>
       </button>
@@ -79,7 +74,7 @@ const rssUrl = 'https://cc.ethereumclassic.org/rss.xml';
           value={icsUrl}
           readonly
           id={`${modalId}-url`}
-          class="flex-1 input input-bordered bg-void border-etc-green/20 text-gray-300 font-mono text-sm focus:border-etc-green/40 focus:outline-none"
+          class="flex-1 input bg-void border border-etc-green/20 text-gray-300 font-mono text-sm focus:border-etc-green/40 focus:outline-none"
         />
         <button
           type="button"
@@ -87,12 +82,8 @@ const rssUrl = 'https://cc.ethereumclassic.org/rss.xml';
           id={`${modalId}-copy`}
           aria-label="Copy URL"
         >
-          <svg class="w-5 h-5 copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-          </svg>
-          <svg class="w-5 h-5 check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-          </svg>
+          <Icon name="lucide:copy" class="icon-md copy-icon" />
+          <Icon name="lucide:check" class="icon-md check-icon hidden" />
         </button>
       </div>
     </div>
@@ -107,9 +98,7 @@ const rssUrl = 'https://cc.ethereumclassic.org/rss.xml';
             <span class="text-lg">📅</span>
             <span class="font-mono text-sm text-gray-300">Google Calendar</span>
           </span>
-          <svg class="w-4 h-4 text-gray-500 transform transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-          </svg>
+          <Icon name="lucide:chevron-down" class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180" />
         </summary>
         <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
           <ol class="list-decimal list-inside space-y-1">
@@ -127,9 +116,7 @@ const rssUrl = 'https://cc.ethereumclassic.org/rss.xml';
             <span class="text-lg">🍎</span>
             <span class="font-mono text-sm text-gray-300">Apple Calendar</span>
           </span>
-          <svg class="w-4 h-4 text-gray-500 transform transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-          </svg>
+          <Icon name="lucide:chevron-down" class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180" />
         </summary>
         <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
           <ol class="list-decimal list-inside space-y-1">
@@ -147,9 +134,7 @@ const rssUrl = 'https://cc.ethereumclassic.org/rss.xml';
             <span class="text-lg">📧</span>
             <span class="font-mono text-sm text-gray-300">Outlook</span>
           </span>
-          <svg class="w-4 h-4 text-gray-500 transform transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-          </svg>
+          <Icon name="lucide:chevron-down" class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180" />
         </summary>
         <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
           <ol class="list-decimal list-inside space-y-1">
@@ -168,9 +153,7 @@ const rssUrl = 'https://cc.ethereumclassic.org/rss.xml';
         download="etccc.ics"
         class="btn btn-sm bg-surface-elevated border-etc-green/20 text-gray-300 hover:bg-surface-elevated/80 font-mono text-xs"
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-        </svg>
+        <Icon name="lucide:download" class="icon-sm" />
         Download ICS
       </a>
     </div>
@@ -189,7 +172,7 @@ const rssUrl = 'https://cc.ethereumclassic.org/rss.xml';
             value={rssUrl}
             readonly
             id={`${modalId}-rss-url`}
-            class="flex-1 input input-bordered bg-void border-etc-green/20 text-gray-300 font-mono text-sm focus:border-etc-green/40 focus:outline-none"
+            class="flex-1 input bg-void border border-etc-green/20 text-gray-300 font-mono text-sm focus:border-etc-green/40 focus:outline-none"
           />
           <button
             type="button"
@@ -197,12 +180,8 @@ const rssUrl = 'https://cc.ethereumclassic.org/rss.xml';
             id={`${modalId}-rss-copy`}
             aria-label="Copy RSS URL"
           >
-            <svg class="w-5 h-5 copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-            </svg>
-            <svg class="w-5 h-5 check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-            </svg>
+            <Icon name="lucide:copy" class="icon-md copy-icon" />
+            <Icon name="lucide:check" class="icon-md check-icon hidden" />
           </button>
         </div>
       </div>
@@ -217,9 +196,7 @@ const rssUrl = 'https://cc.ethereumclassic.org/rss.xml';
               <span class="text-lg">🦊</span>
               <span class="font-mono text-sm text-gray-300">Feedly</span>
             </span>
-            <svg class="w-4 h-4 text-gray-500 transform transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
+            <Icon name="lucide:chevron-down" class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180" />
           </summary>
           <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
             <ol class="list-decimal list-inside space-y-1">
@@ -237,9 +214,7 @@ const rssUrl = 'https://cc.ethereumclassic.org/rss.xml';
               <span class="text-lg">📰</span>
               <span class="font-mono text-sm text-gray-300">Inoreader</span>
             </span>
-            <svg class="w-4 h-4 text-gray-500 transform transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
+            <Icon name="lucide:chevron-down" class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180" />
           </summary>
           <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
             <ol class="list-decimal list-inside space-y-1">
@@ -256,9 +231,7 @@ const rssUrl = 'https://cc.ethereumclassic.org/rss.xml';
               <span class="text-lg">🌐</span>
               <span class="font-mono text-sm text-gray-300">Browser Extension</span>
             </span>
-            <svg class="w-4 h-4 text-gray-500 transform transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
-            </svg>
+            <Icon name="lucide:chevron-down" class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180" />
           </summary>
           <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
             <p class="mb-2">Install an RSS reader extension like:</p>
@@ -277,9 +250,7 @@ const rssUrl = 'https://cc.ethereumclassic.org/rss.xml';
           rel="noopener"
           class="btn btn-sm bg-surface-elevated border-etc-green/20 text-gray-300 hover:bg-surface-elevated/80 font-mono text-xs"
         >
-          <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19 7.38 20 6.18 20C5 20 4 19 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1Z"/>
-          </svg>
+          <Icon name="lucide:rss" class="icon-sm" />
           Open RSS Feed
         </a>
       </div>

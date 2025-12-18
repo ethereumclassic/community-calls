@@ -1,0 +1,71 @@
+/* ═══════════════════════════════════════════════════════════════════
+   DESIGN TOKENS - Single source of truth for all design values
+   ═══════════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* ─────────────────────────────────────────────────────────────────
+     COLOR PALETTE
+     ───────────────────────────────────────────────────────────────── */
+
+  /* ETC Brand - Pastel Green */
+  --color-etc-green: #7aeea8;
+  --color-etc-green-dim: #5ac488;
+  --color-etc-green-glow: #a0ffc8;
+  --color-etc-green-subtle: rgba(122, 238, 168, 0.1);
+
+  /* Dark Foundation */
+  --color-void: #0a0a0c;
+  --color-surface: #111114;
+  --color-surface-elevated: #18181c;
+  --color-surface-hover: #1f1f24;
+
+  /* Accent Colors */
+  --color-phosphor: #7aeea8;
+  --color-amber: #ffb627;
+  --color-terminal-dim: rgba(122, 238, 168, 0.6);
+
+  /* Text Colors */
+  --color-text-primary: #e8e8e8;
+  --color-text-secondary: #c8c8c8;
+  --color-text-muted: #888888;
+
+  /* ─────────────────────────────────────────────────────────────────
+     TYPOGRAPHY
+     ───────────────────────────────────────────────────────────────── */
+
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
+  --font-display: 'Instrument Serif', Georgia, serif;
+
+  /* ─────────────────────────────────────────────────────────────────
+     SPACING & SIZING
+     ───────────────────────────────────────────────────────────────── */
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* ─────────────────────────────────────────────────────────────────
+     TRANSITIONS
+     ───────────────────────────────────────────────────────────────── */
+
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+  --transition-slow: 300ms ease;
+}
+
+/* DaisyUI Theme Overrides */
+[data-theme="dark"] {
+  --b1: 10 10 12;
+  --b2: 17 17 20;
+  --b3: 24 24 28;
+  --bc: 232 232 232;
+  --p: 122 238 168;
+  --pc: 10 10 12;
+  --s: 255 182 39;
+  --sc: 10 10 12;
+  --a: 122 238 168;
+  --ac: 10 10 12;
+  --n: 31 31 36;
+  --nc: 200 200 200;
+}

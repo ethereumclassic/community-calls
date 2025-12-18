@@ -1,80 +1,21 @@
 ---
 import { getCollection, render } from "astro:content";
+import { Icon } from "astro-icon/components";
 import Layout from "../../layouts/Layout.astro";
 import TimezoneBar from "../../components/TimezoneBar.astro";
-
-// Helper to extract call number from filename (fallback)
-const getCallNumberFromFilename = (id: string) => {
-  const match = id.match(/_(\d+)\.md$/);
-  return match ? parseInt(match[1], 10) : 0;
-};
-
-// Get call number from frontmatter or filename
-const getCallNumberFromCall = (call: {
-  id: string;
-  data: { number?: number };
-}) => {
-  if (call.data.number) return call.data.number;
-  return getCallNumberFromFilename(call.id);
-};
-
-// Generate slug from call data
-const getSlug = (call: {
-  id: string;
-  data: { date?: Date; description?: string; number?: number };
-}) => {
-  const date = call.data.date;
-  const num = call.data.number || getCallNumberFromFilename(call.id);
-  const desc = call.data.description;
-
-  if (date && desc) {
-    const dateStr = date.toISOString().split("T")[0];
-    const slugDesc = desc
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
-    return `${dateStr}-${num}-${slugDesc}`;
-  }
-
-  // Fallback to filename without extension
-  return call.id.replace(".md", "");
-};
+import TerminalCard from "../../components/ui/TerminalCard.astro";
+import AnimatedContainer from "../../components/ui/AnimatedContainer.astro";
+import { getCallNumber, getSlug, filterValidCalls, sortCallsByNumber } from "../../lib/calls";
+import { formatFullDate, formatShortDate } from "../../lib/dates";
 
 export async function getStaticPaths() {
   const allCalls = await getCollection("calls");
 
-  // Helper to get call number (inline for build context)
-  const getNum = (call: (typeof allCalls)[0]) => {
-    if (call.data.number) return call.data.number;
-    const match = call.id.match(/_(\d+)\.md$/);
-    return match ? parseInt(match[1], 10) : 0;
-  };
-
-  // Helper to generate slug (inline for build context)
-  const makeSlug = (call: (typeof allCalls)[0]) => {
-    const date = call.data.date;
-    const num = getNum(call);
-    const desc = call.data.description;
-    if (date && desc) {
-      const dateStr = date.toISOString().split("T")[0];
-      const slugDesc = desc
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
-      return `${dateStr}-${num}-${slugDesc}`;
-    }
-    return call.id.replace(".md", "");
-  };
-
   // Filter out addendum pages and recurring call info, then sort by call number
-  const sortedCalls = allCalls
-    .filter(
-      (call) => !call.id.includes("addendum") && !call.id.includes("recurring"),
-    )
-    .sort((a, b) => getNum(a) - getNum(b));
+  const sortedCalls = sortCallsByNumber(filterValidCalls(allCalls));
 
   return sortedCalls.map((call, index) => ({
-    params: { slug: makeSlug(call) },
+    params: { slug: getSlug(call) },
     props: {
       call,
       prevCall: index > 0 ? sortedCalls[index - 1] : null,
@@ -86,18 +27,11 @@ export async function getStaticPaths() {
 const { call, prevCall, nextCall } = Astro.props;
 const { Content } = await render(call);
 
-const callNumber = getCallNumberFromCall(call);
-const title =
-  call.data.title || call.data.name || `ETC Community Call ${callNumber}`;
-
-const formatDate = (d: Date) => {
-  return d.toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
+const callNumber = getCallNumber(call);
+const baseTitle = `ETC Community Call ${callNumber}`;
+const title = call.data.description
+  ? `${baseTitle} - ${call.data.description}`
+  : call.data.title || call.data.name || baseTitle;
 
 // Extract YouTube video ID for embed
 const getYouTubeId = (url: string) => {
@@ -109,18 +43,9 @@ const getYouTubeId = (url: string) => {
 
 const youtubeId = call.data.youtube ? getYouTubeId(call.data.youtube) : null;
 
-// Format date for navigation buttons
-const formatShortDate = (d: Date) => {
-  return d.toLocaleDateString("en-US", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-};
-
 // Prev/next navigation info
-const prevNumber = prevCall ? getCallNumberFromCall(prevCall) : null;
-const nextNumber = nextCall ? getCallNumberFromCall(nextCall) : null;
+const prevNumber = prevCall ? getCallNumber(prevCall) : null;
+const nextNumber = nextCall ? getCallNumber(nextCall) : null;
 const prevSlug = prevCall ? getSlug(prevCall) : null;
 const nextSlug = nextCall ? getSlug(nextCall) : null;
 const prevDate = prevCall?.data.date
@@ -142,28 +67,14 @@ const nextTooltip = nextCall
 ---
 
 <Layout title={title} description={call.data.description}>
-  <article
-    class="max-w-4xl mx-auto opacity-0 animate-fade-in-up"
-    style="animation-delay: 100ms"
-  >
+  <AnimatedContainer as="article" delay={100} class="max-w-4xl mx-auto">
     <!-- Navigation Bar -->
     <nav class="flex items-center justify-between mb-8">
       <a
         href="/"
         class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-gray-500 hover:text-etc-green transition-colors group"
       >
-        <svg
-          class="w-4 h-4 transform group-hover:-translate-x-1 transition-transform"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M15 19l-7-7 7-7"></path>
-        </svg>
+        <Icon name="lucide:chevron-left" class="icon-sm transform group-hover:-translate-x-1 transition-transform" />
         Archive
       </a>
       {
@@ -227,7 +138,7 @@ const nextTooltip = nextCall
           call.data.date && (
             <span class="text-gray-400">
               <span class="text-etc-green/60">date:</span>{" "}
-              {formatDate(call.data.date)}
+              {formatFullDate(call.data.date)}
             </span>
           )
         }
@@ -255,21 +166,8 @@ const nextTooltip = nextCall
     <!-- YouTube Embed -->
     {
       youtubeId && (
-        <section
-          class="mb-10 opacity-0 animate-fade-in-up"
-          style="animation-delay: 200ms"
-        >
-          <div class="terminal-card rounded-xl overflow-hidden">
-            <div class="flex items-center gap-2 px-4 py-2 bg-surface-elevated/50 border-b border-etc-green/10">
-              <span class="w-2 h-2 rounded-full bg-red-500/60" />
-              <span class="w-2 h-2 rounded-full bg-amber/60" />
-              <span class="w-2 h-2 rounded-full bg-etc-green/60" />
-              <span class="ml-3 text-[10px] font-mono text-gray-500">
-                rec_
-                {call.data.date?.toISOString().split("T")[0].replace(/-/g, "")}_
-                {String(callNumber).padStart(3, "0")}.mp4
-              </span>
-            </div>
+        <AnimatedContainer as="section" delay={200} class="mb-10">
+          <TerminalCard showDots title={`rec_${call.data.date?.toISOString().split("T")[0].replace(/-/g, "")}_${String(callNumber).padStart(3, "0")}.mp4`}>
             <div class="aspect-video">
               <iframe
                 width="100%"
@@ -282,19 +180,16 @@ const nextTooltip = nextCall
                 class="border-0"
               />
             </div>
-          </div>
-        </section>
+          </TerminalCard>
+        </AnimatedContainer>
       )
     }
 
     <!-- Host Info -->
     {
       (call.data.host || call.data.cohost) && (
-        <section
-          class="mb-10 opacity-0 animate-fade-in-up"
-          style="animation-delay: 300ms"
-        >
-          <div class="terminal-card rounded-xl p-5">
+        <AnimatedContainer as="section" delay={300} class="mb-10">
+          <TerminalCard class="p-5">
             <div class="flex flex-wrap gap-6">
               {call.data.host && (
                 <div class="flex items-center gap-3">
@@ -331,17 +226,14 @@ const nextTooltip = nextCall
                 </div>
               )}
             </div>
-          </div>
-        </section>
+          </TerminalCard>
+        </AnimatedContainer>
       )
     }
 
     <!-- Main Content -->
-    <section
-      class="prose prose-lg prose-invert max-w-none opacity-0 animate-fade-in-up"
-      style="animation-delay: 400ms"
-    >
+    <AnimatedContainer as="section" delay={400} class="prose prose-lg prose-invert max-w-none">
       <Content />
-    </section>
-  </article>
+    </AnimatedContainer>
+  </AnimatedContainer>
 </Layout>

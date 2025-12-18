@@ -1,0 +1,49 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import CallCard from './CallCard.astro';
+
+interface Props {
+  pastCalls: CollectionEntry<'calls'>[];
+  specialCalls: CollectionEntry<'calls'>[];
+}
+
+const { pastCalls, specialCalls } = Astro.props;
+---
+
+<section id="archive">
+  <div class="flex items-center justify-between mb-8">
+    <h2 class="font-display text-3xl text-gray-100">
+      <span class="text-etc-green/60">//</span> Archive
+    </h2>
+    <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">
+      {pastCalls.length} past calls
+    </span>
+  </div>
+
+  <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    {pastCalls.map((call, index) => (
+      <CallCard
+        number={call.data.callNumber}
+        description={call.data.description}
+        date={call.data.date}
+        time={call.data.time}
+        location={call.data.location}
+        slug={call.data.slug!}
+        youtube={call.data.youtube}
+        index={index}
+      />
+    ))}
+    {specialCalls.map((call, index) => (
+      <CallCard
+        description={call.data.description}
+        date={call.data.date}
+        time={call.data.time}
+        location={call.data.location}
+        slug={call.data.slug!}
+        youtube={call.data.youtube}
+        index={pastCalls.length + index}
+        special={true}
+      />
+    ))}
+  </div>
+</section>

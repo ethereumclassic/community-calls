@@ -1,0 +1,51 @@
+---
+import AnimatedContainer from './AnimatedContainer.astro';
+import TerminalCard from './TerminalCard.astro';
+---
+
+<AnimatedContainer as="section" delay={200} class="mb-16">
+  <TerminalCard showDots title="about.md">
+    <div class="p-6 md:p-8">
+      <div class="grid md:grid-cols-2 gap-8">
+        <div>
+          <h2 class="font-display text-2xl text-gray-100 mb-4">
+            <span class="text-etc-green/60">#</span> What are Community Calls?
+          </h2>
+          <p class="font-mono text-sm text-gray-400 leading-relaxed">
+            ETC Community Calls are open voice discussions where anyone can join
+            to discuss Ethereum Classic development, proposals (ECIPs), ecosystem
+            updates, and more. These calls provide a platform for community members,
+            developers, and enthusiasts to connect and collaborate.
+          </p>
+        </div>
+        <div>
+          <h2 class="font-display text-2xl text-gray-100 mb-4">
+            <span class="text-etc-green/60">#</span> How to Join
+          </h2>
+          <ul class="font-mono text-sm text-gray-400 space-y-2">
+            <li class="flex items-start gap-2">
+              <span class="text-etc-green mt-1">→</span>
+              <span>Calls are typically held on <span class="text-gray-300">Zoom</span> or <span class="text-gray-300">Discord</span></span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-etc-green mt-1">→</span>
+              <span>Check the latest call page for join links</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-etc-green mt-1">→</span>
+              <span>Pre-call "Green Room" hangouts on Discord</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-etc-green mt-1">→</span>
+              <span><button type="button" onclick="document.getElementById('subscribe-modal-global').showModal()" class="text-etc-green hover:underline cursor-pointer">Subscribe to our calendar</button> for reminders</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-etc-green mt-1">→</span>
+              <span>Recordings published on YouTube</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </TerminalCard>
+</AnimatedContainer>

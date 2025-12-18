@@ -189,7 +189,7 @@ const nextTooltip = nextCall
     {
       youtubeId && (
         <AnimatedContainer as="section" delay={200} class="mb-10">
-          <TerminalCard showDots title={`rec_${call.data.date?.toISOString().split("T")[0].replace(/-/g, "")}_${String(callNumber).padStart(3, "0")}.mp4`}>
+          <TerminalCard showDots title={`rec_${call.data.date?.toISOString().split("T")[0].replace(/-/g, "")}_${String(callNumber).padStart(3, "0")}.mp4`} titleLink={`https://www.youtube.com/watch?v=${youtubeId}`}>
             <div class="aspect-video">
               <iframe
                 width="100%"

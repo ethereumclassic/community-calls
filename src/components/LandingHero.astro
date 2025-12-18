@@ -1,0 +1,69 @@
+---
+import AnimatedContainer from './AnimatedContainer.astro';
+import Button from './Button.astro';
+import { siteConfig } from '../lib/config';
+
+interface Props {
+  totalCalls: number;
+  recordedCalls: number;
+}
+
+const { totalCalls, recordedCalls } = Astro.props;
+---
+
+<section class="relative min-h-[70vh] flex items-center justify-center -mt-8 mb-16">
+  <!-- Decorative elements -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <!-- Circuit lines -->
+    <svg class="absolute top-0 left-0 w-full h-full opacity-[0.03]" viewBox="0 0 100 100" preserveAspectRatio="none">
+      <path d="M0,50 L30,50 L35,30 L65,30 L70,50 L100,50" stroke="currentColor" stroke-width="0.2" fill="none" class="text-etc-green"/>
+      <path d="M0,70 L20,70 L25,60 L45,60 L50,70 L100,70" stroke="currentColor" stroke-width="0.2" fill="none" class="text-etc-green"/>
+    </svg>
+  </div>
+
+  <div class="relative z-10 text-center max-w-4xl mx-auto px-4 pt-16">
+    <!-- Logo with glow -->
+    <div class="relative inline-block mb-8 animate-float">
+      <img
+        src={siteConfig.assets.logo}
+        alt="ETC Community Calls"
+        class="w-28 h-28 md:w-36 md:h-36 mx-auto animate-pulse-glow"
+      />
+      <div class="absolute inset-0 bg-etc-green/20 rounded-full blur-2xl scale-150"></div>
+    </div>
+
+    <!-- Main title -->
+    <h1 class="font-display flex flex-col gap-4 text-5xl md:text-7xl lg:text-8xl text-gray-100 mb-6 opacity-0 animate-fade-in-up whitespace-nowrap" style="animation-delay: 200ms">
+     <span>Ethereum Classic</span>
+     <span class="text-glow">Community Calls</span>
+    </h1>
+
+    <!-- Subtitle -->
+    <p class="text-lg md:text-xl font-mono text-gray-400 max-w-2xl mx-auto mb-10 opacity-0 animate-fade-in-up" style="animation-delay: 300ms">
+      Regular open discussions about development,
+      <a href="https://ecips.ethereumclassic.org" target="_blank" rel="noopener noreferrer" class="text-etc-green/80 hover:text-etc-green underline decoration-etc-green/50 hover:decoration-etc-green transition-colors">ECIPs</a>, and the future of
+      <a href="https://ethereumclassic.org" target="_blank" rel="noopener noreferrer" class="text-etc-green/80 hover:text-etc-green underline decoration-etc-green/50 hover:decoration-etc-green transition-colors">Ethereum Classic</a>
+    </p>
+
+    <!-- CTA Buttons -->
+    <AnimatedContainer delay={400} class="flex flex-wrap gap-4 justify-center">
+      <Button href="#archive" icon="lucide:archive">Archive</Button>
+      <Button variant="outline" icon="lucide:calendar" onclick="document.getElementById('subscribe-modal-global').showModal()">Subscribe</Button>
+      <Button variant="outline" href={siteConfig.social.youtube} target="_blank" rel="noopener noreferrer" icon="simple-icons:youtube">YouTube</Button>
+      <Button variant="outline" href={siteConfig.social.discord} target="_blank" rel="noopener noreferrer" icon="simple-icons:discord">Discord</Button>
+    </AnimatedContainer>
+
+    <!-- Stats -->
+    <AnimatedContainer delay={500} class="flex justify-center gap-12 mt-12">
+      <div class="text-center">
+        <div class="text-3xl md:text-4xl font-display text-etc-green">{totalCalls}</div>
+        <div class="text-xs font-mono uppercase tracking-wider text-gray-500 mt-1">Total Calls</div>
+      </div>
+      <div class="w-px bg-etc-green/20"></div>
+      <div class="text-center">
+        <div class="text-3xl md:text-4xl font-display text-etc-green">{recordedCalls}</div>
+        <div class="text-xs font-mono uppercase tracking-wider text-gray-500 mt-1">Recordings</div>
+      </div>
+    </AnimatedContainer>
+  </div>
+</section>

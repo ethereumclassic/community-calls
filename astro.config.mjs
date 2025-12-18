@@ -42,6 +42,7 @@ export default defineConfig({
           'arrow-left',
           'arrow-right',
           'external-link',
+          'video',
         ],
       },
     }),

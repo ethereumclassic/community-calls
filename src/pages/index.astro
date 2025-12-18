@@ -189,7 +189,19 @@ const recordedCalls = regularCalls.filter(c => c.data.youtube).length;
                 )}
               </div>
             </div>
-            <div class="flex-shrink-0">
+            <div class="flex-shrink-0 flex items-center gap-3">
+              {nextCall.data.joinLink && (
+                <a
+                  href={nextCall.data.joinLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 px-6 py-3 bg-etc-green text-void font-mono text-sm font-semibold uppercase tracking-wider rounded-lg hover:bg-etc-green/90 transition-colors"
+                  onclick="event.stopPropagation()"
+                >
+                  <Icon name="lucide:video" class="icon-sm" />
+                  Join
+                </a>
+              )}
               <span class="inline-flex items-center gap-2 px-6 py-3 bg-amber text-void font-mono text-sm font-semibold uppercase tracking-wider rounded-lg group-hover:bg-amber/90 transition-colors">
                 View Details
                 <Icon name="lucide:chevron-right" class="icon-sm transform group-hover:translate-x-1 transition-transform" />

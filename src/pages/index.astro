@@ -91,15 +91,17 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
       </div>
 
       <!-- Terminal-style header -->
-      <div class="mb-6 opacity-0 animate-fade-in-up" style="animation-delay: 100ms">
+      <!-- <div class="mb-6 opacity-0 animate-fade-in-up" style="animation-delay: 100ms">
         <span class="inline-block px-3 py-1 text-[10px] font-mono uppercase tracking-[0.3em] text-etc-green/80 border border-etc-green/20 rounded-full">
           Ethereum Classic
         </span>
-      </div>
+      </div> -->
 
       <!-- Main title -->
-      <h1 class="font-display text-5xl md:text-7xl lg:text-8xl text-gray-100 mb-6 opacity-0 animate-fade-in-up whitespace-nowrap" style="animation-delay: 200ms">
-        Community <span class="text-glow">Calls</span>
+       
+      <h1 class="font-display flex flex-col gap-4 text-5xl md:text-7xl lg:text-8xl text-gray-100 mb-6 opacity-0 animate-fade-in-up whitespace-nowrap" style="animation-delay: 200ms">
+       <span>Ethereum Classic</span>
+       <span class="text-glow">Community Calls</span>
       </h1>
 
       <!-- Subtitle -->
@@ -208,7 +210,7 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
     <section class="mb-16">
       <a
         href={`/calls/${getSlug(nextCall)}`}
-        class="block terminal-card rounded-xl overflow-hidden border-2 border-amber/30 hover:border-amber/50 transition-all duration-300 group"
+        class="block terminal-card upcoming-card rounded-xl overflow-hidden transition-all duration-300 group"
       >
         <!-- Header bar -->
         <div class="flex items-center justify-between px-6 py-4 bg-amber/10 border-b border-amber/20">
@@ -290,6 +292,8 @@ const recordedCalls = filteredCalls.filter(c => c.data.youtube).length;
           number={getCallNumber(call)}
           description={call.data.description}
           date={call.data.date}
+          time={call.data.time}
+          location={call.data.location}
           slug={getSlug(call)}
           youtube={call.data.youtube}
           index={index}

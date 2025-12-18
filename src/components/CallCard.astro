@@ -3,62 +3,120 @@ interface Props {
   number: number;
   description?: string;
   date?: Date;
+  time?: string;
+  location?: string;
   slug: string;
   youtube?: string;
   index?: number;
 }
 
-const { number, description, date, slug, youtube, index = 0 } = Astro.props;
+const {
+  number,
+  description,
+  date,
+  time,
+  location,
+  slug,
+  youtube,
+  index = 0,
+} = Astro.props;
 
 const formatDate = (d: Date) => {
-  return d.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
+  return d.toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
   });
 };
 ---
 
 <a
   href={`/calls/${slug}`}
-  class="group block terminal-card rounded-lg overflow-hidden transition-all duration-300 border-glow-hover opacity-0 animate-fade-in-up"
+  class="group block terminal-card rounded-lg overflow-hidden transition-all duration-300 border-glow-hover opacity-0 animate-fade-in-up relative"
   style={`animation-delay: ${Math.min(index * 50, 500)}ms`}
 >
-  <!-- Content -->
-  <div class="p-4">
-    <!-- Header row: number + badges -->
-    <div class="flex items-center justify-between mb-2">
-      <span class="text-2xl font-display text-etc-green group-hover:text-etc-green/80 transition-colors">
-        #{number}
+  <!-- Floating number -->
+  <span
+    class="absolute top-3 right-3 text-2xl font-display text-etc-green group-hover:text-etc-green/80 transition-colors"
+  >
+    #{number}
+  </span>
+
+  <!-- REC badge bottom right -->
+  {
+    youtube && (
+      <span class="absolute bottom-3 right-3 badge-recording px-2 py-0.5 rounded text-[9px]">
+        REC
       </span>
-      {youtube && (
-        <span class="badge-recording px-2 py-0.5 rounded text-[9px]">
-          REC
-        </span>
-      )}
-    </div>
+    )
+  }
 
+  <!-- Content -->
+  <div class="p-4 pr-24">
     <!-- Description as main title -->
-    {description ? (
-      <h3 class="font-mono text-sm text-gray-300 group-hover:text-gray-100 transition-colors line-clamp-2 mb-3">
-        {description}
-      </h3>
-    ) : (
-      <h3 class="font-mono text-sm text-gray-500 mb-3">
-        Community Call
-      </h3>
-    )}
+    {
+      description ? (
+        <h3 class="font-mono text-sm text-gray-300 group-hover:text-gray-100 transition-colors line-clamp-2 mb-3">
+          {description}
+        </h3>
+      ) : (
+        <h3 class="font-mono text-sm text-gray-500 mb-3">Community Call</h3>
+      )
+    }
 
-    <!-- Date -->
-    {date && (
-      <time class="text-xs font-mono text-gray-500">
-        {formatDate(date)}
-      </time>
-    )}
+    <!-- Date, Time & Location -->
+    <div
+      class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-mono text-gray-500"
+    >
+      {date && <time>{formatDate(date)}</time>}
+      {
+        time && (
+          <span class="flex items-center gap-1">
+            <svg
+              class="w-3 h-3 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            {time}
+          </span>
+        )
+      }
+      {
+        location && (
+          <span class="flex items-center gap-1">
+            <svg
+              class="w-3 h-3 text-gray-600"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+              />
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+            </svg>
+            {location}
+          </span>
+        )
+      }
+    </div>
   </div>
-
-  <!-- Bottom accent line -->
-  <div class="h-px bg-gradient-to-r from-transparent via-etc-green/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 </a>
 
 <style>

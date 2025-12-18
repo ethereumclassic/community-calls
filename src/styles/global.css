@@ -163,6 +163,30 @@ h1, h2, h3, h4, h5, h6, .font-display {
   );
 }
 
+/* Upcoming call card with orange glow */
+.terminal-card.upcoming-card {
+  border-color: rgba(255, 182, 39, 0.3);
+  box-shadow:
+    0 0 30px -10px var(--color-amber),
+    0 0 60px -20px rgba(255, 182, 39, 0.5);
+}
+
+.terminal-card.upcoming-card::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-amber),
+    transparent
+  );
+}
+
+.terminal-card.upcoming-card:hover {
+  border-color: rgba(255, 182, 39, 0.5);
+  box-shadow:
+    0 0 40px -10px var(--color-amber),
+    0 0 80px -20px rgba(255, 182, 39, 0.6);
+}
+
 /* Primary button with glow */
 .btn-etc {
   background: var(--color-etc-green);

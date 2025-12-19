@@ -1,9 +1,12 @@
-import type { CollectionEntry } from "astro:content";
+// Re-export the enriched Call type from calls.ts
+export type { Call } from "./calls";
 
-// Re-export the Astro-generated type
-export type Call = CollectionEntry<"calls">;
+// Raw call type from Astro content collection
+import type { CollectionEntry } from "astro:content";
+export type RawCall = CollectionEntry<"calls">;
 
 // Extracted call data type for utility functions
+import type { Call } from "./calls";
 export type CallData = Call["data"];
 
 // Props interfaces for components

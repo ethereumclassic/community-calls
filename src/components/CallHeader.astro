@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { Call } from "../lib/types";
 import { Icon } from "astro-icon/components";
 import TimezoneBar from "./TimezoneBar";
 import GreenRoom from "./GreenRoom.astro";
@@ -7,7 +7,7 @@ import UpcomingBadge from "./UpcomingBadge.astro";
 import { formatFullDate } from "../lib/dates";
 
 interface Props {
-  call: CollectionEntry<"calls">;
+  call: Call;
 }
 
 const { call } = Astro.props;
@@ -55,30 +55,26 @@ const isUpcoming = call.data.isUpcoming;
   <!-- Timezone Display -->
   {call.data.time && <TimezoneBar client:load time={call.data.time} />}
 
-  <!-- Join Call Button & Green Room (only for upcoming calls) -->
+  <!-- Join Call Button & Green Room (only for upcoming calls with both) -->
   {
     isUpcoming &&
-    ((call.data.joinLink && !call.data.youtube) || call.data.greenRoom) ? (
+    call.data.joinLink && !call.data.youtube && call.data.greenRoom && (
       <div class="mt-6 flex flex-col md:flex-row md:items-center gap-4">
-        {call.data.joinLink && !call.data.youtube && (
-          <a
-            href={call.data.joinLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="flex md:inline-flex items-center justify-center gap-3 px-6 py-3 bg-etc-green text-void font-mono text-sm font-semibold uppercase tracking-wider rounded-lg hover:bg-etc-green/90 transition-colors whitespace-nowrap"
-          >
-            <Icon name="lucide:video" class="icon-sm" />
-            Join Call
-          </a>
-        )}
-        {call.data.greenRoom && (
-          <GreenRoom
-            time={call.data.greenRoom.time}
-            location={call.data.greenRoom.location}
-            joinLink={call.data.greenRoom.joinLink}
-          />
-        )}
+        <a
+          href={call.data.joinLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex md:inline-flex items-center justify-center gap-3 px-6 py-3 bg-etc-green text-void font-mono text-sm font-semibold uppercase tracking-wider rounded-lg hover:bg-etc-green/90 transition-colors whitespace-nowrap"
+        >
+          <Icon name="lucide:video" class="icon-sm" />
+          Join Call
+        </a>
+        <GreenRoom
+          time={call.data.greenRoom.time}
+          location={call.data.greenRoom.location}
+          joinLink={call.data.greenRoom.joinLink}
+        />
       </div>
-    ) : null
+    )
   }
 </header>

@@ -1,10 +1,10 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { Call } from "../lib/types";
 import CallCard from "./CallCard.astro";
 
 interface Props {
-  pastCalls: CollectionEntry<"calls">[];
-  specialCalls: CollectionEntry<"calls">[];
+  pastCalls: Call[];
+  specialCalls: Call[];
 }
 
 const { pastCalls, specialCalls } = Astro.props;

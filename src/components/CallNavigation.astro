@@ -1,11 +1,11 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { Call } from "../lib/types";
 import { Icon } from "astro-icon/components";
 import { formatShortDate } from "../lib/dates";
 
 interface Props {
-  prevCall?: CollectionEntry<"calls"> | null;
-  nextCall?: CollectionEntry<"calls"> | null;
+  prevCall?: Call | null;
+  nextCall?: Call | null;
 }
 
 const { prevCall, nextCall } = Astro.props;

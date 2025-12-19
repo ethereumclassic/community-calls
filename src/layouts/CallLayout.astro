@@ -1,5 +1,5 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { Call } from "../lib/types";
 import PageLayout from "./PageLayout.astro";
 import AnimatedContainer from "../components/AnimatedContainer.astro";
 import CallNavigation from "../components/CallNavigation.astro";
@@ -8,9 +8,9 @@ import YouTubeEmbed from "../components/YouTubeEmbed.astro";
 // import HostList from "../components/HostList.astro";
 
 interface Props {
-  call: CollectionEntry<"calls">;
-  prevCall?: CollectionEntry<"calls"> | null;
-  nextCall?: CollectionEntry<"calls"> | null;
+  call: Call;
+  prevCall?: Call | null;
+  nextCall?: Call | null;
 }
 
 const { call, prevCall, nextCall } = Astro.props;

@@ -1,11 +1,11 @@
 ---
-import type { CollectionEntry } from "astro:content";
+import type { Call } from "../lib/types";
 import { Icon } from "astro-icon/components";
 import { formatFullDate } from "../lib/dates";
 import LocalTime from "./LocalTime";
 
 interface Props {
-  call: CollectionEntry<"calls">;
+  call: Call;
 }
 
 const { call } = Astro.props;

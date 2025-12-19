@@ -1,0 +1,10 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+
+# Enable TypeScript for functions
+[functions."scheduled-rebuild"]
+  node_bundler = "esbuild"

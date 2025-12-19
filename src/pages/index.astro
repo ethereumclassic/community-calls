@@ -7,19 +7,24 @@ import UpcomingCall from '../components/UpcomingCall.astro';
 import SubscribeBanner from '../components/SubscribeBanner.astro';
 import ArchiveGrid from '../components/ArchiveGrid.astro';
 import { sortCallsByDate } from '../lib/calls';
+import { siteConfig } from '../lib/config';
+import { combineDateAndTime } from '../lib/dates';
 
 const allCalls = await getCollection('calls');
 const now = Date.now();
-const oneDayMs = 24 * 60 * 60 * 1000;
 
 // Separate regular and special calls
 const regularCalls = sortCallsByDate(allCalls.filter(call => !call.data.special));
 const specialCalls = sortCallsByDate(allCalls.filter(call => call.data.special));
 
+// Helper to get full event datetime (date + time)
+const getEventDateTime = (call: typeof regularCalls[0]) =>
+  call.data.date ? combineDateAndTime(call.data.date, call.data.time).getTime() : 0;
+
 // Separate upcoming and past regular calls
-// Show as "upcoming" until one day after the event
-const upcomingCalls = regularCalls.filter(call => call.data.date && call.data.date.getTime() > (now - oneDayMs));
-const pastCalls = regularCalls.filter(call => !call.data.date || call.data.date.getTime() <= (now - oneDayMs));
+// Show as "upcoming" until buffer period after the event start time
+const upcomingCalls = regularCalls.filter(call => call.data.date && getEventDateTime(call) > (now - siteConfig.upcomingBufferMs));
+const pastCalls = regularCalls.filter(call => !call.data.date || getEventDateTime(call) <= (now - siteConfig.upcomingBufferMs));
 
 // Get the next upcoming call (soonest)
 const nextCall = upcomingCalls.length > 0

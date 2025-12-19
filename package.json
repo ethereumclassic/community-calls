@@ -8,6 +8,9 @@
     "preview": "astro preview",
     "astro": "astro"
   },
+  "devDependencies": {
+    "@netlify/functions": "^2.8.0"
+  },
   "dependencies": {
     "@astrojs/react": "^4.4.2",
     "@fontsource-variable/jetbrains-mono": "^5.2.8",

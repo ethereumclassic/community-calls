@@ -1,5 +1,32 @@
 import type { Loader, LoaderContext } from 'astro/loaders';
 import { glob } from 'astro/loaders';
+import { siteConfig } from './config';
+
+/**
+ * Parse "1500 UTC" format to hours/minutes
+ */
+function parseUTCTime(timeStr: string): { hours: number; minutes: number } | null {
+  const match = timeStr.match(/^(\d{2})(\d{2})\s*UTC$/i);
+  if (!match) return null;
+  return {
+    hours: parseInt(match[1], 10),
+    minutes: parseInt(match[2], 10),
+  };
+}
+
+/**
+ * Combine a date and time string into a full Date object
+ */
+function combineDateAndTime(date: Date, timeStr?: string): Date {
+  const combined = new Date(date);
+  if (timeStr) {
+    const parsed = parseUTCTime(timeStr);
+    if (parsed) {
+      combined.setUTCHours(parsed.hours, parsed.minutes, 0, 0);
+    }
+  }
+  return combined;
+}
 
 /**
  * Extract call number from filename
@@ -79,11 +106,25 @@ export function callsLoader(options: {
           ? dateValue.toISOString().split('T')[0].replace(/-/g, '')
           : '';
 
+        // Compute event datetime (date + time) as timestamp
+        const timeStr = typeof data.time === 'string' ? data.time : undefined;
+        const eventDateTime = dateValue
+          ? combineDateAndTime(dateValue, timeStr).getTime()
+          : null;
+
+        // Compute isUpcoming - events stay upcoming until buffer period after start
+        const now = Date.now();
+        const isUpcoming = eventDateTime !== null
+          ? eventDateTime > (now - siteConfig.upcomingBufferMs)
+          : false;
+
         // Mutate the data object directly - don't delete/recreate the entry
         data.callNumber = callNumber;
         data.youtubeId = youtubeId;
         data.slug = slug;
         data.uid = `etccc-${callNumber}-${dateStr}@cc.ethereumclassic.org`;
+        data.eventDateTime = eventDateTime;
+        data.isUpcoming = isUpcoming;
       }
     },
     schema: baseLoader.schema,

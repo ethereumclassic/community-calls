@@ -8,12 +8,29 @@ interface Props {
 const { time, location, joinLink } = Astro.props;
 ---
 
-<div class="flex flex-col gap-1 px-4 py-3 bg-etc-green/5 border border-etc-green/20 rounded-lg">
+<div
+  class="flex flex-col gap-1 px-4 py-3 bg-etc-green/5 border border-etc-green/20 rounded-lg"
+>
   <div class="flex items-center gap-2 text-etc-green/80">
     <span class="w-2 h-2 rounded-full bg-etc-green animate-pulse"></span>
-    <span class="text-[10px] font-mono uppercase tracking-wider">Green Room</span>
+    <span class="text-[10px] font-mono uppercase tracking-wider"
+      >Green Room - Join one Hour Before</span
+    >
   </div>
   <p class="text-xs text-gray-400">
-    Join us at <span class="text-gray-300">{time}</span> in <span class="text-gray-300">{location}</span> for an unrecorded pre-call hangout.
+    Join us at <span class="text-gray-300">{time}</span> in {
+      joinLink ? (
+        <a
+          href={joinLink}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-gray-300 underline hover:text-etc-green"
+        >
+          {location}
+        </a>
+      ) : (
+        <span class="text-gray-300">{location}</span>
+      )
+    } for an unrecorded pre-call hangout.
   </p>
 </div>

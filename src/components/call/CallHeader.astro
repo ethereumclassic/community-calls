@@ -13,7 +13,7 @@ interface Props {
 const { call } = Astro.props;
 
 const callNumber = call.data.callNumber!;
-const isUpcoming = call.data.date ? call.data.date > new Date() : false;
+const isUpcoming = call.data.isUpcoming;
 ---
 
 <header class="mb-10">

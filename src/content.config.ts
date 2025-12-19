@@ -41,6 +41,8 @@ const calls = defineCollection({
     youtubeId: z.string().nullable().optional(),
     slug: z.string().optional(),
     uid: z.string().optional(),
+    eventDateTime: z.number().nullable().optional(),
+    isUpcoming: z.boolean().optional(),
   }),
 });
 

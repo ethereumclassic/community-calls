@@ -1,0 +1,17 @@
+---
+import UpcomingCountdown from "./UpcomingCountdown";
+
+interface Props {
+  eventDateTime: number;
+}
+
+const { eventDateTime } = Astro.props;
+---
+
+<span
+  class="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-mono uppercase tracking-widest text-orange-300 border border-orange-400/30 rounded-full"
+>
+  <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
+  <span>Upcoming</span>
+  <UpcomingCountdown client:load eventDateTime={eventDateTime} />
+</span>

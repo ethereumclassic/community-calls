@@ -101,11 +101,11 @@ export default function TimezoneBar({ time }: Props) {
 
   if (!utcTime) return null;
 
-  const leftZones = timezones.filter((tz) => tz.offset < 0 && !tz.isCenter);
-  const centerZone = timezones.find((tz) => tz.isCenter);
-  const rightZones = timezones.filter(
-    (tz) => tz.offset > 0 || (tz.offset === 0 && !tz.isCenter),
-  );
+  const utcZone = timezones.find((tz) => tz.isCenter);
+  const userZone = timezones.find((tz) => tz.isUserTime);
+  const otherZones = timezones
+    .filter((tz) => !tz.isCenter && !tz.isUserTime)
+    .sort((a, b) => a.offset - b.offset);
 
   const renderTimezoneItem = (tz: TimezoneEntry) => {
     const { time: displayTime, dayOffset } = calculateLocalTime(
@@ -204,62 +204,90 @@ export default function TimezoneBar({ time }: Props) {
     );
   };
 
-  // Sort mobile items by offset for logical ordering
+  // Sort mobile items by offset for logical ordering (exclude user's local time since it's shown separately)
   const mobileItems = timezones
-    .filter((tz) => !tz.isCenter)
+    .filter((tz) => !tz.isCenter && !tz.isUserTime)
     .sort((a, b) => a.offset - b.offset);
 
   return (
-    <div className="timezone-bar mt-4 md:-mx-12 lg:-mx-20">
+    <div className="timezone-bar mt-4 md:-ml-12 lg:-ml-20">
       {/* Desktop: Horizontal scrollable bar */}
-      <div className="hidden md:block overflow-x-auto scrollbar-thin pb-2 px-12 lg:px-20 timezone-mask">
+      <div className="hidden md:block overflow-x-auto scrollbar-hide edge-fade-mask pb-2 pl-12 lg:pl-20">
         <div className="flex items-center justify-center gap-1 text-xs font-mono min-w-max">
-          {/* Left side zones */}
-          {leftZones.map(renderTimezoneItem)}
-
-          {/* Center: UTC */}
-          {centerZone && (
+          {/* UTC first */}
+          {utcZone && (
             <div className="flex items-center gap-1.5 px-2 py-1 rounded bg-etc-green/10 border border-etc-green/30 flex-shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-etc-green animate-pulse-glow" />
               <span className="text-etc-green font-semibold">
-                {centerZone.abbr}
+                {utcZone.abbr}
               </span>
               <span className="text-etc-green font-bold">
-                {calculateLocalTime(utcTime, centerZone.offset).time}
+                {calculateLocalTime(utcTime, utcZone.offset).time}
               </span>
             </div>
           )}
 
-          {/* Right side zones */}
-          {rightZones.map(renderTimezoneItem)}
+          {/* User's local time second */}
+          {userZone && renderTimezoneItem(userZone)}
+
+          {/* Other timezones */}
+          {otherZones.map(renderTimezoneItem)}
         </div>
       </div>
 
-      {/* Mobile: Dropdown */}
+      {/* Mobile: UTC dropdown + Local time */}
       <div className="md:hidden">
         <details className="timezone-dropdown">
-          <summary className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-etc-green/10 border border-etc-green/30 cursor-pointer list-none select-none">
-            <span className="w-1.5 h-1.5 rounded-full bg-etc-green animate-pulse-glow" />
-            <span className="text-etc-green font-mono text-sm font-semibold">
-              UTC
-            </span>
-            <span className="text-etc-green font-mono text-sm font-bold">
-              {calculateLocalTime(utcTime, 0).time}
-            </span>
-            <svg
-              className="w-4 h-4 text-etc-green/60 transition-transform duration-200 dropdown-arrow"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
+          <summary className="grid grid-cols-2 gap-2 list-none cursor-pointer select-none">
+            {/* UTC button */}
+            <div className="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-etc-green/10 border border-etc-green/30">
+              <span className="w-1.5 h-1.5 rounded-full bg-etc-green animate-pulse-glow" />
+              <span className="text-etc-green font-mono text-sm font-semibold">
+                UTC
+              </span>
+              <span className="text-etc-green font-mono text-sm font-bold">
+                {calculateLocalTime(utcTime, 0).time}
+              </span>
+              <svg
+                className="w-4 h-4 text-etc-green/60 transition-transform duration-200 dropdown-arrow"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+
+            {/* Local time (static) */}
+            {userZone && (
+              <div
+                className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-orange-500/10 border border-orange-400/30 transition-opacity duration-300 ${mounted ? "opacity-100" : "opacity-0"}`}
+              >
+                <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+                <span className="text-orange-400 font-mono text-sm font-medium">
+                  {userZone.city}
+                </span>
+                <span className="text-orange-300 font-mono text-sm font-bold">
+                  {calculateLocalTime(utcTime, userZone.offset).time}
+                </span>
+                {calculateLocalTime(utcTime, userZone.offset).dayOffset !==
+                  0 && (
+                  <span className="text-[10px] font-mono text-etc-green/80">
+                    {calculateLocalTime(utcTime, userZone.offset).dayOffset > 0
+                      ? "+1"
+                      : "-1"}
+                  </span>
+                )}
+              </div>
+            )}
           </summary>
+
+          {/* Dropdown content - other timezones */}
           <div className="mt-2 p-2 rounded-lg bg-surface border border-etc-green/10 space-y-1">
             {mobileItems.map(renderMobileItem)}
           </div>

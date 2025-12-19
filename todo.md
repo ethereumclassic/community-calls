@@ -4,3 +4,4 @@
 - Test every page has all the right data 
 - Pull thumbnail from youtube or generate one
 - Rip Twiter spaces and re-upload
+- Date deciding feature 

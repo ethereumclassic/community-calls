@@ -84,6 +84,16 @@
    SCROLLBAR UTILITIES
    ───────────────────────────────────────────────────────────────── */
 
+/* Hide scrollbar completely but keep scroll functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
 .scrollbar-thin::-webkit-scrollbar {
   height: 2px;
 }
@@ -119,6 +129,11 @@
       transparent
     )
     transparent;
+}
+
+/* Dropdown arrow animation */
+.timezone-dropdown[open] .dropdown-arrow {
+  transform: rotate(180deg);
 }
 
 /* Edge fade mask */

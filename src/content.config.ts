@@ -12,8 +12,14 @@ const calls = defineCollection({
     location: z.string().optional(),
     joinLink: z.string().url().optional(),
 
-    // Recording
-    youtube: z.string().url().optional(),
+    // Recording - YouTube video ID only (not full URL)
+    youtube: z
+      .string()
+      .regex(/^[a-zA-Z0-9_-]{11}$/, {
+        message:
+          'YouTube field must be an 11-character video ID (e.g., "dQw4w9WgXcQ"), not a full URL',
+      })
+      .optional(),
 
     // Participants
     hosts: z.array(z.string()).optional(),

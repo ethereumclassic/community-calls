@@ -10,16 +10,6 @@ function getCallNumberFromFilename(id: string): number {
 }
 
 /**
- * Extract YouTube video ID from URL
- */
-function getYouTubeId(url: string): string | null {
-  const match = url.match(
-    /(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/))([^&?]+)/
-  );
-  return match ? match[1] : null;
-}
-
-/**
  * Generate URL slug from call data
  */
 function generateSlug(
@@ -68,9 +58,9 @@ export function callsLoader(options: {
             ? data.number
             : getCallNumberFromFilename(id);
 
-        // Compute YouTube ID if youtube URL exists
+        // Use youtube ID directly (no longer a URL)
         const youtubeId =
-          typeof data.youtube === 'string' ? getYouTubeId(data.youtube) : null;
+          typeof data.youtube === 'string' ? data.youtube : null;
 
         // Parse date if it's a string
         const dateValue = data.date instanceof Date

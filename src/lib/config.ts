@@ -21,7 +21,7 @@ export const siteConfig = {
   social: {
     discord: "https://ethereumclassic.org/discord",
     youtube: "https://www.youtube.com/@ETCCommunityCalls",
-    github: "https://github.com/ethereumclassic",
+    github: "https://github.com/ethereumclassic/community-calls",
     website: "https://ethereumclassic.org",
   },
 

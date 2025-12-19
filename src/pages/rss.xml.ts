@@ -1,26 +1,28 @@
-import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
-import { siteConfig } from '../lib/config';
-import { sortCallsByDate, escapeXml } from '../lib/calls';
-import { formatRfc822 } from '../lib/dates';
+import type { APIRoute } from "astro";
+import { getCollection } from "astro:content";
+import { siteConfig } from "../lib/config";
+import { sortCallsByDate, escapeXml } from "../lib/calls";
+import { formatRfc822 } from "../lib/dates";
 
 export const GET: APIRoute = async () => {
-  const allCalls = await getCollection('calls');
+  const allCalls = await getCollection("calls");
 
   // Filter out special calls and sort (newest first), only include dated calls
   const calls = sortCallsByDate(
-    allCalls.filter(call => !call.data.special && call.data.date)
+    allCalls.filter((call) => !call.data.special && call.data.date),
   ).slice(0, 50); // Limit to 50 most recent
 
   const now = new Date();
   const latestDate = calls[0]?.data.date || now;
 
-  const items = calls.map(call => {
+  const items = calls.map((call) => {
     const callNumber = call.data.callNumber!;
     const slug = call.data.slug!;
     const url = `${siteConfig.url}/calls/${slug}`;
-    const title = `ETC Community Call #${callNumber}${call.data.description ? `: ${call.data.description}` : ''}`;
-    const pubDate = call.data.date ? formatRfc822(call.data.date) : formatRfc822(now);
+    const title = `ETC Community Call #${callNumber}${call.data.description ? `: ${call.data.description}` : ""}`;
+    const pubDate = call.data.date
+      ? formatRfc822(call.data.date)
+      : formatRfc822(now);
     const ogImageUrl = `${siteConfig.url}/og/call/${callNumber}.png`;
 
     let description = `Ethereum Classic Community Call #${callNumber}`;
@@ -44,7 +46,7 @@ export const GET: APIRoute = async () => {
       <pubDate>${pubDate}</pubDate>
       <description>${escapeXml(description)}</description>
       <enclosure url="${ogImageUrl}" type="image/png" length="0" />
-      ${call.data.youtube ? `<comments>${escapeXml(call.data.youtube)}</comments>` : ''}
+      ${call.data.youtube ? `<comments>${escapeXml(call.data.youtube)}</comments>` : ""}
     </item>`;
   });
 
@@ -70,15 +72,15 @@ export const GET: APIRoute = async () => {
     <category>Ethereum Classic</category>
     <category>Blockchain</category>
     <generator>Astro</generator>
-${items.join('\n')}
+${items.join("\n")}
   </channel>
 </rss>`;
 
   return new Response(rss, {
     status: 200,
     headers: {
-      'Content-Type': 'application/rss+xml; charset=utf-8',
-      'Cache-Control': 'public, max-age=3600',
+      "Content-Type": "application/rss+xml; charset=utf-8",
+      "Cache-Control": "public, max-age=3600",
     },
   });
 };

@@ -39,8 +39,8 @@
      TYPOGRAPHY
      ───────────────────────────────────────────────────────────────── */
 
-  --font-mono: 'JetBrains Mono Variable', ui-monospace, monospace;
-  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+  --font-display: "Instrument Serif", Georgia, serif;
 
   /* ─────────────────────────────────────────────────────────────────
      SPACING & SIZING

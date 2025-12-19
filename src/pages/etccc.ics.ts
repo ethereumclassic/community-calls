@@ -1,22 +1,22 @@
-import type { APIRoute } from 'astro';
-import { getCollection } from 'astro:content';
-import { siteConfig } from '../lib/config';
-import { sortCallsByDate, escapeICS } from '../lib/calls';
-import { formatICSDate, parseUTCTime } from '../lib/dates';
+import type { APIRoute } from "astro";
+import { getCollection } from "astro:content";
+import { siteConfig } from "../lib/config";
+import { sortCallsByDate, escapeICS } from "../lib/calls";
+import { formatICSDate, parseUTCTime } from "../lib/dates";
 
 export const GET: APIRoute = async () => {
-  const allCalls = await getCollection('calls');
+  const allCalls = await getCollection("calls");
 
   // Filter out special calls, keep only dated calls
   const calls = sortCallsByDate(
-    allCalls.filter(call => !call.data.special && call.data.date)
+    allCalls.filter((call) => !call.data.special && call.data.date),
   );
 
   const now = new Date();
   const nowFormatted = formatICSDate(now);
 
   // Generate VEVENT for each call
-  const events = calls.map(call => {
+  const events = calls.map((call) => {
     const callNumber = call.data.callNumber!;
     const date = call.data.date!;
     const time = call.data.time;
@@ -34,7 +34,7 @@ export const GET: APIRoute = async () => {
     const endDate = new Date(startDate);
     endDate.setUTCHours(endDate.getUTCHours() + 2);
 
-    const summary = `ETC Community Call #${callNumber}${call.data.description ? `: ${call.data.description}` : ''}`;
+    const summary = `ETC Community Call #${callNumber}${call.data.description ? `: ${call.data.description}` : ""}`;
     const slug = call.data.slug!;
     const url = `${siteConfig.url}/calls/${slug}`;
 
@@ -47,10 +47,10 @@ export const GET: APIRoute = async () => {
       description += `\\nRecording: ${call.data.youtube}`;
     }
 
-    const location = call.data.location || 'Online';
+    const location = call.data.location || "Online";
 
     return [
-      'BEGIN:VEVENT',
+      "BEGIN:VEVENT",
       `UID:${call.data.uid}`,
       `DTSTAMP:${nowFormatted}`,
       `DTSTART:${formatICSDate(startDate)}`,
@@ -59,31 +59,31 @@ export const GET: APIRoute = async () => {
       `DESCRIPTION:${escapeICS(description)}`,
       `LOCATION:${escapeICS(location)}`,
       `URL:${url}`,
-      'END:VEVENT',
-    ].join('\r\n');
+      "END:VEVENT",
+    ].join("\r\n");
   });
 
   // Build calendar
   const calendar = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
     `PRODID:-//${siteConfig.name}//cc.ethereumclassic.org//EN`,
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
     `X-WR-CALNAME:${siteConfig.name}`,
     `X-WR-CALDESC:${siteConfig.description}`,
-    'REFRESH-INTERVAL;VALUE=DURATION:PT12H',
-    'X-PUBLISHED-TTL:PT12H',
-    ...events.map(e => e),
-    'END:VCALENDAR',
-  ].join('\r\n');
+    "REFRESH-INTERVAL;VALUE=DURATION:PT12H",
+    "X-PUBLISHED-TTL:PT12H",
+    ...events.map((e) => e),
+    "END:VCALENDAR",
+  ].join("\r\n");
 
   return new Response(calendar, {
     status: 200,
     headers: {
-      'Content-Type': 'text/calendar; charset=utf-8',
-      'Content-Disposition': 'attachment; filename="etccc.ics"',
-      'Cache-Control': 'public, max-age=3600',
+      "Content-Type": "text/calendar; charset=utf-8",
+      "Content-Disposition": 'attachment; filename="etccc.ics"',
+      "Cache-Control": "public, max-age=3600",
     },
   });
 };

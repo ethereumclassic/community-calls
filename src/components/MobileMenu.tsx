@@ -26,12 +26,16 @@ export default function MobileMenu({ youtubeUrl }: MobileMenuProps) {
   // Prevent body scroll when menu is open
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [isOpen]);
 
   const openSubscribeModal = () => {
     setIsOpen(false);
-    (document.getElementById("subscribe-modal-global") as HTMLDialogElement)?.showModal();
+    (
+      document.getElementById("subscribe-modal-global") as HTMLDialogElement
+    )?.showModal();
   };
 
   const menuOverlay = (
@@ -54,7 +58,11 @@ export default function MobileMenu({ youtubeUrl }: MobileMenuProps) {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex flex-col gap-1">
-            <a href="/" className="nav-link-mobile" onClick={() => setIsOpen(false)}>
+            <a
+              href="/"
+              className="nav-link-mobile"
+              onClick={() => setIsOpen(false)}
+            >
               Archive
             </a>
             <button
@@ -90,12 +98,32 @@ export default function MobileMenu({ youtubeUrl }: MobileMenuProps) {
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         ) : (
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
           </svg>
         )}
       </button>

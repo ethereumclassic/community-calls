@@ -8,10 +8,7 @@
   "postCreateCommand": "npm install",
   "customizations": {
     "vscode": {
-      "extensions": [
-        "astro-build.astro-vscode",
-        "bradlc.vscode-tailwindcss"
-      ]
+      "extensions": ["astro-build.astro-vscode", "bradlc.vscode-tailwindcss"]
     }
   }
 }

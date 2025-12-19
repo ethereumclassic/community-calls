@@ -1,8 +1,8 @@
-import { defineCollection, z } from 'astro:content';
-import { callsLoader } from './lib/callsLoader';
+import { defineCollection, z } from "astro:content";
+import { callsLoader } from "./lib/callsLoader";
 
 const calls = defineCollection({
-  loader: callsLoader({ pattern: '**/*.md', base: './calls' }),
+  loader: callsLoader({ pattern: "**/*.md", base: "./calls" }),
   schema: z.object({
     // Core fields
     number: z.number().optional(),

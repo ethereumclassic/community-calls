@@ -1,10 +1,10 @@
 ---
-import type { CollectionEntry } from 'astro:content';
-import CallCard from './CallCard.astro';
+import type { CollectionEntry } from "astro:content";
+import CallCard from "./CallCard.astro";
 
 interface Props {
-  pastCalls: CollectionEntry<'calls'>[];
-  specialCalls: CollectionEntry<'calls'>[];
+  pastCalls: CollectionEntry<"calls">[];
+  specialCalls: CollectionEntry<"calls">[];
 }
 
 const { pastCalls, specialCalls } = Astro.props;
@@ -21,29 +21,33 @@ const { pastCalls, specialCalls } = Astro.props;
   </div>
 
   <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-    {pastCalls.map((call, index) => (
-      <CallCard
-        number={call.data.callNumber}
-        description={call.data.description}
-        date={call.data.date}
-        time={call.data.time}
-        location={call.data.location}
-        slug={call.data.slug!}
-        youtube={call.data.youtube}
-        index={index}
-      />
-    ))}
-    {specialCalls.map((call, index) => (
-      <CallCard
-        description={call.data.description}
-        date={call.data.date}
-        time={call.data.time}
-        location={call.data.location}
-        slug={call.data.slug!}
-        youtube={call.data.youtube}
-        index={pastCalls.length + index}
-        special={true}
-      />
-    ))}
+    {
+      pastCalls.map((call, index) => (
+        <CallCard
+          number={call.data.callNumber}
+          description={call.data.description}
+          date={call.data.date}
+          time={call.data.time}
+          location={call.data.location}
+          slug={call.data.slug!}
+          youtube={call.data.youtube}
+          index={index}
+        />
+      ))
+    }
+    {
+      specialCalls.map((call, index) => (
+        <CallCard
+          description={call.data.description}
+          date={call.data.date}
+          time={call.data.time}
+          location={call.data.location}
+          slug={call.data.slug!}
+          youtube={call.data.youtube}
+          index={pastCalls.length + index}
+          special={true}
+        />
+      ))
+    }
   </div>
 </section>

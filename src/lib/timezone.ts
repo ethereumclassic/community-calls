@@ -5,7 +5,9 @@
 /**
  * Parse "1500 UTC" format to hours/minutes
  */
-export function parseUTCTime(timeStr: string): { hours: number; minutes: number } | null {
+export function parseUTCTime(
+  timeStr: string,
+): { hours: number; minutes: number } | null {
   const match = timeStr.match(/^(\d{2})(\d{2})\s*UTC$/i);
   if (!match) return null;
   return {
@@ -19,7 +21,7 @@ export function parseUTCTime(timeStr: string): { hours: number; minutes: number 
  */
 export function calculateLocalTime(
   utcTime: { hours: number; minutes: number },
-  offsetHours: number
+  offsetHours: number,
 ): { time: string; dayOffset: number } {
   let hours = utcTime.hours + offsetHours;
   const minutes = utcTime.minutes;
@@ -35,7 +37,7 @@ export function calculateLocalTime(
   }
 
   return {
-    time: `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`,
+    time: `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`,
     dayOffset,
   };
 }
@@ -45,12 +47,14 @@ export function calculateLocalTime(
  */
 export function getTimezoneAbbr(): string {
   try {
-    const formatter = new Intl.DateTimeFormat('en-US', { timeZoneName: 'short' });
+    const formatter = new Intl.DateTimeFormat("en-US", {
+      timeZoneName: "short",
+    });
     const parts = formatter.formatToParts(new Date());
-    const tzPart = parts.find((part) => part.type === 'timeZoneName');
-    return tzPart?.value || 'Local';
+    const tzPart = parts.find((part) => part.type === "timeZoneName");
+    return tzPart?.value || "Local";
   } catch {
-    return 'Local';
+    return "Local";
   }
 }
 

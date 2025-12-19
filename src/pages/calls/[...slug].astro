@@ -26,7 +26,10 @@ export async function getStaticPaths() {
       props: {
         call,
         prevCall: index > 0 ? sortedRegularCalls[index - 1] : null,
-        nextCall: index < sortedRegularCalls.length - 1 ? sortedRegularCalls[index + 1] : null,
+        nextCall:
+          index < sortedRegularCalls.length - 1
+            ? sortedRegularCalls[index + 1]
+            : null,
       },
     };
   });

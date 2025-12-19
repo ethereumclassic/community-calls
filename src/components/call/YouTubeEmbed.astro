@@ -15,7 +15,11 @@ const filename = `rec_${date?.toISOString().split("T")[0].replace(/-/g, "")}_${S
 ---
 
 <AnimatedContainer as="section" delay={200} class="mb-10">
-  <TerminalCard showDots title={filename} titleLink={`https://www.youtube.com/watch?v=${youtubeId}`}>
+  <TerminalCard
+    showDots
+    title={filename}
+    titleLink={`https://www.youtube.com/watch?v=${youtubeId}`}
+  >
     <div class="aspect-video">
       <iframe
         width="100%"
@@ -25,8 +29,7 @@ const filename = `rec_${date?.toISOString().split("T")[0].replace(/-/g, "")}_${S
         frameborder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen
-        class="border-0"
-      />
+        class="border-0"></iframe>
     </div>
   </TerminalCard>
 </AnimatedContainer>

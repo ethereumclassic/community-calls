@@ -1,12 +1,12 @@
 ---
-import { Icon } from 'astro-icon/components';
+import { Icon } from "astro-icon/components";
 
 interface Props {
-  variant?: 'primary' | 'outline';
+  variant?: "primary" | "outline";
   href?: string;
-  type?: 'button' | 'submit';
+  type?: "button" | "submit";
   icon?: string;
-  iconPosition?: 'left' | 'right';
+  iconPosition?: "left" | "right";
   class?: string;
   target?: string;
   rel?: string;
@@ -14,41 +14,51 @@ interface Props {
 }
 
 const {
-  variant = 'primary',
+  variant = "primary",
   href,
-  type = 'button',
+  type = "button",
   icon,
-  iconPosition = 'left',
-  class: className = '',
+  iconPosition = "left",
+  class: className = "",
   target,
   rel,
-  onclick
+  onclick,
 } = Astro.props;
 
 const isLink = !!href;
-const Element = isLink ? 'a' : 'button';
-const baseClass = variant === 'primary' ? 'btn-etc' : 'btn-etc-outline';
+const Element = isLink ? "a" : "button";
+const baseClass = variant === "primary" ? "btn-etc" : "btn-etc-outline";
 ---
 
-{isLink ? (
-  <a
-    href={href}
-    target={target}
-    rel={rel}
-    class:list={[baseClass, 'px-8 py-3 rounded-lg inline-flex items-center gap-2', className]}
-  >
-    {icon && iconPosition === 'left' && <Icon name={icon} class="icon-sm" />}
-    <slot />
-    {icon && iconPosition === 'right' && <Icon name={icon} class="icon-sm" />}
-  </a>
-) : (
-  <button
-    type={type}
-    onclick={onclick}
-    class:list={[baseClass, 'px-8 py-3 rounded-lg inline-flex items-center gap-2 cursor-pointer', className]}
-  >
-    {icon && iconPosition === 'left' && <Icon name={icon} class="icon-sm" />}
-    <slot />
-    {icon && iconPosition === 'right' && <Icon name={icon} class="icon-sm" />}
-  </button>
-)}
+{
+  isLink ? (
+    <a
+      href={href}
+      target={target}
+      rel={rel}
+      class:list={[
+        baseClass,
+        "px-8 py-3 rounded-lg inline-flex items-center gap-2",
+        className,
+      ]}
+    >
+      {icon && iconPosition === "left" && <Icon name={icon} class="icon-sm" />}
+      <slot />
+      {icon && iconPosition === "right" && <Icon name={icon} class="icon-sm" />}
+    </a>
+  ) : (
+    <button
+      type={type}
+      onclick={onclick}
+      class:list={[
+        baseClass,
+        "px-8 py-3 rounded-lg inline-flex items-center gap-2 cursor-pointer",
+        className,
+      ]}
+    >
+      {icon && iconPosition === "left" && <Icon name={icon} class="icon-sm" />}
+      <slot />
+      {icon && iconPosition === "right" && <Icon name={icon} class="icon-sm" />}
+    </button>
+  )
+}

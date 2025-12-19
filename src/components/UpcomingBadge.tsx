@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 
 interface Props {
   date: string;
@@ -14,7 +14,7 @@ function parseEventDateTime(dateStr: string, timeStr: string): Date {
   const date = new Date(dateStr);
 
   // Set time in UTC
-  if (tz.toUpperCase() === 'UTC') {
+  if (tz.toUpperCase() === "UTC") {
     date.setUTCHours(parseInt(hours, 10), parseInt(minutes, 10), 0, 0);
   } else {
     // For other timezones, just set the hours/minutes and hope for the best
@@ -31,7 +31,9 @@ function checkIsUpcoming(date: string, time: string): boolean {
 }
 
 export default function UpcomingBadge({ date, time }: Props) {
-  const [isUpcoming, setIsUpcoming] = useState(() => checkIsUpcoming(date, time));
+  const [isUpcoming, setIsUpcoming] = useState(() =>
+    checkIsUpcoming(date, time),
+  );
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -49,7 +51,7 @@ export default function UpcomingBadge({ date, time }: Props) {
 
   return (
     <span
-      className={`inline-flex items-center gap-2 px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-orange-400/80 border border-orange-400/20 rounded-full transition-opacity duration-300 ${mounted ? 'opacity-100' : 'opacity-0'}`}
+      className={`inline-flex items-center gap-2 px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-orange-400/80 border border-orange-400/20 rounded-full transition-opacity duration-300 ${mounted ? "opacity-100" : "opacity-0"}`}
     >
       <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
       Upcoming

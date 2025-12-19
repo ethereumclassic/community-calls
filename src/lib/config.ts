@@ -1,7 +1,8 @@
 export const siteConfig = {
-  url: 'https://cc.ethereumclassic.org',
-  name: 'ETC Community Calls',
-  description: 'Regular open discussions about Ethereum Classic development, ECIPs, and the future of ETC.',
+  url: "https://cc.ethereumclassic.org",
+  name: "ETC Community Calls",
+  description:
+    "Regular open discussions about Ethereum Classic development, ECIPs, and the future of ETC.",
 
   // Event display settings
   // Events stay "upcoming" for this duration after their start time
@@ -9,20 +10,24 @@ export const siteConfig = {
   upcomingBufferMs: 2.5 * 60 * 60 * 1000,
 
   // Feed URLs (derived)
-  get rssUrl() { return `${this.url}/rss.xml`; },
-  get icsUrl() { return `${this.url}/etccc.ics`; },
+  get rssUrl() {
+    return `${this.url}/rss.xml`;
+  },
+  get icsUrl() {
+    return `${this.url}/etccc.ics`;
+  },
 
   // Social links
   social: {
-    discord: 'https://ethereumclassic.org/discord',
-    youtube: 'https://www.youtube.com/@ETCCommunityCalls',
-    github: 'https://github.com/ethereumclassic',
-    website: 'https://ethereumclassic.org',
+    discord: "https://ethereumclassic.org/discord",
+    youtube: "https://www.youtube.com/@ETCCommunityCalls",
+    github: "https://github.com/ethereumclassic",
+    website: "https://ethereumclassic.org",
   },
 
   // Assets
   assets: {
-    logo: '/etc-logo.svg',
-    ogImage: '/og.png',
+    logo: "/etc-logo.svg",
+    ogImage: "/og.png",
   },
 } as const;

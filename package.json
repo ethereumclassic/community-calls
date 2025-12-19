@@ -6,10 +6,17 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "lint": "prettier --check .",
+    "format": "prettier --write .",
+    "typecheck": "astro check"
   },
   "devDependencies": {
-    "@netlify/functions": "^2.8.0"
+    "@astrojs/check": "^0.9.0",
+    "@netlify/functions": "^2.8.0",
+    "prettier": "^3.4.0",
+    "prettier-plugin-astro": "^0.14.0",
+    "typescript": "^5.7.0"
   },
   "dependencies": {
     "@astrojs/react": "^4.4.2",

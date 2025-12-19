@@ -1,6 +1,6 @@
 ---
-import { Icon } from 'astro-icon/components';
-import { siteConfig } from '../lib/config';
+import { Icon } from "astro-icon/components";
+import { siteConfig } from "../lib/config";
 
 interface Props {
   modalId: string;
@@ -12,9 +12,13 @@ const rssUrl = siteConfig.rssUrl;
 ---
 
 <dialog id={modalId} class="modal subscribe-modal">
-  <div class="modal-box bg-surface border border-etc-green/20 max-w-lg max-h-[90vh] overflow-y-auto">
+  <div
+    class="modal-box bg-surface border border-etc-green/20 max-w-lg max-h-[90vh] overflow-y-auto"
+  >
     <form method="dialog">
-      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-gray-400 hover:text-gray-200">
+      <button
+        class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-gray-400 hover:text-gray-200"
+      >
         <Icon name="lucide:x" class="icon-md" />
       </button>
     </form>
@@ -27,7 +31,8 @@ const rssUrl = siteConfig.rssUrl;
     </div>
 
     <p class="font-mono text-sm text-gray-400 mb-6">
-      Never miss an ETC Community Call. Choose your preferred way to stay updated.
+      Never miss an ETC Community Call. Choose your preferred way to stay
+      updated.
     </p>
 
     <!-- Tab buttons -->
@@ -61,109 +66,155 @@ const rssUrl = siteConfig.rssUrl;
     </div>
 
     <!-- Calendar Tab Content -->
-    <div class="tab-content block" data-content="calendar" id={`${modalId}-content-calendar`}>
-
-    <!-- URL Copy Section -->
-    <div class="mb-6">
-      <label class="block text-xs font-mono uppercase tracking-wider text-gray-500 mb-2">
-        Calendar URL
-      </label>
-      <div class="flex gap-2">
-        <input
-          type="text"
-          value={icsUrl}
-          readonly
-          id={`${modalId}-url`}
-          class="flex-1 input bg-void border border-etc-green/20 text-gray-300 font-mono text-sm focus:border-etc-green/40 focus:outline-none"
-        />
-        <button
-          type="button"
-          class="btn btn-square bg-etc-green/10 border-etc-green/20 hover:bg-etc-green/20 text-etc-green"
-          id={`${modalId}-copy`}
-          aria-label="Copy URL"
+    <div
+      class="tab-content block"
+      data-content="calendar"
+      id={`${modalId}-content-calendar`}
+    >
+      <!-- URL Copy Section -->
+      <div class="mb-6">
+        <label
+          class="block text-xs font-mono uppercase tracking-wider text-gray-500 mb-2"
         >
-          <Icon name="lucide:copy" class="icon-md copy-icon" />
-          <Icon name="lucide:check" class="icon-md check-icon hidden" />
-        </button>
+          Calendar URL
+        </label>
+        <div class="flex gap-2">
+          <input
+            type="text"
+            value={icsUrl}
+            readonly
+            id={`${modalId}-url`}
+            class="flex-1 input bg-void border border-etc-green/20 text-gray-300 font-mono text-sm focus:border-etc-green/40 focus:outline-none"
+          />
+          <button
+            type="button"
+            class="btn btn-square bg-etc-green/10 border-etc-green/20 hover:bg-etc-green/20 text-etc-green"
+            id={`${modalId}-copy`}
+            aria-label="Copy URL"
+          >
+            <Icon name="lucide:copy" class="icon-md copy-icon" />
+            <Icon name="lucide:check" class="icon-md check-icon hidden" />
+          </button>
+        </div>
+      </div>
+
+      <!-- Instructions -->
+      <div class="space-y-3">
+        <h4 class="text-sm font-mono uppercase tracking-wider text-gray-400">
+          How to Subscribe
+        </h4>
+
+        <details class="group">
+          <summary
+            class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors"
+          >
+            <span class="flex items-center gap-3">
+              <span class="text-lg">📅</span>
+              <span class="font-mono text-sm text-gray-300"
+                >Google Calendar</span
+              >
+            </span>
+            <Icon
+              name="lucide:chevron-down"
+              class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180"
+            />
+          </summary>
+          <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
+            <ol class="list-decimal list-inside space-y-1">
+              <li>
+                Open <a
+                  href="https://calendar.google.com"
+                  target="_blank"
+                  rel="noopener"
+                  class="text-etc-green hover:underline">Google Calendar</a>
+              </li>
+              <li>
+                Click the <strong class="text-gray-300">+</strong> next to "Other
+                calendars"
+              </li>
+              <li>Select "From URL"</li>
+              <li>Paste the URL above and click "Add calendar"</li>
+            </ol>
+          </div>
+        </details>
+
+        <details class="group">
+          <summary
+            class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors"
+          >
+            <span class="flex items-center gap-3">
+              <span class="text-lg">🍎</span>
+              <span class="font-mono text-sm text-gray-300">Apple Calendar</span
+              >
+            </span>
+            <Icon
+              name="lucide:chevron-down"
+              class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180"
+            />
+          </summary>
+          <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
+            <ol class="list-decimal list-inside space-y-1">
+              <li>Open the Calendar app</li>
+              <li>
+                Go to <strong class="text-gray-300"
+                  >File → New Calendar Subscription</strong>
+              </li>
+              <li>Paste the URL above and click "Subscribe"</li>
+              <li>Adjust settings and click "OK"</li>
+            </ol>
+          </div>
+        </details>
+
+        <details class="group">
+          <summary
+            class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors"
+          >
+            <span class="flex items-center gap-3">
+              <span class="text-lg">📧</span>
+              <span class="font-mono text-sm text-gray-300">Outlook</span>
+            </span>
+            <Icon
+              name="lucide:chevron-down"
+              class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180"
+            />
+          </summary>
+          <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
+            <ol class="list-decimal list-inside space-y-1">
+              <li>Open Outlook Calendar</li>
+              <li>
+                Click <strong class="text-gray-300"
+                  >Add calendar → Subscribe from web</strong>
+              </li>
+              <li>Paste the URL above</li>
+              <li>Name it "ETC Community Calls" and click "Import"</li>
+            </ol>
+          </div>
+        </details>
+      </div>
+
+      <div class="flex gap-2 mt-6">
+        <a
+          href="/etccc.ics"
+          download="etccc.ics"
+          class="btn btn-sm bg-surface-elevated border-etc-green/20 text-gray-300 hover:bg-surface-elevated/80 font-mono text-xs"
+        >
+          <Icon name="lucide:download" class="icon-sm" />
+          Download ICS
+        </a>
       </div>
     </div>
 
-    <!-- Instructions -->
-    <div class="space-y-3">
-      <h4 class="text-sm font-mono uppercase tracking-wider text-gray-400">How to Subscribe</h4>
-
-      <details class="group">
-        <summary class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors">
-          <span class="flex items-center gap-3">
-            <span class="text-lg">📅</span>
-            <span class="font-mono text-sm text-gray-300">Google Calendar</span>
-          </span>
-          <Icon name="lucide:chevron-down" class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180" />
-        </summary>
-        <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
-          <ol class="list-decimal list-inside space-y-1">
-            <li>Open <a href="https://calendar.google.com" target="_blank" rel="noopener" class="text-etc-green hover:underline">Google Calendar</a></li>
-            <li>Click the <strong class="text-gray-300">+</strong> next to "Other calendars"</li>
-            <li>Select "From URL"</li>
-            <li>Paste the URL above and click "Add calendar"</li>
-          </ol>
-        </div>
-      </details>
-
-      <details class="group">
-        <summary class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors">
-          <span class="flex items-center gap-3">
-            <span class="text-lg">🍎</span>
-            <span class="font-mono text-sm text-gray-300">Apple Calendar</span>
-          </span>
-          <Icon name="lucide:chevron-down" class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180" />
-        </summary>
-        <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
-          <ol class="list-decimal list-inside space-y-1">
-            <li>Open the Calendar app</li>
-            <li>Go to <strong class="text-gray-300">File → New Calendar Subscription</strong></li>
-            <li>Paste the URL above and click "Subscribe"</li>
-            <li>Adjust settings and click "OK"</li>
-          </ol>
-        </div>
-      </details>
-
-      <details class="group">
-        <summary class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors">
-          <span class="flex items-center gap-3">
-            <span class="text-lg">📧</span>
-            <span class="font-mono text-sm text-gray-300">Outlook</span>
-          </span>
-          <Icon name="lucide:chevron-down" class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180" />
-        </summary>
-        <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
-          <ol class="list-decimal list-inside space-y-1">
-            <li>Open Outlook Calendar</li>
-            <li>Click <strong class="text-gray-300">Add calendar → Subscribe from web</strong></li>
-            <li>Paste the URL above</li>
-            <li>Name it "ETC Community Calls" and click "Import"</li>
-          </ol>
-        </div>
-      </details>
-    </div>
-
-    <div class="flex gap-2 mt-6">
-      <a
-        href="/etccc.ics"
-        download="etccc.ics"
-        class="btn btn-sm bg-surface-elevated border-etc-green/20 text-gray-300 hover:bg-surface-elevated/80 font-mono text-xs"
-      >
-        <Icon name="lucide:download" class="icon-sm" />
-        Download ICS
-      </a>
-    </div>
-    </div>
-
     <!-- RSS Tab Content -->
-    <div class="tab-content hidden" data-content="rss" id={`${modalId}-content-rss`}>
+    <div
+      class="tab-content hidden"
+      data-content="rss"
+      id={`${modalId}-content-rss`}
+    >
       <!-- RSS URL Copy Section -->
       <div class="mb-6">
-        <label class="block text-xs font-mono uppercase tracking-wider text-gray-500 mb-2">
+        <label
+          class="block text-xs font-mono uppercase tracking-wider text-gray-500 mb-2"
+        >
           RSS Feed URL
         </label>
         <div class="flex gap-2">
@@ -188,20 +239,35 @@ const rssUrl = siteConfig.rssUrl;
 
       <!-- RSS Instructions -->
       <div class="space-y-3">
-        <h4 class="text-sm font-mono uppercase tracking-wider text-gray-400">Popular RSS Readers</h4>
+        <h4 class="text-sm font-mono uppercase tracking-wider text-gray-400">
+          Popular RSS Readers
+        </h4>
 
         <details class="group">
-          <summary class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors">
+          <summary
+            class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors"
+          >
             <span class="flex items-center gap-3">
               <span class="text-lg">🦊</span>
               <span class="font-mono text-sm text-gray-300">Feedly</span>
             </span>
-            <Icon name="lucide:chevron-down" class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180" />
+            <Icon
+              name="lucide:chevron-down"
+              class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180"
+            />
           </summary>
           <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
             <ol class="list-decimal list-inside space-y-1">
-              <li>Open <a href="https://feedly.com" target="_blank" rel="noopener" class="text-etc-green hover:underline">Feedly</a></li>
-              <li>Click the <strong class="text-gray-300">+</strong> button to add content</li>
+              <li>
+                Open <a
+                  href="https://feedly.com"
+                  target="_blank"
+                  rel="noopener"
+                  class="text-etc-green hover:underline">Feedly</a>
+              </li>
+              <li>
+                Click the <strong class="text-gray-300">+</strong> button to add content
+              </li>
               <li>Paste the RSS URL above</li>
               <li>Click "Follow" to subscribe</li>
             </ol>
@@ -209,35 +275,68 @@ const rssUrl = siteConfig.rssUrl;
         </details>
 
         <details class="group">
-          <summary class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors">
+          <summary
+            class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors"
+          >
             <span class="flex items-center gap-3">
               <span class="text-lg">📰</span>
               <span class="font-mono text-sm text-gray-300">Inoreader</span>
             </span>
-            <Icon name="lucide:chevron-down" class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180" />
+            <Icon
+              name="lucide:chevron-down"
+              class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180"
+            />
           </summary>
           <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
             <ol class="list-decimal list-inside space-y-1">
-              <li>Open <a href="https://www.inoreader.com" target="_blank" rel="noopener" class="text-etc-green hover:underline">Inoreader</a></li>
-              <li>Click <strong class="text-gray-300">Add new → Feeds</strong></li>
+              <li>
+                Open <a
+                  href="https://www.inoreader.com"
+                  target="_blank"
+                  rel="noopener"
+                  class="text-etc-green hover:underline">Inoreader</a>
+              </li>
+              <li>
+                Click <strong class="text-gray-300">Add new → Feeds</strong>
+              </li>
               <li>Paste the RSS URL and subscribe</li>
             </ol>
           </div>
         </details>
 
         <details class="group">
-          <summary class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors">
+          <summary
+            class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors"
+          >
             <span class="flex items-center gap-3">
               <span class="text-lg">🌐</span>
-              <span class="font-mono text-sm text-gray-300">Browser Extension</span>
+              <span class="font-mono text-sm text-gray-300"
+                >Browser Extension</span
+              >
             </span>
-            <Icon name="lucide:chevron-down" class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180" />
+            <Icon
+              name="lucide:chevron-down"
+              class="icon-sm text-gray-500 transform transition-transform group-open:rotate-180"
+            />
           </summary>
           <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
             <p class="mb-2">Install an RSS reader extension like:</p>
             <ul class="list-disc list-inside space-y-1">
-              <li><a href="https://chrome.google.com/webstore/detail/rss-feed-reader/pnjaodmkngahhkoihejjehlcdlnohgmp" target="_blank" rel="noopener" class="text-etc-green hover:underline">RSS Feed Reader (Chrome)</a></li>
-              <li><a href="https://addons.mozilla.org/en-US/firefox/addon/feedbro/" target="_blank" rel="noopener" class="text-etc-green hover:underline">Feedbro (Firefox)</a></li>
+              <li>
+                <a
+                  href="https://chrome.google.com/webstore/detail/rss-feed-reader/pnjaodmkngahhkoihejjehlcdlnohgmp"
+                  target="_blank"
+                  rel="noopener"
+                  class="text-etc-green hover:underline"
+                  >RSS Feed Reader (Chrome)</a>
+              </li>
+              <li>
+                <a
+                  href="https://addons.mozilla.org/en-US/firefox/addon/feedbro/"
+                  target="_blank"
+                  rel="noopener"
+                  class="text-etc-green hover:underline">Feedbro (Firefox)</a>
+              </li>
             </ul>
           </div>
         </details>
@@ -258,7 +357,9 @@ const rssUrl = siteConfig.rssUrl;
 
     <div class="modal-action mt-6 border-t border-etc-green/10 pt-4">
       <form method="dialog">
-        <button class="btn btn-sm bg-etc-green/10 border-etc-green/30 text-etc-green hover:bg-etc-green/20 font-mono text-xs">
+        <button
+          class="btn btn-sm bg-etc-green/10 border-etc-green/30 text-etc-green hover:bg-etc-green/20 font-mono text-xs"
+        >
           Done
         </button>
       </form>
@@ -271,53 +372,69 @@ const rssUrl = siteConfig.rssUrl;
 
 <script is:inline>
   // Use event delegation for robust handling across View Transitions
-  document.addEventListener('click', function(e) {
-    const target = e.target.closest('.tab-btn');
+  document.addEventListener("click", function (e) {
+    const target = e.target.closest(".tab-btn");
     if (!target) return;
 
-    const modal = target.closest('dialog.modal');
+    const modal = target.closest("dialog.modal");
     if (!modal) return;
 
-    const tab = target.getAttribute('data-tab');
+    const tab = target.getAttribute("data-tab");
     if (!tab) return;
 
     // Update all tab buttons in this modal
-    modal.querySelectorAll('.tab-btn').forEach(btn => {
-      if (btn.getAttribute('data-tab') === tab) {
-        btn.classList.remove('bg-surface-elevated', 'text-gray-400', 'border-etc-green/10');
-        btn.classList.add('bg-etc-green/20', 'text-etc-green', 'border-etc-green/30');
-        btn.setAttribute('aria-selected', 'true');
+    modal.querySelectorAll(".tab-btn").forEach((btn) => {
+      if (btn.getAttribute("data-tab") === tab) {
+        btn.classList.remove(
+          "bg-surface-elevated",
+          "text-gray-400",
+          "border-etc-green/10",
+        );
+        btn.classList.add(
+          "bg-etc-green/20",
+          "text-etc-green",
+          "border-etc-green/30",
+        );
+        btn.setAttribute("aria-selected", "true");
       } else {
-        btn.classList.add('bg-surface-elevated', 'text-gray-400', 'border-etc-green/10');
-        btn.classList.remove('bg-etc-green/20', 'text-etc-green', 'border-etc-green/30');
-        btn.setAttribute('aria-selected', 'false');
+        btn.classList.add(
+          "bg-surface-elevated",
+          "text-gray-400",
+          "border-etc-green/10",
+        );
+        btn.classList.remove(
+          "bg-etc-green/20",
+          "text-etc-green",
+          "border-etc-green/30",
+        );
+        btn.setAttribute("aria-selected", "false");
       }
     });
 
     // Show/hide tab content
-    modal.querySelectorAll('.tab-content').forEach(content => {
-      if (content.getAttribute('data-content') === tab) {
-        content.classList.remove('hidden');
-        content.classList.add('block');
+    modal.querySelectorAll(".tab-content").forEach((content) => {
+      if (content.getAttribute("data-content") === tab) {
+        content.classList.remove("hidden");
+        content.classList.add("block");
       } else {
-        content.classList.remove('block');
-        content.classList.add('hidden');
+        content.classList.remove("block");
+        content.classList.add("hidden");
       }
     });
   });
 
   // Copy button handler using event delegation
-  document.addEventListener('click', async function(e) {
+  document.addEventListener("click", async function (e) {
     const copyBtn = e.target.closest('[id$="-copy"]');
     if (!copyBtn) return;
 
-    const modal = copyBtn.closest('dialog.modal');
+    const modal = copyBtn.closest("dialog.modal");
     if (!modal) return;
 
     // Determine which URL input to copy from
     const modalId = modal.id;
     let inputId;
-    if (copyBtn.id.includes('-rss-copy')) {
+    if (copyBtn.id.includes("-rss-copy")) {
       inputId = `${modalId}-rss-url`;
     } else {
       inputId = `${modalId}-url`;
@@ -326,20 +443,20 @@ const rssUrl = siteConfig.rssUrl;
     const urlInput = document.getElementById(inputId);
     if (!urlInput || !(urlInput instanceof HTMLInputElement)) return;
 
-    const copyIcon = copyBtn.querySelector('.copy-icon');
-    const checkIcon = copyBtn.querySelector('.check-icon');
+    const copyIcon = copyBtn.querySelector(".copy-icon");
+    const checkIcon = copyBtn.querySelector(".check-icon");
 
     try {
       await navigator.clipboard.writeText(urlInput.value);
-      copyIcon?.classList.add('hidden');
-      checkIcon?.classList.remove('hidden');
+      copyIcon?.classList.add("hidden");
+      checkIcon?.classList.remove("hidden");
       setTimeout(() => {
-        copyIcon?.classList.remove('hidden');
-        checkIcon?.classList.add('hidden');
+        copyIcon?.classList.remove("hidden");
+        checkIcon?.classList.add("hidden");
       }, 2000);
     } catch (err) {
       urlInput.select();
-      document.execCommand('copy');
+      document.execCommand("copy");
     }
   });
 </script>

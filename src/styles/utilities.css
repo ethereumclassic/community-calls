@@ -113,7 +113,12 @@
 }
 
 .scrollbar-thin:hover {
-  scrollbar-color: color-mix(in srgb, var(--color-etc-green-dim) 40%, transparent) transparent;
+  scrollbar-color: color-mix(
+      in srgb,
+      var(--color-etc-green-dim) 40%,
+      transparent
+    )
+    transparent;
 }
 
 /* Edge fade mask */
@@ -143,14 +148,14 @@
 }
 
 .pulse-dot::before {
-  content: '';
+  content: "";
   @apply absolute inline-flex h-full w-full rounded-full opacity-75;
   @apply animate-ping;
   background: inherit;
 }
 
 .pulse-dot::after {
-  content: '';
+  content: "";
   @apply relative inline-flex rounded-full h-3 w-3;
   background: inherit;
 }
@@ -160,12 +165,12 @@
 }
 
 .pulse-dot-green::before {
-  content: '';
+  content: "";
   @apply absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping bg-etc-green;
 }
 
 .pulse-dot-green::after {
-  content: '';
+  content: "";
   @apply relative inline-flex rounded-full h-3 w-3 bg-etc-green;
 }
 
@@ -174,11 +179,11 @@
 }
 
 .pulse-dot-amber::before {
-  content: '';
+  content: "";
   @apply absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping bg-amber;
 }
 
 .pulse-dot-amber::after {
-  content: '';
+  content: "";
   @apply relative inline-flex rounded-full h-3 w-3 bg-amber;
 }

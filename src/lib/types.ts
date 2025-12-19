@@ -1,10 +1,10 @@
-import type { CollectionEntry } from 'astro:content';
+import type { CollectionEntry } from "astro:content";
 
 // Re-export the Astro-generated type
-export type Call = CollectionEntry<'calls'>;
+export type Call = CollectionEntry<"calls">;
 
 // Extracted call data type for utility functions
-export type CallData = Call['data'];
+export type CallData = Call["data"];
 
 // Props interfaces for components
 export interface CallCardProps {
@@ -23,6 +23,6 @@ export interface LayoutProps {
   title: string;
   description?: string;
   ogImage?: string;
-  ogType?: 'website' | 'article';
+  ogType?: "website" | "article";
   publishedTime?: string;
 }

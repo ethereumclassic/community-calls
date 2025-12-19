@@ -1,11 +1,13 @@
-import type { Loader, LoaderContext } from 'astro/loaders';
-import { glob } from 'astro/loaders';
-import { siteConfig } from './config';
+import type { Loader, LoaderContext } from "astro/loaders";
+import { glob } from "astro/loaders";
+import { siteConfig } from "./config";
 
 /**
  * Parse "1500 UTC" format to hours/minutes
  */
-function parseUTCTime(timeStr: string): { hours: number; minutes: number } | null {
+function parseUTCTime(
+  timeStr: string,
+): { hours: number; minutes: number } | null {
   const match = timeStr.match(/^(\d{2})(\d{2})\s*UTC$/i);
   if (!match) return null;
   return {
@@ -41,21 +43,21 @@ function getCallNumberFromFilename(id: string): number {
  */
 function generateSlug(
   id: string,
-  data: { date?: Date; number?: number; description?: string }
+  data: { date?: Date; number?: number; description?: string },
 ): string {
   const date = data.date;
   const num = data.number || getCallNumberFromFilename(id);
   const desc = data.description;
 
   if (date && desc) {
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = date.toISOString().split("T")[0];
     const slugDesc = desc
       .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
     return `${dateStr}-${num}-${slugDesc}`;
   }
-  return id.replace('.md', '');
+  return id.replace(".md", "");
 }
 
 /**
@@ -68,7 +70,7 @@ export function callsLoader(options: {
   const baseLoader = glob({ pattern: options.pattern, base: options.base });
 
   return {
-    name: 'calls-loader',
+    name: "calls-loader",
     load: async (context: LoaderContext) => {
       // First, let the base loader populate the store
       await baseLoader.load(context);
@@ -81,42 +83,47 @@ export function callsLoader(options: {
 
         // Compute call number (from frontmatter or filename)
         const callNumber =
-          typeof data.number === 'number'
+          typeof data.number === "number"
             ? data.number
             : getCallNumberFromFilename(id);
 
         // Use youtube ID directly (no longer a URL)
         const youtubeId =
-          typeof data.youtube === 'string' ? data.youtube : null;
+          typeof data.youtube === "string" ? data.youtube : null;
 
         // Parse date if it's a string
-        const dateValue = data.date instanceof Date
-          ? data.date
-          : (typeof data.date === 'string' ? new Date(data.date) : undefined);
+        const dateValue =
+          data.date instanceof Date
+            ? data.date
+            : typeof data.date === "string"
+              ? new Date(data.date)
+              : undefined;
 
         // Compute slug
         const slug = generateSlug(id, {
           date: dateValue,
           number: callNumber,
-          description: typeof data.description === 'string' ? data.description : undefined,
+          description:
+            typeof data.description === "string" ? data.description : undefined,
         });
 
         // Compute formatted date string for ICS UID
         const dateStr = dateValue
-          ? dateValue.toISOString().split('T')[0].replace(/-/g, '')
-          : '';
+          ? dateValue.toISOString().split("T")[0].replace(/-/g, "")
+          : "";
 
         // Compute event datetime (date + time) as timestamp
-        const timeStr = typeof data.time === 'string' ? data.time : undefined;
+        const timeStr = typeof data.time === "string" ? data.time : undefined;
         const eventDateTime = dateValue
           ? combineDateAndTime(dateValue, timeStr).getTime()
           : null;
 
         // Compute isUpcoming - events stay upcoming until buffer period after start
         const now = Date.now();
-        const isUpcoming = eventDateTime !== null
-          ? eventDateTime > (now - siteConfig.upcomingBufferMs)
-          : false;
+        const isUpcoming =
+          eventDateTime !== null
+            ? eventDateTime > now - siteConfig.upcomingBufferMs
+            : false;
 
         // Mutate the data object directly - don't delete/recreate the entry
         data.callNumber = callNumber;

@@ -30,14 +30,16 @@ const title = call.data.description
 
     <CallHeader call={call} />
 
-    {youtubeId && (
-      <YouTubeEmbed
-        youtubeId={youtubeId}
-        date={call.data.date}
-        callNumber={callNumber}
-        title={title}
-      />
-    )}
+    {
+      youtubeId && (
+        <YouTubeEmbed
+          youtubeId={youtubeId}
+          date={call.data.date}
+          callNumber={callNumber}
+          title={title}
+        />
+      )
+    }
 
     <!-- Hosts - temporarily hidden
     {call.data.hosts && call.data.hosts.length > 0 && (
@@ -46,7 +48,11 @@ const title = call.data.description
     -->
 
     <!-- Main Content -->
-    <AnimatedContainer as="section" delay={400} class="prose prose-lg prose-invert max-w-none">
+    <AnimatedContainer
+      as="section"
+      delay={400}
+      class="prose prose-lg prose-invert max-w-none"
+    >
       <slot />
     </AnimatedContainer>
   </AnimatedContainer>

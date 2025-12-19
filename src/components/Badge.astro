@@ -1,15 +1,17 @@
 ---
 interface Props {
-  variant?: 'recording' | 'number' | 'upcoming';
+  variant?: "recording" | "number" | "upcoming";
   class?: string;
 }
 
-const { variant = 'number', class: className = '' } = Astro.props;
+const { variant = "number", class: className = "" } = Astro.props;
 
 const variantClasses: Record<string, string> = {
-  recording: 'badge-recording px-2 py-0.5 rounded text-[9px]',
-  number: 'px-3 py-1 text-xs font-mono uppercase tracking-wider bg-etc-green/20 text-etc-green border border-etc-green/30 rounded-full',
-  upcoming: 'px-3 py-1 text-xs font-mono uppercase tracking-widest bg-amber/20 text-amber rounded-full',
+  recording: "badge-recording px-2 py-0.5 rounded text-[9px]",
+  number:
+    "px-3 py-1 text-xs font-mono uppercase tracking-wider bg-etc-green/20 text-etc-green border border-etc-green/30 rounded-full",
+  upcoming:
+    "px-3 py-1 text-xs font-mono uppercase tracking-widest bg-amber/20 text-amber rounded-full",
 };
 ---
 

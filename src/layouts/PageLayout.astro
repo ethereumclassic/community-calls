@@ -1,16 +1,16 @@
 ---
-import RootLayout from './RootLayout.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import SubscribeModal from '../components/SubscribeModal.astro';
+import RootLayout from "./RootLayout.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import SubscribeModal from "../components/SubscribeModal.astro";
 
 interface Props {
   title: string;
   description?: string;
   ogImage?: string;
-  ogType?: 'website' | 'article';
+  ogType?: "website" | "article";
   publishedTime?: string;
-  maxWidth?: 'default' | 'narrow' | 'wide' | 'full';
+  maxWidth?: "default" | "narrow" | "wide" | "full";
   class?: string;
 }
 
@@ -20,15 +20,15 @@ const {
   ogImage,
   ogType,
   publishedTime,
-  maxWidth = 'default',
+  maxWidth = "default",
   class: className,
 } = Astro.props;
 
 const maxWidthClass = {
-  default: 'max-w-7xl',
-  narrow: 'max-w-4xl',
-  wide: 'max-w-screen-2xl',
-  full: 'max-w-full',
+  default: "max-w-7xl",
+  narrow: "max-w-4xl",
+  wide: "max-w-screen-2xl",
+  full: "max-w-full",
 }[maxWidth];
 ---
 
@@ -42,14 +42,26 @@ const maxWidthClass = {
   <!-- Ambient glow effects -->
   <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
     <!-- Top left glow -->
-    <div class="absolute -top-40 -left-40 w-96 h-96 bg-etc-green/5 rounded-full blur-[120px]"></div>
+    <div
+      class="absolute -top-40 -left-40 w-96 h-96 bg-etc-green/5 rounded-full blur-[120px]"
+    >
+    </div>
     <!-- Bottom right glow -->
-    <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-etc-green/5 rounded-full blur-[120px]"></div>
+    <div
+      class="absolute -bottom-40 -right-40 w-96 h-96 bg-etc-green/5 rounded-full blur-[120px]"
+    >
+    </div>
   </div>
 
   <Header />
   <main class="flex-1 relative z-10">
-    <div class:list={[maxWidthClass, "mx-auto px-4 sm:px-6 lg:px-8 py-8", className]}>
+    <div
+      class:list={[
+        maxWidthClass,
+        "mx-auto px-4 sm:px-6 lg:px-8 py-8",
+        className,
+      ]}
+    >
       <slot />
     </div>
   </main>

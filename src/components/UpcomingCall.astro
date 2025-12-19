@@ -2,6 +2,7 @@
 import type { CollectionEntry } from 'astro:content';
 import { Icon } from 'astro-icon/components';
 import { formatFullDate } from '../lib/dates';
+import LocalTime from './LocalTime';
 
 interface Props {
   call: CollectionEntry<'calls'>;
@@ -47,6 +48,7 @@ const { call } = Astro.props;
               <span class="flex items-center gap-2">
                 <Icon name="lucide:clock" class="icon-sm text-amber/60" />
                 {call.data.time}
+                <LocalTime client:load time={call.data.time} />
               </span>
             )}
             {call.data.location && (

@@ -1,7 +1,7 @@
 ---
 import type { CollectionEntry } from "astro:content";
 import { Icon } from "astro-icon/components";
-import TimezoneBar from "../TimezoneBar.astro";
+import TimezoneBar from "../TimezoneBar";
 import GreenRoom from "../GreenRoom.astro";
 import UpcomingBadge from "../UpcomingBadge";
 import { formatFullDate } from "../../lib/dates";
@@ -76,7 +76,7 @@ const isUpcoming = call.data.date ? call.data.date > new Date() : false;
   </div>
 
   <!-- Timezone Display -->
-  {call.data.time && <TimezoneBar time={call.data.time} />}
+  {call.data.time && <TimezoneBar client:load time={call.data.time} />}
 
   <!-- Join Call Button & Green Room (only for upcoming calls) -->
   {

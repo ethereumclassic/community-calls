@@ -1,0 +1,101 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import Button from "../components/Button.astro";
+import { siteConfig } from "../lib/config";
+---
+
+<PageLayout title="404 - Page Not Found | ETC Community Calls">
+  <section
+    class="relative min-h-[70vh] flex items-center justify-center -mt-8"
+  >
+    <!-- Decorative circuit lines -->
+    <div class="absolute inset-0 overflow-hidden pointer-events-none">
+      <svg
+        class="absolute top-0 left-0 w-full h-full opacity-[0.03]"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+      >
+        <path
+          d="M0,50 L30,50 L35,30 L65,30 L70,50 L100,50"
+          stroke="currentColor"
+          stroke-width="0.2"
+          fill="none"
+          class="text-etc-green"></path>
+        <path
+          d="M0,70 L20,70 L25,60 L45,60 L50,70 L100,70"
+          stroke="currentColor"
+          stroke-width="0.2"
+          fill="none"
+          class="text-etc-green"></path>
+        <!-- Extra error-themed lines -->
+        <path
+          d="M0,30 L15,30 L20,40 L80,40 L85,30 L100,30"
+          stroke="currentColor"
+          stroke-width="0.15"
+          fill="none"
+          class="text-red-500/50"></path>
+      </svg>
+    </div>
+
+    <div class="relative z-10 text-center max-w-4xl mx-auto px-4">
+      <!-- Logo with glow effect -->
+      <div class="relative inline-block mb-8 animate-float">
+        <img
+          src={siteConfig.assets.logo}
+          alt="ETC Community Calls"
+          class="w-32 h-32 md:w-40 md:h-40 mx-auto animate-pulse-glow grayscale-[30%]"
+        />
+        <div
+          class="absolute inset-0 bg-etc-green/15 rounded-full blur-2xl scale-150"
+        >
+        </div>
+      </div>
+
+      <!-- 404 Error Code -->
+      <h1
+        class="font-display text-8xl md:text-9xl lg:text-[12rem] text-etc-green mb-4 opacity-0 animate-fade-in-up leading-none"
+        style="animation-delay: 100ms; text-shadow: 0 0 60px rgba(62, 207, 142, 0.3);"
+      >
+        404
+      </h1>
+
+      <!-- Page Not Found Text -->
+      <h2
+        class="font-display text-3xl md:text-4xl lg:text-5xl text-gray-100 mb-6 opacity-0 animate-fade-in-up"
+        style="animation-delay: 200ms"
+      >
+        Page Not Found
+      </h2>
+
+      <!-- Description -->
+      <p
+        class="text-lg md:text-xl font-mono text-gray-400 max-w-xl mx-auto mb-10 opacity-0 animate-fade-in-up"
+        style="animation-delay: 300ms"
+      >
+        The page you're looking for doesn't exist or has been moved.
+        <span class="text-etc-green/60">Let's get you back on track.</span>
+      </p>
+
+      <!-- Terminal-style error message -->
+      <div
+        class="inline-block bg-gray-900/50 border border-etc-green/20 rounded-lg px-6 py-4 mb-10 opacity-0 animate-fade-in-up font-mono text-sm text-left"
+        style="animation-delay: 400ms"
+      >
+        <div class="text-gray-500 mb-1">$ request --page</div>
+        <div class="text-red-400">
+          Error: Route not found<span class="animate-terminal-blink">_</span>
+        </div>
+      </div>
+
+      <!-- Back to Home Button -->
+      <div
+        class="opacity-0 animate-fade-in-up"
+        style="animation-delay: 500ms"
+      >
+        <Button href="/" icon="lucide:home">
+          Back to Home
+        </Button>
+      </div>
+    </div>
+  </section>
+</PageLayout>

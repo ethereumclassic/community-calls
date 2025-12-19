@@ -10,14 +10,16 @@ import { sortCallsByDate } from '../lib/calls';
 
 const allCalls = await getCollection('calls');
 const now = Date.now();
+const oneDayMs = 24 * 60 * 60 * 1000;
 
 // Separate regular and special calls
 const regularCalls = sortCallsByDate(allCalls.filter(call => !call.data.special));
 const specialCalls = sortCallsByDate(allCalls.filter(call => call.data.special));
 
 // Separate upcoming and past regular calls
-const upcomingCalls = regularCalls.filter(call => call.data.date && call.data.date.getTime() > now);
-const pastCalls = regularCalls.filter(call => !call.data.date || call.data.date.getTime() <= now);
+// Show as "upcoming" until one day after the event
+const upcomingCalls = regularCalls.filter(call => call.data.date && call.data.date.getTime() > (now - oneDayMs));
+const pastCalls = regularCalls.filter(call => !call.data.date || call.data.date.getTime() <= (now - oneDayMs));
 
 // Get the next upcoming call (soonest)
 const nextCall = upcomingCalls.length > 0

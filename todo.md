@@ -1,6 +1,6 @@
-- recurring calls
-- list speakers
+- Recurring calls
+- List speakers
 - POAPs for speakers
-- Optimize images in markdown
-- Better call loader?
-- Test calendar/rss
+- Test every page has all the right data 
+- Pull thumbnail from youtube or generate one
+- Rip Twiter spaces and re-upload

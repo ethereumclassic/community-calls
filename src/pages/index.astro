@@ -1,14 +1,13 @@
 ---
-import { getCollection } from "astro:content";
 import PageLayout from "../layouts/PageLayout.astro";
 import LandingHero from "../components/LandingHero.astro";
 import LandingAbout from "../components/LandingAbout.astro";
 import UpcomingCall from "../components/UpcomingCall.astro";
 import SubscribeBanner from "../components/SubscribeBanner.astro";
 import ArchiveGrid from "../components/ArchiveGrid.astro";
-import { sortCallsByDate } from "../lib/calls";
+import { getCalls, sortCallsByDate } from "../lib/calls";
 
-const allCalls = await getCollection("calls");
+const allCalls = await getCalls();
 
 // Separate regular and special calls
 const regularCalls = sortCallsByDate(
@@ -18,7 +17,7 @@ const specialCalls = sortCallsByDate(
   allCalls.filter((call) => call.data.special),
 );
 
-// Separate upcoming and past regular calls (isUpcoming computed by loader)
+// Separate upcoming and past regular calls
 const upcomingCalls = regularCalls.filter((call) => call.data.isUpcoming);
 const pastCalls = regularCalls.filter((call) => !call.data.isUpcoming);
 

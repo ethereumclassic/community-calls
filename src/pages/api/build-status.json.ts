@@ -1,34 +1,21 @@
 import type { APIRoute } from "astro";
-import { getCollection } from "astro:content";
 import { siteConfig } from "../../lib/config";
-import { sortCallsByDate } from "../../lib/calls";
-import { combineDateAndTime } from "../../lib/dates";
+import { getCalls, sortCallsByDate } from "../../lib/calls";
 
 /**
  * Returns the current build status for smart rebuild detection.
  * The scheduled function fetches this to determine if a rebuild is needed.
  */
 export const GET: APIRoute = async () => {
-  const allCalls = await getCollection("calls");
-  const now = Date.now();
+  const allCalls = await getCalls();
 
   // Get regular calls only (same logic as index.astro)
   const regularCalls = sortCallsByDate(
     allCalls.filter((call) => !call.data.special),
   );
 
-  // Helper to get full event datetime (date + time) - same as index.astro
-  const getEventDateTime = (call: (typeof regularCalls)[0]) =>
-    call.data.date
-      ? combineDateAndTime(call.data.date, call.data.time).getTime()
-      : 0;
-
-  // Find upcoming calls using the shared buffer
-  const upcomingCalls = regularCalls.filter(
-    (call) =>
-      call.data.date &&
-      getEventDateTime(call) > now - siteConfig.upcomingBufferMs,
-  );
+  // Find upcoming calls (already computed by getCalls)
+  const upcomingCalls = regularCalls.filter((call) => call.data.isUpcoming);
 
   // Get the next upcoming call (soonest first)
   const nextCall =
@@ -37,15 +24,10 @@ export const GET: APIRoute = async () => {
   // Build the response
   let nextUpcomingEvent = null;
 
-  if (nextCall && nextCall.data.date) {
-    const eventDateTime = combineDateAndTime(
-      nextCall.data.date,
-      nextCall.data.time,
-    );
-
+  if (nextCall && nextCall.data.eventDateTime) {
     nextUpcomingEvent = {
       number: nextCall.data.callNumber,
-      datetime: eventDateTime.toISOString(),
+      datetime: new Date(nextCall.data.eventDateTime).toISOString(),
       description: nextCall.data.description,
     };
   }

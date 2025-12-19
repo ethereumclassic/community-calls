@@ -1,20 +1,11 @@
 /**
- * Timezone utilities for client-side hydration
+ * Client-side timezone utilities for hydration
  */
 
-/**
- * Parse "1500 UTC" format to hours/minutes
- */
-export function parseUTCTime(
-  timeStr: string,
-): { hours: number; minutes: number } | null {
-  const match = timeStr.match(/^(\d{2})(\d{2})\s*UTC$/i);
-  if (!match) return null;
-  return {
-    hours: parseInt(match[1], 10),
-    minutes: parseInt(match[2], 10),
-  };
-}
+import { parseUTCTime } from "./dates";
+
+// Re-export for convenience
+export { parseUTCTime };
 
 /**
  * Calculate local time from UTC time and offset

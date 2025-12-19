@@ -1,10 +1,10 @@
 ---
-import { getCollection, render } from "astro:content";
+import { render } from "astro:content";
 import CallLayout from "../../layouts/CallLayout.astro";
-import { sortCallsByNumber } from "../../lib/calls";
+import { getCalls, sortCallsByNumber } from "../../lib/calls";
 
 export async function getStaticPaths() {
-  const allCalls = await getCollection("calls");
+  const allCalls = await getCalls();
 
   // Regular calls get prev/next navigation
   const regularCalls = allCalls.filter((call) => !call.data.special);

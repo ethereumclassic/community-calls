@@ -1,11 +1,10 @@
 import type { APIRoute } from "astro";
-import { getCollection } from "astro:content";
 import { siteConfig } from "../lib/config";
-import { sortCallsByDate } from "../lib/calls";
+import { getCalls, sortCallsByDate } from "../lib/calls";
 import { formatISODate } from "../lib/dates";
 
 export const GET: APIRoute = async () => {
-  const allCalls = await getCollection("calls");
+  const allCalls = await getCalls();
 
   // Filter out special calls, only include dated calls
   const calls = sortCallsByDate(

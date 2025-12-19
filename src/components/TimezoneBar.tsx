@@ -54,23 +54,11 @@ export default function TimezoneBar({ time }: Props) {
       isUserTime: true,
     };
 
-    // Calculate user's time
-    const userTime = calculateLocalTime(utcTime, userOffset);
-
-    // Filter out entries that have the same calculated time as user (except UTC)
-    const filtered = baseTimezones.filter((tz) => {
-      if (tz.isCenter) return true; // Always keep UTC
-      const tzTime = calculateLocalTime(utcTime, tz.offset);
-      return (
-        tzTime.time !== userTime.time || tzTime.dayOffset !== userTime.dayOffset
-      );
-    });
-
-    // Insert user entry in correct position by offset
+    // Insert user entry in correct position by offset (always show all timezones)
     const result: TimezoneEntry[] = [];
     let inserted = false;
 
-    for (const tz of filtered) {
+    for (const tz of baseTimezones) {
       if (!inserted && !tz.isCenter && userOffset < tz.offset) {
         result.push(userEntry);
         inserted = true;
@@ -79,11 +67,11 @@ export default function TimezoneBar({ time }: Props) {
       // Insert after UTC if user offset is 0 but not UTC itself
       if (tz.isCenter && !inserted && userOffset >= 0) {
         // Check if we should insert here (user offset <= next non-center item's offset)
-        const nextNonCenter = filtered.find(
+        const nextNonCenter = baseTimezones.find(
           (t) =>
             !t.isCenter &&
             t.offset >= 0 &&
-            filtered.indexOf(t) > filtered.indexOf(tz),
+            baseTimezones.indexOf(t) > baseTimezones.indexOf(tz),
         );
         if (!nextNonCenter || userOffset <= nextNonCenter.offset) {
           result.push(userEntry);

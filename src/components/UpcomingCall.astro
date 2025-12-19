@@ -1,0 +1,69 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { Icon } from 'astro-icon/components';
+import { formatFullDate } from '../lib/dates';
+
+interface Props {
+  call: CollectionEntry<'calls'>;
+}
+
+const { call } = Astro.props;
+---
+
+<section class="mb-16">
+  <a
+    href={`/calls/${call.data.slug}`}
+    class="block terminal-card upcoming-card rounded-xl overflow-hidden transition-all duration-300 group"
+  >
+    <!-- Header bar -->
+    <div class="flex items-center justify-between px-6 py-4 bg-amber/10 border-b border-amber/20">
+      <div class="flex items-center gap-3">
+        <span class="relative flex h-3 w-3">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-3 w-3 bg-amber"></span>
+        </span>
+        <span class="text-xs font-mono uppercase tracking-widest text-amber">Upcoming Call</span>
+      </div>
+      <span class="px-3 py-1 text-xs font-mono uppercase tracking-wider bg-amber/20 text-amber rounded-full">
+        #{call.data.callNumber}
+      </span>
+    </div>
+
+    <!-- Content -->
+    <div class="p-6 md:p-8">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+        <div class="flex-1">
+          <h2 class="font-display text-3xl md:text-4xl text-gray-100 group-hover:text-amber transition-colors mb-3">
+            {call.data.description || 'Community Call'}
+          </h2>
+          <div class="flex flex-wrap items-center gap-4 text-sm font-mono text-gray-400">
+            {call.data.date && (
+              <span class="flex items-center gap-2">
+                <Icon name="lucide:calendar" class="icon-sm text-amber/60" />
+                {formatFullDate(call.data.date)}
+              </span>
+            )}
+            {call.data.time && (
+              <span class="flex items-center gap-2">
+                <Icon name="lucide:clock" class="icon-sm text-amber/60" />
+                {call.data.time}
+              </span>
+            )}
+            {call.data.location && (
+              <span class="flex items-center gap-2">
+                <Icon name="lucide:map-pin" class="icon-sm text-amber/60" />
+                {call.data.location}
+              </span>
+            )}
+          </div>
+        </div>
+        <div class="flex-shrink-0">
+          <span class="inline-flex items-center gap-2 px-6 py-3 bg-amber text-void font-mono text-sm font-semibold uppercase tracking-wider rounded-lg group-hover:bg-amber/90 transition-colors">
+            View Details
+            <Icon name="lucide:chevron-right" class="icon-sm transform group-hover:translate-x-1 transition-transform" />
+          </span>
+        </div>
+      </div>
+    </div>
+  </a>
+</section>

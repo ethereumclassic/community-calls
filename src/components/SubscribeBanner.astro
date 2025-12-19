@@ -1,0 +1,39 @@
+---
+import { Icon } from "astro-icon/components";
+import TerminalCard from "./TerminalCard.astro";
+import Button from "./Button.astro";
+---
+
+<section class="mb-16">
+  <TerminalCard class="border-etc-green/20">
+    <div class="p-6 md:p-8">
+      <div
+        class="flex flex-col md:flex-row md:items-center md:justify-between gap-6"
+      >
+        <div class="flex items-start gap-4">
+          <div class="p-3 rounded-lg bg-etc-green/10 flex-shrink-0">
+            <Icon name="lucide:calendar" class="icon-lg text-etc-green" />
+          </div>
+          <div>
+            <h3 class="font-display text-3xl text-gray-100 mb-2">
+              Never Miss a Call
+            </h3>
+            <p class="font-mono text-sm text-gray-400">
+              Subscribe to our calendar feed and get automatic updates for all
+              upcoming ETC Community Calls directly in your calendar app.
+            </p>
+          </div>
+        </div>
+        <div class="flex-shrink-0">
+          <Button
+            icon="lucide:bell"
+            onclick="document.getElementById('subscribe-modal-global').showModal()"
+            class="whitespace-nowrap px-6"
+          >
+            Subscribe to Calendar
+          </Button>
+        </div>
+      </div>
+    </div>
+  </TerminalCard>
+</section>

@@ -1,0 +1,38 @@
+---
+import { getCollection } from 'astro:content';
+import PageLayout from '../layouts/PageLayout.astro';
+import LandingHero from '../components/LandingHero.astro';
+import LandingAbout from '../components/LandingAbout.astro';
+import UpcomingCall from '../components/UpcomingCall.astro';
+import SubscribeBanner from '../components/SubscribeBanner.astro';
+import ArchiveGrid from '../components/ArchiveGrid.astro';
+import { sortCallsByDate } from '../lib/calls';
+
+const allCalls = await getCollection('calls');
+const now = Date.now();
+
+// Separate regular and special calls
+const regularCalls = sortCallsByDate(allCalls.filter(call => !call.data.special));
+const specialCalls = sortCallsByDate(allCalls.filter(call => call.data.special));
+
+// Separate upcoming and past regular calls
+const upcomingCalls = regularCalls.filter(call => call.data.date && call.data.date.getTime() > now);
+const pastCalls = regularCalls.filter(call => !call.data.date || call.data.date.getTime() <= now);
+
+// Get the next upcoming call (soonest)
+const nextCall = upcomingCalls.length > 0
+  ? sortCallsByDate(upcomingCalls, 'asc')[0]
+  : null;
+
+// Stats (only count regular calls)
+const totalCalls = regularCalls.length;
+const recordedCalls = regularCalls.filter(c => c.data.youtube).length;
+---
+
+<PageLayout title="ETC Community Calls">
+  <LandingHero totalCalls={totalCalls} recordedCalls={recordedCalls} />
+  <LandingAbout />
+  {nextCall && <UpcomingCall call={nextCall} />}
+  <SubscribeBanner />
+  <ArchiveGrid pastCalls={pastCalls} specialCalls={specialCalls} />
+</PageLayout>

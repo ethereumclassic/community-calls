@@ -1,0 +1,77 @@
+---
+import { Icon } from 'astro-icon/components';
+import { siteConfig } from '../lib/config';
+
+const currentYear = new Date().getFullYear();
+---
+
+<footer class="relative border-t border-etc-green/10 bg-void/50 backdrop-blur-sm">
+  <!-- Top accent line -->
+  <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-etc-green/30 to-transparent"></div>
+
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+      <!-- Left: Branding -->
+      <div class="flex items-center gap-3">
+        <div class="relative">
+          <img src={siteConfig.assets.logo} alt="ETC" class="h-8 w-8 opacity-60" />
+        </div>
+        <div class="text-xs font-mono text-gray-500">
+          <span class="text-etc-green/80">Ethereum Classic</span> Community Calls &copy; {currentYear}
+        </div>
+      </div>
+
+      <!-- Center: Tagline -->
+      <p class="text-xs font-mono text-gray-500 text-center order-last md:order-none">
+        Built with <code class="px-1.5 py-0.5 bg-etc-green/10 text-etc-green rounded text-[10px]">&lt;3</code> for the Original Ethereum Vision
+      </p>
+
+      <!-- Right: Links -->
+      <div class="flex items-center gap-6">
+        <a
+          href={siteConfig.social.website}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-xs font-mono text-gray-500 hover:text-etc-green transition-colors duration-200"
+        >
+          ethereumclassic.org
+        </a>
+        <button
+          type="button"
+          onclick="document.getElementById('subscribe-modal-global').showModal()"
+          class="social-link cursor-pointer"
+          aria-label="Subscribe to Calendar"
+        >
+          <Icon name="lucide:calendar" class="icon-sm" />
+        </button>
+        <a
+          href={siteConfig.social.discord}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="social-link"
+          aria-label="Discord"
+        >
+          <Icon name="simple-icons:discord" class="icon-sm" />
+        </a>
+        <a
+          href={siteConfig.social.youtube}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="social-link"
+          aria-label="YouTube"
+        >
+          <Icon name="simple-icons:youtube" class="icon-sm" />
+        </a>
+        <a
+          href={siteConfig.social.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="social-link"
+          aria-label="GitHub"
+        >
+          <Icon name="simple-icons:github" class="icon-sm" />
+        </a>
+      </div>
+    </div>
+  </div>
+</footer>

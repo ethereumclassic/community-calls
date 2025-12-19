@@ -1,0 +1,166 @@
+/* ═══════════════════════════════════════════════════════════════════
+   BASE STYLES - Element defaults and resets
+   ═══════════════════════════════════════════════════════════════════ */
+
+html {
+  background: var(--color-void);
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-mono);
+  background: var(--color-void);
+  color: var(--color-text-primary);
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Scanline overlay - subtle CRT effect */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+  background: repeating-linear-gradient(0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.03) 2px,
+      rgba(0, 0, 0, 0.03) 4px);
+}
+
+/* Grid background pattern */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.03;
+  background-image:
+    linear-gradient(var(--color-etc-green) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-etc-green) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   TYPOGRAPHY BASE
+   ───────────────────────────────────────────────────────────────── */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 400;
+  letter-spacing: -0.01em;
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   SELECTION & SCROLLBAR
+   ───────────────────────────────────────────────────────────────── */
+
+::selection {
+  background: var(--color-etc-green);
+  color: var(--color-void);
+}
+
+::-moz-selection {
+  background: var(--color-etc-green);
+  color: var(--color-void);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-void);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-etc-green-dim);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-etc-green);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   PROSE (MARKDOWN CONTENT)
+   ───────────────────────────────────────────────────────────────── */
+
+.prose {
+  --tw-prose-body: var(--color-text-secondary);
+  --tw-prose-headings: var(--color-text-primary);
+  --tw-prose-links: var(--color-etc-green);
+  --tw-prose-bold: var(--color-text-primary);
+  --tw-prose-code: var(--color-etc-green);
+  --tw-prose-pre-bg: var(--color-surface);
+  --tw-prose-hr: rgba(111, 207, 151, 0.2);
+}
+
+.prose h1 {
+  font-family: var(--font-display);
+  font-size: 3.25rem;
+  line-height: 1.2;
+}
+
+.prose h2 {
+  font-family: var(--font-display);
+  font-size: 2.75rem;
+  line-height: 1.25;
+}
+
+.prose h3 {
+  font-family: var(--font-display);
+  font-size: 2.375rem;
+  line-height: 1.3;
+}
+
+.prose h4 {
+  font-family: var(--font-display);
+  font-size: 2.125rem;
+  line-height: 1.4;
+}
+
+.prose a {
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-etc-green-dim);
+  transition: all var(--transition-normal);
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
+}
+
+.prose a:hover {
+  color: var(--color-etc-green-glow);
+  border-bottom-color: var(--color-etc-green);
+  text-shadow: 0 0 10px var(--color-etc-green-subtle);
+}
+
+.prose code {
+  background: var(--color-surface-elevated);
+  padding: 0.2em 0.4em;
+  border-radius: var(--radius-sm);
+  font-size: 0.875em;
+}
+
+.prose pre {
+  border: 1px solid rgba(111, 207, 151, 0.2);
+}

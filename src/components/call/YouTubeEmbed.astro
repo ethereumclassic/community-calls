@@ -1,0 +1,32 @@
+---
+import AnimatedContainer from "../AnimatedContainer.astro";
+import TerminalCard from "../TerminalCard.astro";
+
+interface Props {
+  youtubeId: string;
+  date?: Date;
+  callNumber: number;
+  title: string;
+}
+
+const { youtubeId, date, callNumber, title } = Astro.props;
+
+const filename = `rec_${date?.toISOString().split("T")[0].replace(/-/g, "")}_${String(callNumber).padStart(3, "0")}.mp4`;
+---
+
+<AnimatedContainer as="section" delay={200} class="mb-10">
+  <TerminalCard showDots title={filename} titleLink={`https://www.youtube.com/watch?v=${youtubeId}`}>
+    <div class="aspect-video">
+      <iframe
+        width="100%"
+        height="100%"
+        src={`https://www.youtube.com/embed/${youtubeId}`}
+        title={title}
+        frameborder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+        class="border-0"
+      />
+    </div>
+  </TerminalCard>
+</AnimatedContainer>

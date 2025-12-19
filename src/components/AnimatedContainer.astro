@@ -1,0 +1,20 @@
+---
+interface Props {
+  delay?: number;
+  class?: string;
+  as?: 'div' | 'section' | 'article' | 'nav' | 'header' | 'footer';
+}
+
+const {
+  delay = 0,
+  class: className = '',
+  as: Element = 'div'
+} = Astro.props;
+---
+
+<Element
+  class:list={['opacity-0 animate-fade-in-up', className]}
+  style={delay ? `animation-delay: ${delay}ms` : undefined}
+>
+  <slot />
+</Element>

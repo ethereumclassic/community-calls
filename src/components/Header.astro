@@ -1,0 +1,59 @@
+---
+import { siteConfig } from "../lib/config";
+import MobileMenu from "./MobileMenu";
+---
+
+<header
+  class="sticky top-0 z-50 backdrop-blur-xl bg-void/80 border-b border-etc-green/10"
+  transition:persist
+>
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <nav class="flex items-center justify-between h-16">
+      <!-- Logo & Title -->
+      <a href="/" class="flex items-center gap-3 group flex-shrink-0">
+        <div class="relative">
+          <img
+            src={siteConfig.assets.logo}
+            alt="ETC"
+            class="h-8 w-8 sm:h-9 sm:w-9 transition-transform duration-300 group-hover:scale-110"
+          />
+          <div
+            class="absolute inset-0 bg-etc-green/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+          >
+          </div>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-sm font-mono font-semibold tracking-wide"
+            >Ethereum Classic</span
+          >
+          <span class="text-xs sm:text-sm font-mono -mt-0.5 text-etc-green"
+            >Community Calls</span
+          >
+        </div>
+      </a>
+
+      <!-- Desktop Navigation -->
+      <div class="hidden md:flex items-center gap-1">
+        <a href="/" class="nav-link"> Archive </a>
+        <button
+          type="button"
+          onclick="document.getElementById('subscribe-modal-global').showModal()"
+          class="nav-link cursor-pointer"
+        >
+          Subscribe
+        </button>
+        <a
+          href={siteConfig.social.youtube}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="nav-link"
+        >
+          YouTube
+        </a>
+      </div>
+
+      <!-- Mobile Menu (React component) -->
+      <MobileMenu client:media="(max-width: 767px)" youtubeUrl={siteConfig.social.youtube} />
+    </nav>
+  </div>
+</header>

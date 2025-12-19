@@ -1,0 +1,189 @@
+---
+// OG Square Image page - for taking 512x512 logo screenshots
+import "../styles/index.css";
+import "@fontsource-variable/jetbrains-mono";
+import "@fontsource/instrument-serif/400.css";
+import "@fontsource/instrument-serif/400-italic.css";
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ETC Community Calls - Square Logo</title>
+    <style>
+      /* Override body for fixed 512x512 dimensions */
+      body {
+        width: 512px;
+        height: 512px;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+      }
+
+      /* Remove scanline effect for clean screenshot */
+      body::before {
+        display: none;
+      }
+
+      .container {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+      }
+
+      /* Background decorative elements */
+      .bg-pattern {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        opacity: 0.03;
+      }
+
+      .bg-pattern svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Border decoration */
+      .border-frame {
+        position: absolute;
+        inset: 16px;
+        border: 1px solid rgba(111, 207, 151, 0.15);
+        border-radius: 8px;
+        pointer-events: none;
+      }
+
+      /* Corner accents */
+      .corner {
+        position: absolute;
+        width: 32px;
+        height: 32px;
+        border-color: var(--color-etc-green);
+        opacity: 0.4;
+      }
+
+      .corner-tl {
+        top: 16px;
+        left: 16px;
+        border-top: 2px solid;
+        border-left: 2px solid;
+      }
+
+      .corner-tr {
+        top: 16px;
+        right: 16px;
+        border-top: 2px solid;
+        border-right: 2px solid;
+      }
+
+      .corner-bl {
+        bottom: 16px;
+        left: 16px;
+        border-bottom: 2px solid;
+        border-left: 2px solid;
+      }
+
+      .corner-br {
+        bottom: 16px;
+        right: 16px;
+        border-bottom: 2px solid;
+        border-right: 2px solid;
+      }
+
+      /* Logo section */
+      .logo-section {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        z-index: 10;
+      }
+
+      .logo-glow {
+        position: absolute;
+        inset: 0;
+        background: rgba(111, 207, 151, 0.2);
+        border-radius: 9999px;
+        filter: blur(60px);
+        transform: scale(1.8);
+      }
+
+      .logo {
+        position: relative;
+        width: 140px;
+        height: 140px;
+      }
+
+      .title {
+        position: relative;
+        font-family: "Instrument Serif", Georgia, serif;
+        font-weight: 400;
+        font-size: 62px;
+        line-height: 1.1;
+        letter-spacing: -0.01em;
+        color: #f3f4f6;
+        text-align: center;
+        margin: 0;
+      }
+
+      .title .glow {
+        color: var(--color-etc-green);
+        text-shadow:
+          0 0 10px var(--color-etc-green-glow),
+          0 0 20px var(--color-etc-green),
+          0 0 40px var(--color-etc-green-dim);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Background pattern -->
+    <div class="bg-pattern">
+      <svg viewBox="0 0 512 512" preserveAspectRatio="none">
+        <path
+          d="M0,256 L128,256 L160,180 L352,180 L384,256 L512,256"
+          stroke="#6fcf97"
+          stroke-width="2"
+          fill="none"></path>
+        <path
+          d="M0,360 L100,360 L130,300 L230,300 L260,360 L512,360"
+          stroke="#6fcf97"
+          stroke-width="2"
+          fill="none"></path>
+        <path
+          d="M0,150 L80,150 L110,200 L200,200 L230,150 L300,150"
+          stroke="#6fcf97"
+          stroke-width="2"
+          fill="none"></path>
+      </svg>
+    </div>
+
+    <!-- Border frame -->
+    <div class="border-frame"></div>
+
+    <!-- Corner accents -->
+    <div class="corner corner-tl"></div>
+    <div class="corner corner-tr"></div>
+    <div class="corner corner-bl"></div>
+    <div class="corner corner-br"></div>
+
+    <!-- Main content -->
+    <div class="container">
+      <div class="logo-section">
+        <!-- <div class="logo-glow"></div> -->
+        <img src="/etc-logo.svg" alt="ETC Logo" class="logo" />
+        <h1 class="title">
+          <span>Ethereum Classic</span><br />
+          <span class="glow">Community Calls</span>
+        </h1>
+      </div>
+    </div>
+  </body>
+</html>

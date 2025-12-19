@@ -1,19 +1,38 @@
 <div align="center">
-  
-<img src="https://github.com/ethereumclassic/community-calls/raw/main/etc_cc_logo.png" width="200" height="200">
+
+<img src="public/og.png">
 
 # ETC Community Calls
 
-Every week on a Tuesday, usually at 15:00 UTC, we get together to chat about ETC. All are welcome.
+Regular open discussions about Ethereum Classic development, ECIPs, and the future of ETC.
 
-The ETC Discord can be joined at https://ethereumclassic.org/discord
+[cc.ethereumclassic.org](https://cc.ethereumclassic.org)
 
-Please join us in the #community-calls channel to ask questions or bring up topics.
-
-## Recorded Calls
-
-[Ethereum Classic Community Calls Youtube Channel](https://www.youtube.com/channel/UCp07VPnC1ejyAp5gMvvA4dw/videos)
-
-  
 </div>
 
+## Contributing
+
+Contributions are welcome! To add or update call information:
+
+1. Fork this repository
+2. Add/edit markdown files in the `calls/` directory
+3. Submit a pull request
+
+Call files use YAML frontmatter for metadata (title, date, time, etc.) and markdown for the description.
+
+## Development
+
+```bash
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
+```
+
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.

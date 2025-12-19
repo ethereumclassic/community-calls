@@ -1,0 +1,38 @@
+---
+import AnimatedContainer from "../AnimatedContainer.astro";
+import TerminalCard from "../TerminalCard.astro";
+
+interface Props {
+  hosts: string[];
+}
+
+const { hosts } = Astro.props;
+---
+
+{
+  hosts && hosts.length > 0 && (
+    <AnimatedContainer as="section" delay={300} class="mb-10">
+      <TerminalCard class="p-5">
+        <div class="flex flex-wrap gap-6">
+          {hosts.map((host, index) => (
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full bg-etc-green/10 border border-etc-green/20 flex items-center justify-center">
+                <span class="text-etc-green text-sm font-mono">
+                  {host.charAt(0)}
+                </span>
+              </div>
+              <div>
+                <div class="text-[10px] font-mono uppercase tracking-wider text-gray-500">
+                  {index === 0 ? "Host" : "Co-host"}
+                </div>
+                <div class="text-sm font-mono text-gray-200">
+                  {host}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </TerminalCard>
+    </AnimatedContainer>
+  )
+}

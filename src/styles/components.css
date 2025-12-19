@@ -1,0 +1,172 @@
+/* ═══════════════════════════════════════════════════════════════════
+   COMPONENT STYLES - Reusable component classes
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ─────────────────────────────────────────────────────────────────
+   BUTTONS
+   ───────────────────────────────────────────────────────────────── */
+
+.btn-etc {
+  background: var(--color-etc-green);
+  color: var(--color-void);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  border: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 20px -5px var(--color-etc-green);
+}
+
+.btn-etc:hover {
+  background: var(--color-etc-green-glow);
+  box-shadow:
+    0 0 30px -5px var(--color-etc-green-glow),
+    0 0 60px -10px var(--color-etc-green);
+  transform: translateY(-2px);
+}
+
+.btn-etc-outline {
+  background: transparent;
+  color: var(--color-etc-green);
+  font-family: var(--font-mono);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+  border: 1px solid var(--color-etc-green-dim);
+  transition: all 0.3s ease;
+}
+
+.btn-etc-outline:hover {
+  background: var(--color-etc-green-subtle);
+  border-color: var(--color-etc-green);
+  box-shadow: 0 0 20px -5px var(--color-etc-green);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   CARDS
+   ───────────────────────────────────────────────────────────────── */
+
+.terminal-card {
+  background: var(--color-surface);
+  border: 1px solid rgba(111, 207, 151, 0.2);
+  position: relative;
+}
+
+.terminal-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-etc-green-dim),
+    transparent
+  );
+}
+
+.terminal-card.upcoming-card {
+  border-color: rgba(255, 182, 39, 0.3);
+  box-shadow:
+    0 0 30px -10px var(--color-amber),
+    0 0 60px -20px rgba(255, 182, 39, 0.5);
+}
+
+.terminal-card.upcoming-card::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--color-amber),
+    transparent
+  );
+}
+
+.terminal-card.upcoming-card:hover {
+  border-color: rgba(255, 182, 39, 0.5);
+  box-shadow:
+    0 0 40px -10px var(--color-amber),
+    0 0 80px -20px rgba(255, 182, 39, 0.6);
+}
+
+.glass-card {
+  background: linear-gradient(
+    135deg,
+    rgba(24, 24, 28, 0.9) 0%,
+    rgba(17, 17, 20, 0.95) 100%
+  );
+  border: 1px solid rgba(111, 207, 151, 0.15);
+  backdrop-filter: blur(10px);
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   BADGES
+   ───────────────────────────────────────────────────────────────── */
+
+.badge-recording {
+  background: var(--color-etc-green);
+  color: var(--color-void);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: none;
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   NAVIGATION
+   ───────────────────────────────────────────────────────────────── */
+
+.nav-link {
+  @apply px-4 py-2 text-xs font-mono uppercase tracking-wider;
+  @apply text-gray-300 hover:text-etc-green;
+  @apply transition-colors duration-200;
+}
+
+.nav-link-mobile {
+  @apply px-4 py-3 text-sm font-mono uppercase tracking-wider rounded-lg;
+  @apply text-gray-300 hover:text-etc-green hover:bg-etc-green/5;
+  @apply transition-colors duration-200;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   LINKS
+   ───────────────────────────────────────────────────────────────── */
+
+.social-link {
+  @apply text-gray-500 hover:text-etc-green;
+  @apply transition-colors duration-200;
+}
+
+.link-back {
+  @apply inline-flex items-center gap-2;
+  @apply text-xs font-mono uppercase tracking-wider;
+  @apply text-gray-500 hover:text-etc-green;
+  @apply transition-colors;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   FORMS & INPUTS
+   ───────────────────────────────────────────────────────────────── */
+
+.input-etc {
+  @apply input bg-void border border-etc-green/20;
+  @apply text-gray-300 font-mono text-sm;
+  @apply focus:border-etc-green/40 focus:outline-none;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   ICONS (Size Classes for Astro Icon)
+   ───────────────────────────────────────────────────────────────── */
+
+.icon-xs { @apply w-3 h-3; }
+.icon-sm { @apply w-4 h-4; }
+.icon-md { @apply w-5 h-5; }
+.icon-lg { @apply w-6 h-6; }
+.icon-xl { @apply w-8 h-8; }

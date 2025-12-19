@@ -1,0 +1,53 @@
+---
+import type { CollectionEntry } from "astro:content";
+import PageLayout from "./PageLayout.astro";
+import AnimatedContainer from "../components/AnimatedContainer.astro";
+import CallNavigation from "../components/call/CallNavigation.astro";
+import CallHeader from "../components/call/CallHeader.astro";
+import YouTubeEmbed from "../components/call/YouTubeEmbed.astro";
+// import HostList from "../components/call/HostList.astro";
+
+interface Props {
+  call: CollectionEntry<"calls">;
+  prevCall?: CollectionEntry<"calls"> | null;
+  nextCall?: CollectionEntry<"calls"> | null;
+}
+
+const { call, prevCall, nextCall } = Astro.props;
+
+const callNumber = call.data.callNumber!;
+const youtubeId = call.data.youtubeId;
+
+const baseTitle = `ETC Community Call ${callNumber}`;
+const title = call.data.description
+  ? `${baseTitle} - ${call.data.description}`
+  : baseTitle;
+---
+
+<PageLayout title={title} description={call.data.description} maxWidth="narrow">
+  <AnimatedContainer as="article" delay={100}>
+    <CallNavigation prevCall={prevCall} nextCall={nextCall} />
+
+    <CallHeader call={call} />
+
+    {youtubeId && (
+      <YouTubeEmbed
+        youtubeId={youtubeId}
+        date={call.data.date}
+        callNumber={callNumber}
+        title={title}
+      />
+    )}
+
+    <!-- Hosts - temporarily hidden
+    {call.data.hosts && call.data.hosts.length > 0 && (
+      <HostList hosts={call.data.hosts} />
+    )}
+    -->
+
+    <!-- Main Content -->
+    <AnimatedContainer as="section" delay={400} class="prose prose-lg prose-invert max-w-none">
+      <slot />
+    </AnimatedContainer>
+  </AnimatedContainer>
+</PageLayout>

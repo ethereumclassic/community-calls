@@ -1,0 +1,107 @@
+---
+import type { CollectionEntry } from "astro:content";
+import { Icon } from "astro-icon/components";
+import TimezoneBar from "../TimezoneBar.astro";
+import GreenRoom from "../GreenRoom.astro";
+import UpcomingBadge from "../UpcomingBadge";
+import { formatFullDate } from "../../lib/dates";
+
+interface Props {
+  call: CollectionEntry<"calls">;
+}
+
+const { call } = Astro.props;
+
+const callNumber = call.data.callNumber!;
+const isUpcoming = call.data.date ? call.data.date > new Date() : false;
+---
+
+<header class="mb-10">
+  <!-- Status badge -->
+  <div class="flex items-center gap-3 mb-4 h-[26px]">
+    {
+      call.data.youtube ? (
+        <span class="inline-flex items-center gap-2 px-3 py-1 text-[10px] font-mono uppercase tracking-widest text-etc-green/80 border border-etc-green/20 rounded-full">
+          <span class="w-1.5 h-1.5 rounded-full bg-etc-green animate-pulse-glow" />
+          Recorded
+        </span>
+      ) : (
+        call.data.date &&
+        call.data.time && (
+          <UpcomingBadge
+            client:only="react"
+            date={call.data.date.toISOString()}
+            time={call.data.time}
+          />
+        )
+      )
+    }
+  </div>
+
+  <!-- Title -->
+  {
+    callNumber !== 0 && (
+      <p class="text-lg font-mono text-gray-400 mb-4">
+        Ethereum Classic Community Call #{callNumber}
+      </p>
+    )
+  }
+  <h1 class="font-display text-5xl md:text-6xl text-white mb-4">
+    {call.data.description}
+  </h1>
+  <!-- Meta info -->
+  <div class="flex flex-wrap items-center gap-4 text-sm md:text-lg font-mono">
+    {
+      call.data.date && (
+        <span class="text-gray-400">
+          <span class="text-etc-green/60">date:</span>{" "}
+          {formatFullDate(call.data.date)}
+        </span>
+      )
+    }
+    {
+      call.data.time && (
+        <span class="text-gray-400">
+          <span class="text-etc-green/60">time:</span> {call.data.time}
+        </span>
+      )
+    }
+    {
+      call.data.location && (
+        <span class="text-gray-400">
+          <span class="text-etc-green/60">location:</span> {call.data.location}
+        </span>
+      )
+    }
+  </div>
+
+  <!-- Timezone Display -->
+  {call.data.time && <TimezoneBar time={call.data.time} />}
+
+  <!-- Join Call Button & Green Room (only for upcoming calls) -->
+  {
+    isUpcoming &&
+    ((call.data.joinLink && !call.data.youtube) || call.data.greenRoom) ? (
+      <div class="mt-6 flex flex-col md:flex-row md:items-center gap-4">
+        {call.data.joinLink && !call.data.youtube && (
+          <a
+            href={call.data.joinLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center gap-3 px-6 py-3 bg-etc-green text-void font-mono text-sm font-semibold uppercase tracking-wider rounded-lg hover:bg-etc-green/90 transition-colors whitespace-nowrap"
+          >
+            <Icon name="lucide:video" class="icon-sm" />
+            Join Call
+          </a>
+        )}
+        {call.data.greenRoom && (
+          <GreenRoom
+            time={call.data.greenRoom.time}
+            location={call.data.greenRoom.location}
+            joinLink={call.data.greenRoom.joinLink}
+          />
+        )}
+      </div>
+    ) : null
+  }
+</header>

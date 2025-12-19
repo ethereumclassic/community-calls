@@ -1,0 +1,100 @@
+---
+import { Icon } from 'astro-icon/components';
+import { formatShortDate } from '../lib/dates';
+import type { CallCardProps } from '../lib/types';
+
+interface Props extends CallCardProps {}
+
+const {
+  number,
+  description,
+  date,
+  time,
+  location,
+  slug,
+  youtube,
+  index = 0,
+  special = false,
+} = Astro.props;
+
+const glowClass = special ? 'border-glow-special-hover' : 'border-glow-hover';
+const accentClass = special ? 'text-gray-200' : 'text-etc-green';
+const accentHoverClass = special ? 'group-hover:text-white' : 'group-hover:text-etc-green/80';
+---
+
+<a
+  href={`/calls/${slug}`}
+  class:list={[
+    "group block terminal-card rounded-lg overflow-hidden transition-all duration-300 opacity-0 animate-fade-in-up relative",
+    glowClass
+  ]}
+  style={`animation-delay: ${Math.min(index * 50, 500)}ms`}
+>
+  <!-- Floating number or special label -->
+  {number ? (
+    <span
+      class:list={[
+        "absolute top-3 right-3 text-2xl font-display transition-colors",
+        accentClass,
+        accentHoverClass
+      ]}
+    >
+      #{number}
+    </span>
+  ) : (
+    <span
+      class:list={[
+        "absolute top-3 right-3 text-xs font-mono uppercase tracking-wider px-2 py-1 rounded transition-colors",
+        special ? "text-gray-400 bg-gray-800/50" : "text-etc-green/60 bg-etc-green/10"
+      ]}
+    >
+      Special
+    </span>
+  )}
+
+  <!-- REC badge bottom right -->
+  {
+    youtube && (
+      <span class="absolute bottom-3 right-3 badge-recording px-2 py-0.5 rounded text-[9px]">
+        REC
+      </span>
+    )
+  }
+
+  <!-- Content -->
+  <div class="p-4 pr-24">
+    <!-- Description as main title -->
+    {
+      description ? (
+        <h3 class="font-mono text-sm text-gray-300 group-hover:text-gray-100 transition-colors line-clamp-2 mb-3">
+          {description}
+        </h3>
+      ) : (
+        <h3 class="font-mono text-sm text-gray-500 mb-3">Community Call</h3>
+      )
+    }
+
+    <!-- Date, Time & Location -->
+    <div
+      class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-mono text-gray-500"
+    >
+      {date && <time>{formatShortDate(date)}</time>}
+      {
+        time && (
+          <span class="flex items-center gap-1">
+            <Icon name="lucide:clock" class="icon-xs text-gray-600" />
+            {time}
+          </span>
+        )
+      }
+      {
+        location && (
+          <span class="flex items-center gap-1">
+            <Icon name="lucide:map-pin" class="icon-xs text-gray-600" />
+            {location}
+          </span>
+        )
+      }
+    </div>
+  </div>
+</a>

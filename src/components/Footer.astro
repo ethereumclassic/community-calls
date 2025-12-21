@@ -1,6 +1,7 @@
 ---
 import { Icon } from "astro-icon/components";
 import { siteConfig } from "../lib/config";
+import Link from "./Link.astro";
 
 const currentYear = new Date().getFullYear();
 ---
@@ -43,14 +44,11 @@ const currentYear = new Date().getFullYear();
 
       <!-- Right: Links -->
       <div class="flex items-center gap-6">
-        <a
+        <Link
           href={siteConfig.social.website}
-          target="_blank"
-          rel="noopener noreferrer"
+          text="ethereumclassic.org"
           class="text-xs font-mono text-gray-500 hover:text-etc-green transition-colors duration-200"
-        >
-          ethereumclassic.org
-        </a>
+        />
         <button
           type="button"
           onclick="document.getElementById('subscribe-modal-global').showModal()"
@@ -59,33 +57,27 @@ const currentYear = new Date().getFullYear();
         >
           <Icon name="lucide:calendar" class="icon-sm" />
         </button>
-        <a
+        <Link
           href={siteConfig.social.discord}
-          target="_blank"
-          rel="noopener noreferrer"
           class="social-link"
           aria-label="Discord"
         >
           <Icon name="simple-icons:discord" class="icon-sm" />
-        </a>
-        <a
+        </Link>
+        <Link
           href={siteConfig.social.youtube}
-          target="_blank"
-          rel="noopener noreferrer"
           class="social-link"
           aria-label="YouTube"
         >
           <Icon name="simple-icons:youtube" class="icon-sm" />
-        </a>
-        <a
+        </Link>
+        <Link
           href={siteConfig.social.github}
-          target="_blank"
-          rel="noopener noreferrer"
           class="social-link"
           aria-label="GitHub"
         >
           <Icon name="simple-icons:github" class="icon-sm" />
-        </a>
+        </Link>
       </div>
     </div>
   </div>

@@ -1,4 +1,6 @@
 ---
+import Link from "./Link.astro";
+
 interface Props {
   time: string;
   location: string;
@@ -13,21 +15,18 @@ const { time, location, joinLink } = Astro.props;
 >
   <div class="flex items-center gap-2 text-etc-green/80">
     <span class="w-2 h-2 rounded-full bg-etc-green animate-pulse"></span>
-    <span class="text-[10px] font-mono uppercase tracking-wider"
+    <span class="text-xs font-mono uppercase tracking-wider"
       >Green Room - Join one Hour Before</span
     >
   </div>
-  <p class="text-xs text-gray-400">
+  <p class="text-sm text-gray-400">
     Join us at <span class="text-gray-300">{time}</span> in {
       joinLink ? (
-        <a
+        <Link
           href={joinLink}
-          target="_blank"
-          rel="noopener noreferrer"
+          text={location}
           class="text-gray-300 underline hover:text-etc-green"
-        >
-          {location}
-        </a>
+        />
       ) : (
         <span class="text-gray-300">{location}</span>
       )

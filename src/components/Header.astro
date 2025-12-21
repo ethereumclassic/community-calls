@@ -1,6 +1,7 @@
 ---
 import { siteConfig } from "../lib/config";
 import MobileMenu from "./MobileMenu";
+import Link from "./Link.astro";
 ---
 
 <header
@@ -10,7 +11,7 @@ import MobileMenu from "./MobileMenu";
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <nav class="flex items-center justify-between h-16">
       <!-- Logo & Title -->
-      <a href="/" class="flex items-center gap-3 group flex-shrink-0">
+      <a href="/" data-astro-prefetch class="flex items-center gap-3 group flex-shrink-0">
         <div class="relative">
           <img
             src={siteConfig.assets.logo}
@@ -34,7 +35,7 @@ import MobileMenu from "./MobileMenu";
 
       <!-- Desktop Navigation -->
       <div class="hidden md:flex items-center gap-1">
-        <a href="/" class="nav-link"> Archive </a>
+        <a href="/#archive" data-astro-prefetch class="nav-link"> Archive </a>
         <button
           type="button"
           onclick="document.getElementById('subscribe-modal-global').showModal()"
@@ -42,14 +43,11 @@ import MobileMenu from "./MobileMenu";
         >
           Subscribe
         </button>
-        <a
+        <Link
           href={siteConfig.social.youtube}
-          target="_blank"
-          rel="noopener noreferrer"
+          text="YouTube"
           class="nav-link"
-        >
-          YouTube
-        </a>
+        />
       </div>
 
       <!-- Mobile Menu (React component) -->

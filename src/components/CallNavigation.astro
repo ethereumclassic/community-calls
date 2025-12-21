@@ -33,7 +33,8 @@ const nextTooltip = nextCall
 
 <nav class="flex items-center justify-between mb-8">
   <a
-    href="/"
+    href="/#archive"
+    data-astro-prefetch
     class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-gray-500 hover:text-etc-green transition-colors group"
   >
     <Icon
@@ -48,6 +49,7 @@ const nextTooltip = nextCall
         {prevSlug && (
           <a
             href={`/calls/${prevSlug}`}
+            data-astro-prefetch
             class="px-3 py-1 text-gray-300 hover:text-etc-green hover:bg-etc-green/10 rounded transition-colors"
             title={prevTooltip}
           >
@@ -58,6 +60,7 @@ const nextTooltip = nextCall
         {nextSlug && (
           <a
             href={`/calls/${nextSlug}`}
+            data-astro-prefetch
             class="px-3 py-1 text-gray-300 hover:text-etc-green hover:bg-etc-green/10 rounded transition-colors"
             title={nextTooltip}
           >

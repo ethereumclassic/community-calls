@@ -1,6 +1,7 @@
 ---
 import { Icon } from "astro-icon/components";
 import { siteConfig } from "../lib/config";
+import Link from "./Link.astro";
 
 interface Props {
   modalId: string;
@@ -122,12 +123,11 @@ const rssUrl = siteConfig.rssUrl;
           <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
             <ol class="list-decimal list-inside space-y-1">
               <li>
-                Open <a
+                Open <Link
                   href="https://calendar.google.com"
-                  target="_blank"
-                  rel="noopener"
-                  class="text-etc-green hover:underline">Google Calendar</a
-                >
+                  text="Google Calendar"
+                  class="text-etc-green hover:underline"
+                />
               </li>
               <li>
                 Click the <strong class="text-gray-300">+</strong> next to "Other
@@ -262,12 +262,11 @@ const rssUrl = siteConfig.rssUrl;
           <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
             <ol class="list-decimal list-inside space-y-1">
               <li>
-                Open <a
+                Open <Link
                   href="https://feedly.com"
-                  target="_blank"
-                  rel="noopener"
-                  class="text-etc-green hover:underline">Feedly</a
-                >
+                  text="Feedly"
+                  class="text-etc-green hover:underline"
+                />
               </li>
               <li>
                 Click the <strong class="text-gray-300">+</strong> button to add content
@@ -294,12 +293,11 @@ const rssUrl = siteConfig.rssUrl;
           <div class="mt-2 p-3 text-xs font-mono text-gray-400 leading-relaxed">
             <ol class="list-decimal list-inside space-y-1">
               <li>
-                Open <a
+                Open <Link
                   href="https://www.inoreader.com"
-                  target="_blank"
-                  rel="noopener"
-                  class="text-etc-green hover:underline">Inoreader</a
-                >
+                  text="Inoreader"
+                  class="text-etc-green hover:underline"
+                />
               </li>
               <li>
                 Click <strong class="text-gray-300">Add new → Feeds</strong>
@@ -328,21 +326,18 @@ const rssUrl = siteConfig.rssUrl;
             <p class="mb-2">Install an RSS reader extension like:</p>
             <ul class="list-disc list-inside space-y-1">
               <li>
-                <a
+                <Link
                   href="https://chrome.google.com/webstore/detail/rss-feed-reader/pnjaodmkngahhkoihejjehlcdlnohgmp"
-                  target="_blank"
-                  rel="noopener"
+                  text="RSS Feed Reader (Chrome)"
                   class="text-etc-green hover:underline"
-                  >RSS Feed Reader (Chrome)</a
-                >
+                />
               </li>
               <li>
-                <a
+                <Link
                   href="https://addons.mozilla.org/en-US/firefox/addon/feedbro/"
-                  target="_blank"
-                  rel="noopener"
-                  class="text-etc-green hover:underline">Feedbro (Firefox)</a
-                >
+                  text="Feedbro (Firefox)"
+                  class="text-etc-green hover:underline"
+                />
               </li>
             </ul>
           </div>

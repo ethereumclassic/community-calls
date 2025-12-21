@@ -2,6 +2,7 @@
 import { Icon } from "astro-icon/components";
 import { formatShortDate } from "../lib/dates";
 import type { CallCardProps } from "../lib/types";
+import { formatFullDate } from "../lib/dates";
 
 interface Props extends CallCardProps {}
 
@@ -26,6 +27,7 @@ const accentHoverClass = special
 
 <a
   href={`/calls/${slug}`}
+  data-astro-prefetch
   class:list={[
     "group block terminal-card rounded-lg overflow-hidden transition-all duration-300 opacity-0 animate-fade-in-up relative",
     glowClass,
@@ -68,39 +70,22 @@ const accentHoverClass = special
   }
 
   <!-- Content -->
-  <div class="p-4 pr-24">
-    <!-- Description as main title -->
-    {
-      description ? (
-        <h3 class="font-mono text-sm text-gray-300 group-hover:text-gray-100 transition-colors line-clamp-2 mb-3">
-          {description}
-        </h3>
-      ) : (
-        <h3 class="font-mono text-sm text-gray-500 mb-3">Community Call</h3>
-      )
-    }
+  <div class="p-4 pr-18 h-full flex flex-col">
+    <h3
+      class="font-mono text-sm flex-grow text-gray-300 group-hover:text-gray-100 transition-colors line-clamp-2 mb-3"
+    >
+      {description}
+    </h3>
 
     <!-- Date, Time & Location -->
     <div
       class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-mono text-gray-500"
     >
-      {date && <time>{formatShortDate(date)}</time>}
-      {
-        time && (
-          <span class="flex items-center gap-1">
-            <Icon name="lucide:clock" class="icon-xs text-gray-600" />
-            {time}
-          </span>
-        )
-      }
-      {
-        location && (
-          <span class="flex items-center gap-1">
-            <Icon name="lucide:map-pin" class="icon-xs text-gray-600" />
-            {location}
-          </span>
-        )
-      }
+      <span class="flex items-center gap-2">
+        {formatShortDate(date)}
+        {" · "}
+        {time}
+      </span>
     </div>
   </div>
 </a>

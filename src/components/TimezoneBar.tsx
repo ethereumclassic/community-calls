@@ -200,7 +200,7 @@ export default function TimezoneBar({ time }: Props) {
   return (
     <div className="timezone-bar mt-4 md:-ml-12 lg:-ml-20">
       {/* Desktop: Horizontal scrollable bar */}
-      <div className="hidden md:block overflow-x-auto scrollbar-hide edge-fade-mask pb-2 pl-12 lg:pl-20">
+      <div className="hidden md:block overflow-x-auto scrollbar-hide edge-fade-mask pb-2 pl-12 lg:pl-20 pr-14">
         <div className="flex items-center justify-center gap-1 text-xs font-mono min-w-max">
           {/* UTC first */}
           {utcZone && (

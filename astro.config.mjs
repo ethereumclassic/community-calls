@@ -9,6 +9,7 @@ import rehypeExternalLinks from "rehype-external-links";
 export default defineConfig({
   site: "https://cc.ethereumclassic.org",
   output: "static",
+  prefetch: true,
   vite: {
     plugins: [tailwindcss()],
   },
@@ -35,6 +36,7 @@ export default defineConfig({
           "chevron-left",
           "chevron-right",
           "x",
+          "phone",
           "copy",
           "check",
           "bell",

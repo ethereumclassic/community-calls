@@ -80,3 +80,15 @@ export function combineDateAndTime(date: Date, timeStr?: string): Date {
   }
   return combined;
 }
+
+/**
+ * Format time string with proper colons
+ * Converts "1500 UTC" to "15:00 UTC"
+ */
+export function formatTime(timeStr: string): string {
+  const parsed = parseUTCTime(timeStr);
+  if (!parsed) return timeStr;
+  const hours = parsed.hours.toString().padStart(2, "0");
+  const minutes = parsed.minutes.toString().padStart(2, "0");
+  return `${hours}:${minutes} UTC`;
+}

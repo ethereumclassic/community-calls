@@ -1,5 +1,6 @@
 ---
 import Link from "./Link.astro";
+import { formatTime } from "../lib/dates";
 
 interface Props {
   time: string;
@@ -20,7 +21,7 @@ const { time, location, joinLink } = Astro.props;
     >
   </div>
   <p class="text-sm text-gray-400">
-    Join us at <span class="text-gray-300">{time}</span> in {
+    Join us at <span class="text-gray-300">{formatTime(time)}</span> in {
       joinLink ? (
         <Link
           href={joinLink}

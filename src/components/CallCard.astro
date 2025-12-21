@@ -1,6 +1,6 @@
 ---
 import { Icon } from "astro-icon/components";
-import { formatShortDate } from "../lib/dates";
+import { formatShortDate, formatTime } from "../lib/dates";
 import type { CallCardProps } from "../lib/types";
 import { formatFullDate } from "../lib/dates";
 
@@ -84,7 +84,7 @@ const accentHoverClass = special
       <span class="flex items-center gap-2">
         {formatShortDate(date)}
         {" · "}
-        {time}
+        {time && formatTime(time)}
       </span>
     </div>
   </div>

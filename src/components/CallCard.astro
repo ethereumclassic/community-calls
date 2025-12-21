@@ -1,8 +1,6 @@
 ---
-import { Icon } from "astro-icon/components";
 import { formatShortDate, formatTime } from "../lib/dates";
 import type { CallCardProps } from "../lib/types";
-import { formatFullDate } from "../lib/dates";
 
 interface Props extends CallCardProps {}
 
@@ -11,7 +9,6 @@ const {
   description,
   date,
   time,
-  location,
   slug,
   youtube,
   index = 0,
@@ -31,6 +28,7 @@ const accentHoverClass = special
   class:list={[
     "group block terminal-card rounded-lg overflow-hidden transition-all duration-300 opacity-0 animate-fade-in-up relative",
     glowClass,
+    special && "special-card",
   ]}
   style={`animation-delay: ${Math.min(index * 50, 500)}ms`}
 >
@@ -51,7 +49,7 @@ const accentHoverClass = special
         class:list={[
           "absolute top-3 right-3 text-xs font-mono uppercase tracking-wider px-2 py-1 rounded transition-colors",
           special
-            ? "text-gray-400 bg-gray-800/50"
+            ? "text-amber bg-amber/10"
             : "text-etc-green/60 bg-etc-green/10",
         ]}
       >
@@ -84,7 +82,7 @@ const accentHoverClass = special
       <span class="flex items-center gap-2">
         {formatShortDate(date)}
         {" · "}
-        {time && formatTime(time)}
+        {formatTime(time)}
       </span>
     </div>
   </div>

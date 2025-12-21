@@ -14,7 +14,7 @@ export default function JoinCallButton({
   location,
 }: Props) {
   const [canJoin, setCanJoin] = useState(
-    () => eventDateTime - Date.now() <= TEN_MINUTES_MS
+    () => eventDateTime - Date.now() <= TEN_MINUTES_MS,
   );
   const [mounted, setMounted] = useState(false);
 

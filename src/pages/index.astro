@@ -9,17 +9,9 @@ import { getCalls, sortCallsByDate } from "../lib/calls";
 
 const allCalls = await getCalls();
 
-// Separate regular and special calls
-const regularCalls = sortCallsByDate(
-  allCalls.filter((call) => !call.data.special),
-);
-const specialCalls = sortCallsByDate(
-  allCalls.filter((call) => call.data.special),
-);
-
-// Separate upcoming and past regular calls
+// Separate regular calls for stats and upcoming
+const regularCalls = allCalls.filter((call) => !call.data.special);
 const upcomingCalls = regularCalls.filter((call) => call.data.isUpcoming);
-const pastCalls = regularCalls.filter((call) => !call.data.isUpcoming);
 
 // Get the next upcoming call (soonest)
 const nextCall =
@@ -35,5 +27,5 @@ const recordedCalls = regularCalls.filter((c) => c.data.youtube).length;
   <LandingAbout />
   {nextCall && <UpcomingCall call={nextCall} />}
   <SubscribeBanner />
-  <ArchiveGrid pastCalls={pastCalls} specialCalls={specialCalls} />
+  <ArchiveGrid />
 </PageLayout>

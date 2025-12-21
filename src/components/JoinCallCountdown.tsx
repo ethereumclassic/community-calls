@@ -50,7 +50,7 @@ function TimeUnit({
 
 export default function JoinCallCountdown({ eventDateTime }: Props) {
   const [timeLeft, setTimeLeft] = useState(() =>
-    calculateTimeLeft(eventDateTime)
+    calculateTimeLeft(eventDateTime),
   );
   const [mounted, setMounted] = useState(false);
 
@@ -92,8 +92,16 @@ export default function JoinCallCountdown({ eventDateTime }: Props) {
           <TimeUnit label="Days" value={timeLeft.days} color={countdownColor} />
         )}
         <TimeUnit label="Hours" value={timeLeft.hours} color={countdownColor} />
-        <TimeUnit label="Mins" value={timeLeft.minutes} color={countdownColor} />
-        <TimeUnit label="Secs" value={timeLeft.seconds} color={countdownColor} />
+        <TimeUnit
+          label="Mins"
+          value={timeLeft.minutes}
+          color={countdownColor}
+        />
+        <TimeUnit
+          label="Secs"
+          value={timeLeft.seconds}
+          color={countdownColor}
+        />
       </div>
     </div>
   );

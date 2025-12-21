@@ -1,13 +1,9 @@
 ---
-import type { Call } from "../lib/types";
 import CallCard from "./CallCard.astro";
+import { getCalls, sortCallsByDate } from "../lib/calls";
 
-interface Props {
-  pastCalls: Call[];
-  specialCalls: Call[];
-}
-
-const { pastCalls, specialCalls } = Astro.props;
+const allCalls = await getCalls();
+const calls = sortCallsByDate(allCalls.filter((call) => !call.data.isUpcoming));
 ---
 
 <section id="archive" class="scroll-mt-24">
@@ -16,15 +12,15 @@ const { pastCalls, specialCalls } = Astro.props;
       <span class="text-etc-green/60">//</span> Archive
     </h2>
     <span class="text-xs font-mono text-gray-500 uppercase tracking-wider">
-      {pastCalls.length} past calls
+      {calls.length} past calls
     </span>
   </div>
 
   <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
     {
-      pastCalls.map((call, index) => (
+      calls.map((call, index) => (
         <CallCard
-          number={call.data.callNumber}
+          number={call.data.special ? undefined : call.data.callNumber}
           description={call.data.description}
           date={call.data.date}
           time={call.data.time}
@@ -32,20 +28,7 @@ const { pastCalls, specialCalls } = Astro.props;
           slug={call.data.slug!}
           youtube={call.data.youtube}
           index={index}
-        />
-      ))
-    }
-    {
-      specialCalls.map((call, index) => (
-        <CallCard
-          description={call.data.description}
-          date={call.data.date}
-          time={call.data.time}
-          location={call.data.location}
-          slug={call.data.slug!}
-          youtube={call.data.youtube}
-          index={pastCalls.length + index}
-          special={true}
+          special={call.data.special}
         />
       ))
     }

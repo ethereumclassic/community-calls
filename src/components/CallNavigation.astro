@@ -20,8 +20,8 @@ const prevDate = prevCall?.data.date
 const nextDate = nextCall?.data.date
   ? formatShortDate(nextCall.data.date)
   : null;
-const prevDesc = prevCall?.data.description || "";
-const nextDesc = nextCall?.data.description || "";
+const prevDesc = prevCall?.data.description ?? "";
+const nextDesc = nextCall?.data.description ?? "";
 
 const prevTooltip = prevCall
   ? `Call ${prevNumber}${prevDate ? ` • ${prevDate}` : ""}${prevDesc ? `\n${prevDesc}` : ""}`

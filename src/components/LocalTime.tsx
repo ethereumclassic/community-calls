@@ -49,7 +49,9 @@ export default function LocalTime({
         <span className="text-orange-400 font-medium">{tzAbbr}</span>
         <span className="text-orange-300 font-semibold">{localTime}</span>
         {dayOffsetDisplay && (
-          <span className="text-[9px] text-etc-green/80">{dayOffsetDisplay}</span>
+          <span className="text-[9px] text-etc-green/80">
+            {dayOffsetDisplay}
+          </span>
         )}
       </div>
     );

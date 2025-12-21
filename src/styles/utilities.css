@@ -35,18 +35,18 @@
     inset 0 0 20px -10px var(--color-etc-green-subtle);
 }
 
-/* Special/White variants */
+/* Special/Amber variants */
 .border-glow-special {
   box-shadow:
-    0 0 0 1px var(--color-special-dim),
-    0 0 20px -5px var(--color-special);
+    0 0 0 1px rgba(255, 182, 39, 0.3),
+    0 0 20px -5px var(--color-amber);
 }
 
 .border-glow-special-hover:hover {
   box-shadow:
-    0 0 0 1px var(--color-special),
-    0 0 30px -5px var(--color-special-glow),
-    inset 0 0 20px -10px var(--color-special-subtle);
+    0 0 0 1px var(--color-amber),
+    0 0 30px -5px var(--color-amber),
+    inset 0 0 20px -10px rgba(255, 182, 39, 0.2);
 }
 
 /* ─────────────────────────────────────────────────────────────────

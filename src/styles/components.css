@@ -50,8 +50,10 @@
    ───────────────────────────────────────────────────────────────── */
 
 .terminal-card {
+  --card-accent: var(--color-etc-green-dim);
+  --card-border: rgba(111, 207, 151, 0.2);
   background: var(--color-surface);
-  border: 1px solid rgba(111, 207, 151, 0.2);
+  border: 1px solid var(--card-border);
   position: relative;
 }
 
@@ -65,25 +67,17 @@
   background: linear-gradient(
     90deg,
     transparent,
-    var(--color-etc-green-dim),
+    var(--card-accent),
     transparent
   );
 }
 
 .terminal-card.upcoming-card {
-  border-color: rgba(255, 182, 39, 0.3);
+  --card-accent: var(--color-amber);
+  --card-border: rgba(255, 182, 39, 0.3);
   box-shadow:
     0 0 30px -10px var(--color-amber),
     0 0 60px -20px rgba(255, 182, 39, 0.5);
-}
-
-.terminal-card.upcoming-card::before {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    var(--color-amber),
-    transparent
-  );
 }
 
 .terminal-card.upcoming-card:hover {
@@ -91,6 +85,11 @@
   box-shadow:
     0 0 40px -10px var(--color-amber),
     0 0 80px -20px rgba(255, 182, 39, 0.6);
+}
+
+.terminal-card.special-card {
+  --card-accent: var(--color-amber);
+  --card-border: rgba(255, 182, 39, 0.2);
 }
 
 .glass-card {

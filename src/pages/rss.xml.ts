@@ -7,34 +7,26 @@ import { escapeXml } from "../lib/encode";
 export const GET: APIRoute = async () => {
   const allCalls = await getCalls();
 
-  // Filter out special calls and sort (newest first), only include dated calls
+  // Filter out special calls and sort (newest first)
   const calls = sortCallsByDate(
-    allCalls.filter((call) => !call.data.special && call.data.date),
+    allCalls.filter((call) => !call.data.special),
   ).slice(0, 50); // Limit to 50 most recent
 
   const now = new Date();
-  const latestDate = calls[0]?.data.date || now;
+  const latestDate = calls[0]?.data.date ?? now;
 
   const items = calls.map((call) => {
     const callNumber = call.data.callNumber!;
     const slug = call.data.slug!;
     const url = `${siteConfig.url}/calls/${slug}`;
-    const title = `ETC Community Call #${callNumber}${call.data.description ? `: ${call.data.description}` : ""}`;
-    const pubDate = call.data.date
-      ? formatRfc822(call.data.date)
-      : formatRfc822(now);
+    const title = `ETC Community Call #${callNumber}: ${call.data.description}`;
+    const pubDate = formatRfc822(call.data.date);
     const ogImageUrl = `${siteConfig.url}/og/call/${callNumber}.png`;
 
     let description = `Ethereum Classic Community Call #${callNumber}`;
-    if (call.data.description) {
-      description += ` - ${call.data.description}`;
-    }
-    if (call.data.time) {
-      description += ` | Time: ${call.data.time}`;
-    }
-    if (call.data.location) {
-      description += ` | Location: ${call.data.location}`;
-    }
+    description += ` - ${call.data.description}`;
+    description += ` | Time: ${call.data.time}`;
+    description += ` | Location: ${call.data.location}`;
     if (call.data.youtube) {
       description += ` | Recording available on YouTube`;
     }

@@ -2,7 +2,7 @@
 import { Icon } from "astro-icon/components";
 import type { Call } from "../lib/types";
 import { siteConfig } from "../lib/config";
-import { formatFullDate, formatShortDate } from "../lib/dates";
+import { formatFullDate } from "../lib/dates";
 import JoinCallCountdown from "./JoinCallCountdown";
 import JoinCallButton from "./JoinCallButton";
 import CopyLinkBox from "./CopyLinkBox.astro";
@@ -22,8 +22,9 @@ const callNumber = call.data.callNumber;
 const icsUrl = `${siteConfig.url}/calls/${call.data.slug}.ics`;
 
 // Dynamic location display
-const location = call.data.location ?? "Zoom";
-const locationIcon = location.toLowerCase() === "discord" ? "lucide:headphones" : "lucide:video";
+const location = call.data.location;
+const locationIcon =
+  location.toLowerCase() === "discord" ? "lucide:headphones" : "lucide:video";
 
 // Build calendar event for add-to-calendar buttons
 const startDate = combineDateAndTime(call.data.date, call.data.time);
@@ -33,18 +34,16 @@ endDate.setUTCHours(endDate.getUTCHours() + 2);
 const callUrl = `${siteConfig.url}/calls/${call.data.slug}`;
 
 let calendarDescription = `Ethereum Classic Community Call #${callNumber}`;
-if (call.data.description) {
-  calendarDescription += `\n\n${call.data.description}`;
-}
+calendarDescription += `\n\n${call.data.description}`;
 calendarDescription += `\n\nMore info: ${callUrl}`;
 if (call.data.joinLink) {
   calendarDescription += `\nJoin: ${call.data.joinLink}`;
 }
 
 const calendarEvent: CalendarEvent = {
-  title: `ETC Community Call #${callNumber}${call.data.description ? `: ${call.data.description}` : ""}`,
+  title: `ETC Community Call #${callNumber}: ${call.data.description}`,
   description: calendarDescription,
-  location: call.data.location || "Online",
+  location: call.data.location,
   startDate,
   endDate,
   url: callUrl,
@@ -72,11 +71,9 @@ const calendarEvent: CalendarEvent = {
       <p class="font-mono text-sm text-gray-500">
         {formatFullDate(call.data.date)}
       </p>
-      {call.data.time && (
-        <div class="mt-3 flex justify-center">
-          <TimeBadges time={call.data.time} />
-        </div>
-      )}
+      <div class="mt-3 flex justify-center">
+        <TimeBadges time={call.data.time} />
+      </div>
     </div>
 
     <!-- Countdown -->

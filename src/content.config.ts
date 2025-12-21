@@ -7,8 +7,8 @@ const calls = defineCollection({
     number: z.number().optional(),
     description: z.string(),
     date: z.coerce.date(),
-    time: z.string().optional(),
-    location: z.string().optional(),
+    time: z.string(),
+    location: z.string(),
     joinLink: z.string().url().optional(),
     youtube: z
       .string()

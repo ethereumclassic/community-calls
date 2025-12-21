@@ -68,15 +68,12 @@ export function parseUTCTime(
 
 /**
  * Combine a date and time string into a full Date object
- * Returns the date at midnight UTC if time is not provided or invalid
  */
-export function combineDateAndTime(date: Date, timeStr?: string): Date {
+export function combineDateAndTime(date: Date, timeStr: string): Date {
   const combined = new Date(date);
-  if (timeStr) {
-    const parsed = parseUTCTime(timeStr);
-    if (parsed) {
-      combined.setUTCHours(parsed.hours, parsed.minutes, 0, 0);
-    }
+  const parsed = parseUTCTime(timeStr);
+  if (parsed) {
+    combined.setUTCHours(parsed.hours, parsed.minutes, 0, 0);
   }
   return combined;
 }

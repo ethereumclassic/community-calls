@@ -7,10 +7,8 @@ import { escapeICS } from "../lib/encode";
 export const GET: APIRoute = async () => {
   const allCalls = await getCalls();
 
-  // Filter out special calls, keep only dated calls
-  const calls = sortCallsByDate(
-    allCalls.filter((call) => !call.data.special && call.data.date),
-  );
+  // Filter out special calls
+  const calls = sortCallsByDate(allCalls.filter((call) => !call.data.special));
 
   const now = new Date();
   const nowFormatted = formatICSDate(now);
@@ -18,36 +16,32 @@ export const GET: APIRoute = async () => {
   // Generate VEVENT for each call
   const events = calls.map((call) => {
     const callNumber = call.data.callNumber!;
-    const date = call.data.date!;
+    const date = call.data.date;
     const time = call.data.time;
 
     // Set start time
     const startDate = new Date(date);
-    if (time) {
-      const parsed = parseUTCTime(time);
-      if (parsed) {
-        startDate.setUTCHours(parsed.hours, parsed.minutes, 0, 0);
-      }
+    const parsed = parseUTCTime(time);
+    if (parsed) {
+      startDate.setUTCHours(parsed.hours, parsed.minutes, 0, 0);
     }
 
     // End time is typically 2 hours after start
     const endDate = new Date(startDate);
     endDate.setUTCHours(endDate.getUTCHours() + 2);
 
-    const summary = `ETC Community Call #${callNumber}${call.data.description ? `: ${call.data.description}` : ""}`;
+    const summary = `ETC Community Call #${callNumber}: ${call.data.description}`;
     const slug = call.data.slug!;
     const url = `${siteConfig.url}/calls/${slug}`;
 
     let description = `Ethereum Classic Community Call #${callNumber}`;
-    if (call.data.description) {
-      description += `\\n\\n${call.data.description}`;
-    }
+    description += `\\n\\n${call.data.description}`;
     description += `\\n\\nMore info: ${url}`;
     if (call.data.youtube) {
       description += `\\nRecording: ${call.data.youtube}`;
     }
 
-    const location = call.data.location || "Online";
+    const location = call.data.location;
 
     return [
       "BEGIN:VEVENT",

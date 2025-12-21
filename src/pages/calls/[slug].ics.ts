@@ -7,10 +7,7 @@ import { escapeICS } from "../../lib/encode";
 export const getStaticPaths: GetStaticPaths = async () => {
   const allCalls = await getCalls();
 
-  // Only generate ICS for calls that have a date
-  const datedCalls = allCalls.filter((call) => call.data.date);
-
-  return datedCalls.map((call) => ({
+  return allCalls.map((call) => ({
     params: { slug: call.data.slug },
     props: { call },
   }));
@@ -20,7 +17,7 @@ export const GET: APIRoute = async ({ props }) => {
   const { call } = props;
 
   const callNumber = call.data.callNumber!;
-  const date = call.data.date!;
+  const date = call.data.date;
   const time = call.data.time;
 
   const now = new Date();
@@ -28,25 +25,21 @@ export const GET: APIRoute = async ({ props }) => {
 
   // Set start time
   const startDate = new Date(date);
-  if (time) {
-    const parsed = parseUTCTime(time);
-    if (parsed) {
-      startDate.setUTCHours(parsed.hours, parsed.minutes, 0, 0);
-    }
+  const parsed = parseUTCTime(time);
+  if (parsed) {
+    startDate.setUTCHours(parsed.hours, parsed.minutes, 0, 0);
   }
 
   // End time is typically 1 hour after start
   const endDate = new Date(startDate);
   endDate.setUTCHours(endDate.getUTCHours() + 1);
 
-  const summary = `ETC Community Call #${callNumber}${call.data.description ? `: ${call.data.description}` : ""}`;
+  const summary = `ETC Community Call #${callNumber}: ${call.data.description}`;
   const slug = call.data.slug!;
   const url = `${siteConfig.url}/calls/${slug}`;
 
   let description = `Ethereum Classic Community Call #${callNumber}`;
-  if (call.data.description) {
-    description += `\\n\\n${call.data.description}`;
-  }
+  description += `\\n\\n${call.data.description}`;
   description += `\\n\\nMore info: ${url}`;
   if (call.data.joinLink) {
     description += `\\nJoin: ${call.data.joinLink}`;
@@ -55,7 +48,7 @@ export const GET: APIRoute = async ({ props }) => {
     description += `\\nRecording: https://youtube.com/watch?v=${call.data.youtube}`;
   }
 
-  const location = call.data.location || "Online";
+  const location = call.data.location;
 
   const event = [
     "BEGIN:VEVENT",

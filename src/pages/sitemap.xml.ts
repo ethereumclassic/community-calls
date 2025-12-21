@@ -6,10 +6,8 @@ import { formatISODate } from "../lib/dates";
 export const GET: APIRoute = async () => {
   const allCalls = await getCalls();
 
-  // Filter out special calls, only include dated calls
-  const calls = sortCallsByDate(
-    allCalls.filter((call) => !call.data.special && call.data.date),
-  );
+  // Filter out special calls
+  const calls = sortCallsByDate(allCalls.filter((call) => !call.data.special));
 
   const today = formatISODate(new Date());
   const latestCallDate = calls[0]?.data.date
@@ -27,9 +25,8 @@ export const GET: APIRoute = async () => {
     // Individual call pages
     ...calls.map((call) => {
       const slug = call.data.slug!;
-      const lastmod = call.data.date ? formatISODate(call.data.date) : today;
-      const isUpcoming =
-        call.data.date && call.data.date.getTime() > Date.now();
+      const lastmod = formatISODate(call.data.date);
+      const isUpcoming = call.data.date.getTime() > Date.now();
 
       return `  <url>
     <loc>${siteConfig.url}/calls/${slug}</loc>

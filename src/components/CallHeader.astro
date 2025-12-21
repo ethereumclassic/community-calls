@@ -50,7 +50,7 @@ const joinModalId = `join-call-modal-${callNumber}`;
   </div>
 
   <!-- Timezone Display -->
-  {call.data.time && <TimezoneBar time={call.data.time} />}
+  <TimezoneBar time={call.data.time} />
 
   <!-- Join Call Button & Green Room (only for upcoming calls with both) -->
   {
@@ -77,5 +77,4 @@ const joinModalId = `join-call-modal-${callNumber}`;
         </div>
       )
   }
-
 </header>

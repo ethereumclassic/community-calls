@@ -1,4 +1,4 @@
-import { getCollection, getEntry, type CollectionEntry } from "astro:content";
+import { getCollection, type CollectionEntry } from "astro:content";
 import { siteConfig } from "./config";
 import { combineDateAndTime } from "./dates";
 
@@ -69,14 +69,6 @@ function enrichCall(raw: RawCall): Call {
 export async function getCalls(): Promise<Call[]> {
   const rawCalls = await getCollection("calls");
   return rawCalls.map(enrichCall);
-}
-
-/**
- * Get a single call by slug with computed fields
- */
-export async function getCall(slug: string): Promise<Call | undefined> {
-  const rawCall = await getEntry("calls", slug);
-  return rawCall ? enrichCall(rawCall) : undefined;
 }
 
 /**

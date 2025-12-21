@@ -44,28 +44,20 @@ const { call } = Astro.props;
           <h2
             class="font-display text-3xl md:text-4xl text-gray-100 group-hover:text-amber transition-colors mb-3"
           >
-            {call.data.description || "Community Call"}
+            {call.data.description}
           </h2>
           <div
             class="flex flex-wrap items-center gap-4 text-sm font-mono text-gray-400"
           >
-            {
-              call.data.date && (
-                <span class="flex items-center gap-2">
-                  <Icon name="lucide:calendar" class="icon-sm text-amber/60" />
-                  {formatFullDate(call.data.date)}
-                </span>
-              )
-            }
-            {
-              call.data.time && (
-                <span class="flex items-center gap-2">
-                  <Icon name="lucide:clock" class="icon-sm text-amber/60" />
-                  {formatTime(call.data.time)}
-                  <LocalTime client:load time={call.data.time} />
-                </span>
-              )
-            }
+            <span class="flex items-center gap-2">
+              <Icon name="lucide:calendar" class="icon-sm text-amber/60" />
+              {formatFullDate(call.data.date)}
+            </span>
+            <span class="flex items-center gap-2">
+              <Icon name="lucide:clock" class="icon-sm text-amber/60" />
+              {formatTime(call.data.time)}
+              <LocalTime client:load time={call.data.time} />
+            </span>
             <!--
             {
               call.data.location && (

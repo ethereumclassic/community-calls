@@ -18,7 +18,7 @@ export interface CalendarEvent {
   url?: string;
 }
 
-export interface CalendarLink {
+interface CalendarLink {
   id: string;
   label: string;
   url: string;
@@ -29,7 +29,10 @@ export interface CalendarLink {
  * Format date for Google/Yahoo Calendar (YYYYMMDDTHHmmssZ)
  */
 function formatGoogleDate(date: Date): string {
-  return date.toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "");
+  return date
+    .toISOString()
+    .replace(/[-:]/g, "")
+    .replace(/\.\d{3}/, "");
 }
 
 /**
@@ -43,7 +46,7 @@ function formatOutlookDate(date: Date): string {
  * Generate Google Calendar URL
  * https://calendar.google.com/calendar/render?action=TEMPLATE&...
  */
-export function getGoogleCalendarUrl(event: CalendarEvent): string {
+function getGoogleCalendarUrl(event: CalendarEvent): string {
   const params = new URLSearchParams({
     action: "TEMPLATE",
     text: event.title,
@@ -63,7 +66,7 @@ export function getGoogleCalendarUrl(event: CalendarEvent): string {
  * Generate Outlook.com (personal) Calendar URL
  * https://outlook.live.com/calendar/0/deeplink/compose?...
  */
-export function getOutlookUrl(event: CalendarEvent): string {
+function getOutlookUrl(event: CalendarEvent): string {
   const params = new URLSearchParams({
     path: "/calendar/action/compose",
     rru: "addevent",
@@ -81,7 +84,7 @@ export function getOutlookUrl(event: CalendarEvent): string {
  * Generate Office 365 Calendar URL
  * https://outlook.office.com/calendar/deeplink/compose?...
  */
-export function getOffice365Url(event: CalendarEvent): string {
+function getOffice365Url(event: CalendarEvent): string {
   const params = new URLSearchParams({
     path: "/calendar/action/compose",
     rru: "addevent",
@@ -99,7 +102,7 @@ export function getOffice365Url(event: CalendarEvent): string {
  * Generate Yahoo Calendar URL
  * https://calendar.yahoo.com/?v=60&...
  */
-export function getYahooCalendarUrl(event: CalendarEvent): string {
+function getYahooCalendarUrl(event: CalendarEvent): string {
   const params = new URLSearchParams({
     v: "60",
     title: event.title,

@@ -3,6 +3,7 @@ import AnimatedContainer from "./AnimatedContainer.astro";
 import Button from "./Button.astro";
 import Link from "./Link.astro";
 import { siteConfig } from "../lib/config";
+import ETCLogo from "./ETCLogo.astro";
 
 interface Props {
   totalCalls: number;
@@ -41,11 +42,7 @@ const { totalCalls, recordedCalls } = Astro.props;
   <div class="relative z-10 text-center max-w-4xl mx-auto px-4 pt-16">
     <!-- Logo with glow -->
     <div class="relative inline-block mb-8 animate-float">
-      <img
-        src={siteConfig.assets.logo}
-        alt="ETC Community Calls"
-        class="w-28 h-28 md:w-36 md:h-36 mx-auto animate-pulse-glow"
-      />
+      <ETCLogo class="w-28 h-28 md:w-36 md:h-36 mx-auto animate-pulse-glow" />
       <div
         class="absolute inset-0 bg-etc-green/20 rounded-full blur-2xl scale-150"
       >

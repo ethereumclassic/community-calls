@@ -2,6 +2,7 @@
 import { siteConfig } from "../lib/config";
 import MobileMenu from "./MobileMenu";
 import Link from "./Link.astro";
+import ETCLogo from "./ETCLogo.astro";
 ---
 
 <header
@@ -13,11 +14,7 @@ import Link from "./Link.astro";
       <!-- Logo & Title -->
       <a href="/" data-astro-prefetch class="flex items-center gap-3 group flex-shrink-0">
         <div class="relative">
-          <img
-            src={siteConfig.assets.logo}
-            alt="ETC"
-            class="h-8 w-8 sm:h-9 sm:w-9 transition-transform duration-300 group-hover:scale-110"
-          />
+          <ETCLogo class="h-8 w-8 sm:h-9 sm:w-9 transition-transform duration-300 group-hover:scale-110" />
           <div
             class="absolute inset-0 bg-etc-green/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"
           >

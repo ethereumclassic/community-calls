@@ -12,8 +12,8 @@ export type CallData = Call["data"];
 // Props interfaces for components
 export interface CallCardProps {
   number?: number;
-  description?: string;
-  date?: Date;
+  description: string;
+  date: Date;
   time?: string;
   location?: string;
   slug: string;

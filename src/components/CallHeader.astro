@@ -1,10 +1,10 @@
 ---
 import type { Call } from "../lib/types";
 import { Icon } from "astro-icon/components";
-import TimezoneBar from "./TimezoneBar";
+import TimezoneBar from "./TimezoneBar.astro";
 import GreenRoom from "./GreenRoom.astro";
 import UpcomingBadge from "./UpcomingBadge.astro";
-import Link from "./Link.astro";
+import LiveBadge from "./LiveBadge.astro";
 import { formatFullDate } from "../lib/dates";
 
 interface Props {
@@ -15,6 +15,7 @@ const { call } = Astro.props;
 
 const callNumber = call.data.callNumber!;
 const isUpcoming = call.data.isUpcoming;
+const joinModalId = `join-call-modal-${callNumber}`;
 ---
 
 <header class="mb-10">
@@ -22,10 +23,7 @@ const isUpcoming = call.data.isUpcoming;
   <div class="flex items-center gap-3 mb-8 h-[26px]">
     {
       call.data.youtube ? (
-        <span class="inline-flex items-center gap-2 px-4 py-1.5 text-xs font-mono uppercase tracking-widest text-etc-green/80 border border-etc-green/20 rounded-full">
-          <span class="w-2 h-2 rounded-full bg-etc-green animate-pulse-glow" />
-          Recorded
-        </span>
+        <LiveBadge color="green">Recorded</LiveBadge>
       ) : (
         isUpcoming &&
         call.data.eventDateTime && (
@@ -52,7 +50,7 @@ const isUpcoming = call.data.isUpcoming;
   </div>
 
   <!-- Timezone Display -->
-  {call.data.time && <TimezoneBar client:load time={call.data.time} />}
+  {call.data.time && <TimezoneBar time={call.data.time} />}
 
   <!-- Join Call Button & Green Room (only for upcoming calls with both) -->
   {
@@ -61,15 +59,16 @@ const isUpcoming = call.data.isUpcoming;
       !call.data.youtube &&
       call.data.greenRoom && (
         <div class="mt-6 flex flex-col md:flex-row md:items-center gap-4">
-          <Link
+          <a
             href={call.data.joinLink}
-            class="flex md:inline-flex items-center justify-center gap-5 px-6 py-4 bg-etc-green text-void font-mono text-base font-semibold uppercase tracking-wider rounded-lg hover:bg-etc-green/90 transition-colors whitespace-nowrap"
+            data-modal-trigger={joinModalId}
+            class="flex md:inline-flex items-center justify-center gap-5 px-6 py-4 bg-etc-green text-void font-mono text-base font-semibold uppercase tracking-wider rounded-lg hover:bg-etc-green/90 transition-colors whitespace-nowrap cursor-pointer"
           >
             <Icon name="lucide:phone" class="icon-lg" />
             Join Call
             <br class="hidden md:inline" />
             on {call.data.location}
-          </Link>
+          </a>
           <GreenRoom
             time={call.data.greenRoom.time}
             location={call.data.greenRoom.location}
@@ -78,4 +77,5 @@ const isUpcoming = call.data.isUpcoming;
         </div>
       )
   }
+
 </header>

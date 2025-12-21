@@ -1,7 +1,13 @@
+# Next
+
+- create a nice inline gui for speakers/hosts, link to github profiles
+- Test every page has all the right data
+- Fix flashing
+
+# Later
+
 - Recurring calls
-- List speakers
+- Date deciding feature
 - POAPs for speakers
-- Test every page has all the right data 
 - Pull thumbnail from youtube or generate one
-- Rip Twiter spaces and re-upload
-- Date deciding feature 
+- Rip Twitter spaces and re-upload

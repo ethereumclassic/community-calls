@@ -1,0 +1,36 @@
+---
+import LiveDot from "./LiveDot.astro";
+
+interface Props {
+  color?: "green" | "amber";
+  size?: "sm" | "md";
+  class?: string;
+}
+
+const { color = "green", size = "md", class: className = "" } = Astro.props;
+
+const colorStyles = {
+  green: {
+    text: "text-etc-green/80",
+    border: "border-etc-green/20",
+  },
+  amber: {
+    text: "text-orange-300",
+    border: "border-orange-400/30",
+  },
+};
+
+const styles = colorStyles[color];
+---
+
+<span
+  class:list={[
+    "inline-flex items-center gap-2 px-4 py-1.5 text-xs font-mono uppercase tracking-widest rounded-full border",
+    styles.text,
+    styles.border,
+    className,
+  ]}
+>
+  <LiveDot color={color} size={size} />
+  <slot />
+</span>

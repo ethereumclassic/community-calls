@@ -1,0 +1,140 @@
+---
+import { parseUTCTime, calculateLocalTime } from "../lib/timezone";
+import LocalTime from "./LocalTime";
+import LiveDot from "./LiveDot.astro";
+import TimeBadges from "./TimeBadges.astro";
+
+interface Props {
+  time: string; // Format: "1500 UTC"
+}
+
+interface TimezoneEntry {
+  city: string;
+  offset: number;
+  abbr: string;
+}
+
+const { time } = Astro.props;
+
+const timezones: TimezoneEntry[] = [
+  { city: "Los Angeles", offset: -8, abbr: "PST" },
+  { city: "New York", offset: -5, abbr: "EST" },
+  { city: "London", offset: 0, abbr: "GMT" },
+  { city: "Berlin", offset: 1, abbr: "CET" },
+  { city: "Dubai", offset: 4, abbr: "GST" },
+  { city: "Bangkok", offset: 7, abbr: "ICT" },
+  { city: "Shanghai", offset: 8, abbr: "CST" },
+  { city: "Tokyo", offset: 9, abbr: "JST" },
+  { city: "Sydney", offset: 11, abbr: "AEDT" },
+];
+
+const utcTime = parseUTCTime(time);
+const utcDisplay = utcTime
+  ? `${utcTime.hours.toString().padStart(2, "0")}:${utcTime.minutes.toString().padStart(2, "0")}`
+  : "";
+
+function getTimeDisplay(offset: number) {
+  if (!utcTime) return { time: "", dayOffset: 0 };
+  return calculateLocalTime(utcTime, offset);
+}
+---
+
+{
+  utcTime && (
+    <div class="timezone-bar mt-4 md:-ml-12 lg:-ml-20">
+      {/* Desktop: Horizontal scrollable bar */}
+      <div class="hidden md:block overflow-x-auto scrollbar-hide edge-fade-mask pb-2 pl-12 lg:pl-20 pr-14">
+        <div class="flex items-center justify-center gap-1 text-xs font-mono min-w-max">
+          {/* UTC and Local time badges */}
+          <TimeBadges time={time} />
+
+          {/* Static world timezones */}
+          {timezones.map((tz) => {
+            const { time: displayTime, dayOffset } = getTimeDisplay(tz.offset);
+            return (
+              <div class="flex items-center gap-1.5 px-2 py-1 rounded bg-surface/50 border border-etc-green/5 hover:border-etc-green/20 transition-colors flex-shrink-0">
+                <span class="text-gray-500">{tz.city}</span>
+                <span class="text-gray-300">{displayTime}</span>
+                {dayOffset !== 0 && (
+                  <span class="text-[9px] text-etc-green/80">
+                    {dayOffset > 0 ? "+1" : "-1"}
+                  </span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Mobile: UTC dropdown + Local time */}
+      <div class="md:hidden">
+        <details class="timezone-dropdown">
+          <summary class="grid grid-cols-2 gap-2 list-none cursor-pointer select-none">
+            {/* UTC button */}
+            <div class="flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-etc-green/10 border border-etc-green/30">
+              <LiveDot color="green" size="sm" />
+              <span class="text-etc-green font-mono text-sm font-semibold">
+                UTC
+              </span>
+              <span class="text-etc-green font-mono text-sm font-bold">
+                {utcDisplay}
+              </span>
+              <svg
+                class="w-4 h-4 text-etc-green/60 transition-transform duration-200 dropdown-arrow"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </div>
+
+            {/* Local time (hydrated) */}
+            <LocalTime
+              client:load
+              time={time}
+              variant="badge-mobile"
+              showDayOffset
+            />
+          </summary>
+
+          {/* Dropdown content - other timezones */}
+          <div class="mt-2 p-2 rounded-lg bg-surface border border-etc-green/10 space-y-1">
+            {timezones.map((tz) => {
+              const { time: displayTime, dayOffset } = getTimeDisplay(
+                tz.offset,
+              );
+              return (
+                <div class="flex items-center justify-between px-3 py-2 rounded bg-surface-elevated/50 hover:bg-surface-hover transition-colors">
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-mono text-gray-500 w-10">
+                      {tz.abbr}
+                    </span>
+                    <span class="text-sm font-mono text-gray-400">
+                      {tz.city}
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="text-sm font-mono text-gray-200 font-semibold">
+                      {displayTime}
+                    </span>
+                    {dayOffset !== 0 && (
+                      <span class="text-[10px] font-mono text-etc-green/80">
+                        {dayOffset > 0 ? "+1" : "-1"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </details>
+      </div>
+    </div>
+  )
+}

@@ -3,6 +3,7 @@ import type { Call } from "../lib/types";
 import { Icon } from "astro-icon/components";
 import { formatFullDate, formatTime } from "../lib/dates";
 import LocalTime from "./LocalTime";
+import LiveDot from "./LiveDot.astro";
 
 interface Props {
   call: Call;
@@ -22,13 +23,7 @@ const { call } = Astro.props;
       class="flex items-center justify-between px-6 py-4 bg-amber/10 border-b border-amber/20"
     >
       <div class="flex items-center gap-3">
-        <span class="relative flex h-3 w-3">
-          <span
-            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber opacity-75"
-          ></span>
-          <span class="relative inline-flex rounded-full h-3 w-3 bg-amber"
-          ></span>
-        </span>
+        <LiveDot color="amber" size="lg" />
         <span class="text-xs font-mono uppercase tracking-widest text-amber"
           >Upcoming Call</span
         >

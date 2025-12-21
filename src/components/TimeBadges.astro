@@ -1,0 +1,32 @@
+---
+import { parseUTCTime } from "../lib/timezone";
+import LocalTime from "./LocalTime";
+import LiveDot from "./LiveDot.astro";
+
+interface Props {
+  time: string; // Format: "1500 UTC"
+}
+
+const { time } = Astro.props;
+
+const utcTime = parseUTCTime(time);
+const utcDisplay = utcTime
+  ? `${utcTime.hours.toString().padStart(2, "0")}:${utcTime.minutes.toString().padStart(2, "0")}`
+  : "";
+---
+
+{
+  utcTime && (
+    <div class="flex items-center gap-1 text-xs font-mono">
+      {/* UTC badge */}
+      <div class="flex items-center gap-1.5 px-2 py-1 rounded bg-etc-green/10 border border-etc-green/30 flex-shrink-0">
+        <LiveDot color="green" size="sm" />
+        <span class="text-etc-green font-semibold">UTC</span>
+        <span class="text-etc-green font-bold">{utcDisplay}</span>
+      </div>
+
+      {/* User's local time (hydrated) */}
+      <LocalTime client:load time={time} variant="badge" showDayOffset />
+    </div>
+  )
+}

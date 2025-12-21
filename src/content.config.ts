@@ -5,8 +5,8 @@ const calls = defineCollection({
   loader: glob({ pattern: "**/*.md", base: "./calls" }),
   schema: z.object({
     number: z.number().optional(),
-    description: z.string().optional(),
-    date: z.coerce.date().optional(),
+    description: z.string(),
+    date: z.coerce.date(),
     time: z.string().optional(),
     location: z.string().optional(),
     joinLink: z.string().url().optional(),

@@ -26,7 +26,15 @@ export default defineConfig({
     icon({
       include: {
         // Brand icons
-        "simple-icons": ["discord", "youtube", "github"],
+        "simple-icons": [
+          "discord",
+          "youtube",
+          "github",
+          "google",
+          "microsoftoutlook",
+          "yahoo",
+          "apple",
+        ],
         // UI icons
         lucide: [
           "calendar",
@@ -49,6 +57,11 @@ export default defineConfig({
           "external-link",
           "video",
           "home",
+          "calendar-plus",
+          "mail",
+          "bookmark",
+          "newspaper",
+          "globe",
         ],
       },
     }),

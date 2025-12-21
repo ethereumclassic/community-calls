@@ -1,0 +1,42 @@
+---
+interface Props {
+  color?: "green" | "amber";
+  size?: "sm" | "md" | "lg";
+}
+
+const { color = "green", size = "md" } = Astro.props;
+
+const sizeStyles = {
+  sm: { dot: "w-1.5 h-1.5", ping: "h-1.5 w-1.5" },
+  md: { dot: "w-2 h-2", ping: "h-2 w-2" },
+  lg: { dot: "w-3 h-3", ping: "h-3 w-3" },
+};
+
+const dotSize = sizeStyles[size].dot;
+const pingSize = sizeStyles[size].ping;
+
+const colorStyles = {
+  green: {
+    dot: "bg-etc-green",
+    ping: "bg-etc-green",
+  },
+  amber: {
+    dot: "bg-orange-400",
+    ping: "bg-orange-400",
+  },
+};
+
+const styles = colorStyles[color];
+---
+
+<span class="relative flex flex-shrink-0">
+  <span
+    class:list={[
+      "animate-ping absolute inline-flex rounded-full opacity-75",
+      pingSize,
+      styles.ping,
+    ]}></span>
+  <span
+    class:list={["relative inline-flex rounded-full", dotSize, styles.dot]}
+  ></span>
+</span>

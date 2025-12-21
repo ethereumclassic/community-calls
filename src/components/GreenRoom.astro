@@ -1,5 +1,6 @@
 ---
 import Link from "./Link.astro";
+import LiveDot from "./LiveDot.astro";
 import { formatTime } from "../lib/dates";
 
 interface Props {
@@ -15,7 +16,7 @@ const { time, location, joinLink } = Astro.props;
   class="flex flex-col gap-1 px-4 py-3 bg-etc-green/5 border border-etc-green/20 rounded-lg"
 >
   <div class="flex items-center gap-2 text-etc-green/80">
-    <span class="w-2 h-2 rounded-full bg-etc-green animate-pulse"></span>
+    <LiveDot color="green" />
     <span class="text-xs font-mono uppercase tracking-wider"
       >Green Room - Join one Hour Before</span
     >

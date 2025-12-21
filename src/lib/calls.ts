@@ -12,7 +12,7 @@ export interface Call extends Omit<RawCall, "data"> {
     callNumber: number;
     slug: string;
     youtubeId: string | null;
-    eventDateTime: number | null;
+    eventDateTime: number;
     isUpcoming: boolean;
     uid: string;
   };
@@ -39,21 +39,14 @@ function enrichCall(raw: RawCall): Call {
   const slug = data.special ? id.replace(".md", "") : String(callNumber);
 
   // Compute event datetime
-  const eventDateTime = data.date
-    ? combineDateAndTime(data.date, data.time).getTime()
-    : null;
+  const eventDateTime = combineDateAndTime(data.date, data.time).getTime();
 
   // Compute isUpcoming
   const now = Date.now();
-  const isUpcoming =
-    eventDateTime !== null
-      ? eventDateTime > now - siteConfig.upcomingBufferMs
-      : false;
+  const isUpcoming = eventDateTime > now - siteConfig.upcomingBufferMs;
 
   // Compute UID for ICS
-  const dateStr = data.date
-    ? data.date.toISOString().split("T")[0].replace(/-/g, "")
-    : "";
+  const dateStr = data.date.toISOString().split("T")[0].replace(/-/g, "");
   const uid = `etccc-${callNumber}-${dateStr}@cc.ethereumclassic.org`;
 
   return {
@@ -94,8 +87,8 @@ export function sortCallsByDate(
   order: "asc" | "desc" = "desc",
 ): Call[] {
   return [...calls].sort((a, b) => {
-    const dateA = a.data.date ? new Date(a.data.date).getTime() : 0;
-    const dateB = b.data.date ? new Date(b.data.date).getTime() : 0;
+    const dateA = new Date(a.data.date).getTime();
+    const dateB = new Date(b.data.date).getTime();
     return order === "desc" ? dateB - dateA : dateA - dateB;
   });
 }

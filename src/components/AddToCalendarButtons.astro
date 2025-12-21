@@ -1,0 +1,39 @@
+---
+import { Icon } from "astro-icon/components";
+import {
+  getCalendarLinks,
+  type CalendarEvent,
+} from "../lib/calendar-links";
+
+interface Props {
+  event: CalendarEvent;
+  icsUrl: string;
+}
+
+const { event, icsUrl } = Astro.props;
+const calendarLinks = getCalendarLinks(event, icsUrl);
+---
+
+<div class="add-to-calendar-buttons">
+  <label
+    class="block text-xs font-mono uppercase tracking-wider text-gray-500 mb-2"
+  >
+    Add to Calendar
+  </label>
+  <div class="flex flex-wrap gap-2">
+    {
+      calendarLinks.map((link) => (
+        <a
+          href={link.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn-sm bg-etc-green/10 border-etc-green/20 hover:bg-etc-green/20 text-etc-green gap-1.5"
+          title={`Add to ${link.label}`}
+        >
+          <Icon name={link.icon} class="icon-sm" />
+          <span class="text-xs">{link.label}</span>
+        </a>
+      ))
+    }
+  </div>
+</div>

@@ -5,6 +5,7 @@ import AnimatedContainer from "../components/AnimatedContainer.astro";
 import CallNavigation from "../components/CallNavigation.astro";
 import CallHeader from "../components/CallHeader.astro";
 import YouTubeEmbed from "../components/YouTubeEmbed.astro";
+import JoinCallModal from "../components/JoinCallModal.astro";
 // import HostList from "../components/HostList.astro";
 
 interface Props {
@@ -17,6 +18,8 @@ const { call, prevCall, nextCall } = Astro.props;
 
 const callNumber = call.data.callNumber!;
 const youtubeId = call.data.youtubeId;
+const isUpcoming = call.data.isUpcoming;
+const joinModalId = `join-call-modal-${callNumber}`;
 
 const baseTitle = `ETC Community Call ${callNumber}`;
 const title = call.data.description
@@ -56,4 +59,11 @@ const title = call.data.description
       <slot />
     </AnimatedContainer>
   </AnimatedContainer>
+
+  <!-- Join Call Modal (rendered at root level for proper backdrop) -->
+  {
+    isUpcoming && call.data.joinLink && !call.data.youtube && (
+      <JoinCallModal slot="modals" call={call} modalId={joinModalId} />
+    )
+  }
 </PageLayout>

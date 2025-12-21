@@ -69,4 +69,7 @@ const maxWidthClass = {
 
   <!-- Global Subscribe Modal -->
   <SubscribeModal modalId="subscribe-modal-global" />
+
+  <!-- Page-specific modals (rendered at root level for proper backdrop) -->
+  <slot name="modals" />
 </RootLayout>

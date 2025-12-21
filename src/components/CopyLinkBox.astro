@@ -1,0 +1,84 @@
+---
+import { Icon } from "astro-icon/components";
+
+interface Props {
+  label: string;
+  url: string;
+  inputId: string;
+}
+
+const { label, url, inputId } = Astro.props;
+---
+
+<div class="copy-link-box">
+  <label
+    class="block text-xs font-mono uppercase tracking-wider text-gray-500 mb-2"
+  >
+    {label}
+  </label>
+  <div class="flex gap-2">
+    <input
+      type="text"
+      value={url}
+      readonly
+      id={inputId}
+      class="url-input flex-1 input input-sm bg-void border border-etc-green/20 text-gray-300 font-mono text-sm focus:border-etc-green/40 focus:outline-none"
+    />
+    <button
+      type="button"
+      class="btn btn-sm bg-etc-green/10 border-etc-green/20 hover:bg-etc-green/20 text-etc-green copy-btn gap-1.5"
+      data-input-id={inputId}
+    >
+      <Icon name="lucide:copy" class="icon-sm copy-icon" />
+      <Icon name="lucide:check" class="icon-sm check-icon hidden" />
+      <span class="copy-text">Copy</span>
+    </button>
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="btn btn-sm btn-square bg-etc-green/10 border-etc-green/20 hover:bg-etc-green/20 text-etc-green"
+      aria-label="Open"
+    >
+      <Icon name="lucide:external-link" class="icon-sm" />
+    </a>
+  </div>
+</div>
+
+<style>
+  .url-input {
+    direction: rtl;
+  }
+</style>
+
+<script is:inline>
+  document.addEventListener("click", async function (e) {
+    const copyBtn = e.target.closest(".copy-btn");
+    if (!copyBtn) return;
+
+    const inputId = copyBtn.dataset.inputId;
+    if (!inputId) return;
+
+    const urlInput = document.getElementById(inputId);
+    if (!urlInput || !(urlInput instanceof HTMLInputElement)) return;
+
+    const copyIcon = copyBtn.querySelector(".copy-icon");
+    const checkIcon = copyBtn.querySelector(".check-icon");
+    const copyText = copyBtn.querySelector(".copy-text");
+
+    try {
+      await navigator.clipboard.writeText(urlInput.value);
+      copyIcon?.classList.add("hidden");
+      checkIcon?.classList.remove("hidden");
+      if (copyText) copyText.textContent = "Copied";
+      setTimeout(() => {
+        copyIcon?.classList.remove("hidden");
+        checkIcon?.classList.add("hidden");
+        if (copyText) copyText.textContent = "Copy";
+      }, 2000);
+    } catch (err) {
+      urlInput.select();
+      document.execCommand("copy");
+    }
+  });
+</script>

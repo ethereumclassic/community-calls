@@ -2,6 +2,7 @@
 import { Icon } from "astro-icon/components";
 import { siteConfig } from "../lib/config";
 import Link from "./Link.astro";
+import CopyLinkBox from "./CopyLinkBox.astro";
 
 interface Props {
   modalId: string;
@@ -74,29 +75,13 @@ const rssUrl = siteConfig.rssUrl;
     >
       <!-- URL Copy Section -->
       <div class="mb-6">
-        <label
-          class="block text-xs font-mono uppercase tracking-wider text-gray-500 mb-2"
-        >
-          Calendar URL
-        </label>
-        <div class="flex gap-2">
-          <input
-            type="text"
-            value={icsUrl}
-            readonly
-            id={`${modalId}-url`}
-            class="flex-1 input bg-void border border-etc-green/20 text-gray-300 font-mono text-sm focus:border-etc-green/40 focus:outline-none"
-          />
-          <button
-            type="button"
-            class="btn btn-square bg-etc-green/10 border-etc-green/20 hover:bg-etc-green/20 text-etc-green"
-            id={`${modalId}-copy`}
-            aria-label="Copy URL"
-          >
-            <Icon name="lucide:copy" class="icon-md copy-icon" />
-            <Icon name="lucide:check" class="icon-md check-icon hidden" />
-          </button>
-        </div>
+        <CopyLinkBox
+          label="Calendar Feed URL"
+          url={icsUrl}
+          inputId={`${modalId}-url`}
+          openIcon="lucide:calendar"
+          openLabel="Open Calendar"
+        />
       </div>
 
       <!-- Instructions -->
@@ -110,7 +95,7 @@ const rssUrl = siteConfig.rssUrl;
             class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors"
           >
             <span class="flex items-center gap-3">
-              <span class="text-lg">📅</span>
+              <Icon name="lucide:calendar" class="icon-md text-gray-300" />
               <span class="font-mono text-sm text-gray-300"
                 >Google Calendar</span
               >
@@ -144,7 +129,7 @@ const rssUrl = siteConfig.rssUrl;
             class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors"
           >
             <span class="flex items-center gap-3">
-              <span class="text-lg">🍎</span>
+              <Icon name="simple-icons:apple" class="icon-md text-gray-300" />
               <span class="font-mono text-sm text-gray-300">Apple Calendar</span
               >
             </span>
@@ -172,7 +157,7 @@ const rssUrl = siteConfig.rssUrl;
             class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors"
           >
             <span class="flex items-center gap-3">
-              <span class="text-lg">📧</span>
+              <Icon name="lucide:mail" class="icon-md text-gray-300" />
               <span class="font-mono text-sm text-gray-300">Outlook</span>
             </span>
             <Icon
@@ -195,16 +180,6 @@ const rssUrl = siteConfig.rssUrl;
         </details>
       </div>
 
-      <div class="flex gap-2 mt-6">
-        <a
-          href="/etccc.ics"
-          download="etccc.ics"
-          class="btn btn-sm bg-surface-elevated border-etc-green/20 text-gray-300 hover:bg-surface-elevated/80 font-mono text-xs"
-        >
-          <Icon name="lucide:download" class="icon-sm" />
-          Download ICS
-        </a>
-      </div>
     </div>
 
     <!-- RSS Tab Content -->
@@ -215,29 +190,13 @@ const rssUrl = siteConfig.rssUrl;
     >
       <!-- RSS URL Copy Section -->
       <div class="mb-6">
-        <label
-          class="block text-xs font-mono uppercase tracking-wider text-gray-500 mb-2"
-        >
-          RSS Feed URL
-        </label>
-        <div class="flex gap-2">
-          <input
-            type="text"
-            value={rssUrl}
-            readonly
-            id={`${modalId}-rss-url`}
-            class="flex-1 input bg-void border border-etc-green/20 text-gray-300 font-mono text-sm focus:border-etc-green/40 focus:outline-none"
-          />
-          <button
-            type="button"
-            class="btn btn-square bg-etc-green/10 border-etc-green/20 hover:bg-etc-green/20 text-etc-green"
-            id={`${modalId}-rss-copy`}
-            aria-label="Copy RSS URL"
-          >
-            <Icon name="lucide:copy" class="icon-md copy-icon" />
-            <Icon name="lucide:check" class="icon-md check-icon hidden" />
-          </button>
-        </div>
+        <CopyLinkBox
+          label="RSS Feed URL"
+          url={rssUrl}
+          inputId={`${modalId}-rss-url`}
+          openIcon="lucide:rss"
+          openLabel="Open RSS Feed"
+        />
       </div>
 
       <!-- RSS Instructions -->
@@ -251,7 +210,7 @@ const rssUrl = siteConfig.rssUrl;
             class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors"
           >
             <span class="flex items-center gap-3">
-              <span class="text-lg">🦊</span>
+              <Icon name="lucide:bookmark" class="icon-md text-gray-300" />
               <span class="font-mono text-sm text-gray-300">Feedly</span>
             </span>
             <Icon
@@ -282,7 +241,7 @@ const rssUrl = siteConfig.rssUrl;
             class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors"
           >
             <span class="flex items-center gap-3">
-              <span class="text-lg">📰</span>
+              <Icon name="lucide:newspaper" class="icon-md text-gray-300" />
               <span class="font-mono text-sm text-gray-300">Inoreader</span>
             </span>
             <Icon
@@ -312,7 +271,7 @@ const rssUrl = siteConfig.rssUrl;
             class="flex items-center justify-between cursor-pointer p-3 rounded-lg bg-surface-elevated hover:bg-surface-elevated/80 transition-colors"
           >
             <span class="flex items-center gap-3">
-              <span class="text-lg">🌐</span>
+              <Icon name="lucide:globe" class="icon-md text-gray-300" />
               <span class="font-mono text-sm text-gray-300"
                 >Browser Extension</span
               >
@@ -344,17 +303,6 @@ const rssUrl = siteConfig.rssUrl;
         </details>
       </div>
 
-      <div class="flex gap-2 mt-6">
-        <a
-          href="/rss.xml"
-          target="_blank"
-          rel="noopener"
-          class="btn btn-sm bg-surface-elevated border-etc-green/20 text-gray-300 hover:bg-surface-elevated/80 font-mono text-xs"
-        >
-          <Icon name="lucide:rss" class="icon-sm" />
-          Open RSS Feed
-        </a>
-      </div>
     </div>
 
     <div class="modal-action mt-6 border-t border-etc-green/10 pt-4">
@@ -425,42 +373,6 @@ const rssUrl = siteConfig.rssUrl;
     });
   });
 
-  // Copy button handler using event delegation
-  document.addEventListener("click", async function (e) {
-    const copyBtn = e.target.closest('[id$="-copy"]');
-    if (!copyBtn) return;
-
-    const modal = copyBtn.closest("dialog.modal");
-    if (!modal) return;
-
-    // Determine which URL input to copy from
-    const modalId = modal.id;
-    let inputId;
-    if (copyBtn.id.includes("-rss-copy")) {
-      inputId = `${modalId}-rss-url`;
-    } else {
-      inputId = `${modalId}-url`;
-    }
-
-    const urlInput = document.getElementById(inputId);
-    if (!urlInput || !(urlInput instanceof HTMLInputElement)) return;
-
-    const copyIcon = copyBtn.querySelector(".copy-icon");
-    const checkIcon = copyBtn.querySelector(".check-icon");
-
-    try {
-      await navigator.clipboard.writeText(urlInput.value);
-      copyIcon?.classList.add("hidden");
-      checkIcon?.classList.remove("hidden");
-      setTimeout(() => {
-        copyIcon?.classList.remove("hidden");
-        checkIcon?.classList.add("hidden");
-      }, 2000);
-    } catch (err) {
-      urlInput.select();
-      document.execCommand("copy");
-    }
-  });
 </script>
 
 <style>

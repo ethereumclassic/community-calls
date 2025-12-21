@@ -1,0 +1,149 @@
+---
+import { Icon } from "astro-icon/components";
+import type { Call } from "../lib/types";
+import { siteConfig } from "../lib/config";
+import { formatFullDate, formatShortDate } from "../lib/dates";
+import JoinCallCountdown from "./JoinCallCountdown";
+import JoinCallButton from "./JoinCallButton";
+import CopyLinkBox from "./CopyLinkBox.astro";
+import TimeBadges from "./TimeBadges.astro";
+import AddToCalendarButtons from "./AddToCalendarButtons.astro";
+import { combineDateAndTime } from "../lib/dates";
+import type { CalendarEvent } from "../lib/calendar-links";
+
+interface Props {
+  call: Call;
+  modalId: string;
+}
+
+const { call, modalId } = Astro.props;
+
+const callNumber = call.data.callNumber;
+const icsUrl = `${siteConfig.url}/calls/${call.data.slug}.ics`;
+
+// Dynamic location display
+const location = call.data.location ?? "Zoom";
+const locationIcon = location.toLowerCase() === "discord" ? "lucide:headphones" : "lucide:video";
+
+// Build calendar event for add-to-calendar buttons
+const startDate = combineDateAndTime(call.data.date, call.data.time);
+const endDate = new Date(startDate);
+endDate.setUTCHours(endDate.getUTCHours() + 2);
+
+const callUrl = `${siteConfig.url}/calls/${call.data.slug}`;
+
+let calendarDescription = `Ethereum Classic Community Call #${callNumber}`;
+if (call.data.description) {
+  calendarDescription += `\n\n${call.data.description}`;
+}
+calendarDescription += `\n\nMore info: ${callUrl}`;
+if (call.data.joinLink) {
+  calendarDescription += `\nJoin: ${call.data.joinLink}`;
+}
+
+const calendarEvent: CalendarEvent = {
+  title: `ETC Community Call #${callNumber}${call.data.description ? `: ${call.data.description}` : ""}`,
+  description: calendarDescription,
+  location: call.data.location || "Online",
+  startDate,
+  endDate,
+  url: callUrl,
+};
+---
+
+<dialog id={modalId} class="modal join-call-modal">
+  <div class="modal-box bg-surface border border-etc-green/20 max-w-md">
+    <form method="dialog">
+      <button
+        class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-gray-400 hover:text-gray-200"
+      >
+        <Icon name="lucide:x" class="icon-md" />
+      </button>
+    </form>
+
+    <!-- Title and Date -->
+    <div class="mb-6 pt-4 text-center">
+      <p class="font-mono text-sm text-gray-500">
+        Ethereum Classic Community Call #{callNumber}
+      </p>
+      <h3 class="font-display text-5xl text-gray-100 mt-2 mb-3">
+        {call.data.description}
+      </h3>
+      <p class="font-mono text-sm text-gray-500">
+        {formatFullDate(call.data.date)}
+      </p>
+      {call.data.time && (
+        <div class="mt-3 flex justify-center">
+          <TimeBadges time={call.data.time} />
+        </div>
+      )}
+    </div>
+
+    <!-- Countdown -->
+    <JoinCallCountdown client:load eventDateTime={call.data.eventDateTime} />
+
+    <!-- Join Button -->
+    {
+      call.data.joinLink && (
+        <div class="mt-4">
+          <JoinCallButton
+            client:load
+            eventDateTime={call.data.eventDateTime}
+            joinLink={call.data.joinLink}
+            location={location}
+          />
+        </div>
+      )
+    }
+
+    <!-- Divider -->
+    <div class="my-5 border-t border-etc-green/10"></div>
+
+    <!-- Join Link -->
+    {
+      call.data.joinLink && (
+        <div class="mt-4">
+          <CopyLinkBox
+            label={`${location} Link`}
+            url={call.data.joinLink}
+            inputId={`${modalId}-join-url`}
+            openIcon={locationIcon}
+            openLabel={`Open ${location}`}
+          />
+        </div>
+      )
+    }
+
+    <!-- Add to Calendar -->
+    <div class="mt-4">
+      <AddToCalendarButtons event={calendarEvent} icsUrl={icsUrl} />
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop bg-black/50 backdrop-blur-sm">
+    <button>close</button>
+  </form>
+</dialog>
+
+<script is:inline>
+  // Progressive enhancement: intercept modal trigger clicks
+  // Without JS: links go directly to join URL
+  // With JS: show modal instead
+  document.addEventListener("click", function (e) {
+    const trigger = e.target.closest("[data-modal-trigger]");
+    if (!trigger) return;
+
+    const modalId = trigger.getAttribute("data-modal-trigger");
+    const modal = document.getElementById(modalId);
+    if (modal && modal.showModal) {
+      e.preventDefault();
+      modal.showModal();
+    }
+    // If modal not found or showModal not supported, let the link work normally
+  });
+</script>
+
+<style>
+  .join-call-modal::backdrop {
+    background: transparent;
+  }
+</style>

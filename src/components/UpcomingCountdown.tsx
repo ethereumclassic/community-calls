@@ -33,15 +33,15 @@ function formatTimeLeft(time: TimeLeft): string {
   }
 
   if (time.days > 0) {
-    return `Starts in ${time.days}d ${time.hours}h`;
+    return `Starts in ${time.days} ${time.days === 1 ? "day" : "days"}`;
   }
   if (time.hours > 0) {
-    return `Starts in ${time.hours}h ${time.minutes}m`;
+    return `Starts in ${time.hours} ${time.hours === 1 ? "hour" : "hours"}`;
   }
   if (time.minutes > 0) {
-    return `Starts in ${time.minutes}m ${time.seconds}s`;
+    return `Starts in ${time.minutes} ${time.minutes === 1 ? "minute" : "minutes"}`;
   }
-  return `Starts in ${time.seconds}s`;
+  return `Starts in ${time.seconds} ${time.seconds === 1 ? "second" : "seconds"}`;
 }
 
 export default function UpcomingCountdown({ eventDateTime }: Props) {

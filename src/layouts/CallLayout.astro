@@ -12,9 +12,10 @@ interface Props {
   call: Call;
   prevCall?: Call | null;
   nextCall?: Call | null;
+  upcomingCall?: Call | null;
 }
 
-const { call, prevCall, nextCall } = Astro.props;
+const { call, prevCall, nextCall, upcomingCall } = Astro.props;
 
 const callNumber = call.data.callNumber!;
 const youtubeId = call.data.youtubeId;
@@ -29,7 +30,12 @@ const title = call.data.description
 
 <PageLayout title={title} description={call.data.description} maxWidth="narrow">
   <AnimatedContainer as="article" delay={100}>
-    <CallNavigation prevCall={prevCall} nextCall={nextCall} />
+    <CallNavigation
+      prevCall={prevCall}
+      nextCall={nextCall}
+      currentCall={call}
+      upcomingCall={upcomingCall}
+    />
 
     <CallHeader call={call} />
 

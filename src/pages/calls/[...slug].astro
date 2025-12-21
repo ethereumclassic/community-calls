@@ -1,7 +1,7 @@
 ---
 import { render } from "astro:content";
 import CallLayout from "../../layouts/CallLayout.astro";
-import { getCalls, sortCallsByNumber } from "../../lib/calls";
+import { getCalls, sortCallsByNumber, sortCallsByDate } from "../../lib/calls";
 
 export async function getStaticPaths() {
   const allCalls = await getCalls();
@@ -10,13 +10,18 @@ export async function getStaticPaths() {
   const regularCalls = allCalls.filter((call) => !call.data.special);
   const sortedRegularCalls = sortCallsByNumber(regularCalls);
 
+  // Find the next upcoming call (earliest upcoming by date)
+  const upcomingCalls = regularCalls.filter((call) => call.data.isUpcoming);
+  const upcomingCall =
+    upcomingCalls.length > 0 ? sortCallsByDate(upcomingCalls, "asc")[0] : null;
+
   // Generate paths for all calls
   const allPaths = allCalls.map((call) => {
     // Only regular calls get prev/next navigation
     if (call.data.special) {
       return {
         params: { slug: call.data.slug },
-        props: { call, prevCall: null, nextCall: null },
+        props: { call, prevCall: null, nextCall: null, upcomingCall: null },
       };
     }
 
@@ -30,6 +35,7 @@ export async function getStaticPaths() {
           index < sortedRegularCalls.length - 1
             ? sortedRegularCalls[index + 1]
             : null,
+        upcomingCall,
       },
     };
   });
@@ -37,10 +43,15 @@ export async function getStaticPaths() {
   return allPaths;
 }
 
-const { call, prevCall, nextCall } = Astro.props;
+const { call, prevCall, nextCall, upcomingCall } = Astro.props;
 const { Content } = await render(call);
 ---
 
-<CallLayout call={call} prevCall={prevCall} nextCall={nextCall}>
+<CallLayout
+  call={call}
+  prevCall={prevCall}
+  nextCall={nextCall}
+  upcomingCall={upcomingCall}
+>
   <Content />
 </CallLayout>

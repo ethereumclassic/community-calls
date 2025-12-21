@@ -1,14 +1,16 @@
 ---
 import type { Call } from "../lib/types";
-import { Icon } from "astro-icon/components";
 import { formatShortDate } from "../lib/dates";
+import NavLink from "./NavLink.astro";
 
 interface Props {
   prevCall?: Call | null;
   nextCall?: Call | null;
+  currentCall?: Call | null;
+  upcomingCall?: Call | null;
 }
 
-const { prevCall, nextCall } = Astro.props;
+const { prevCall, nextCall, currentCall, upcomingCall } = Astro.props;
 
 const prevNumber = prevCall?.data.callNumber;
 const nextNumber = nextCall?.data.callNumber;
@@ -29,45 +31,50 @@ const prevTooltip = prevCall
 const nextTooltip = nextCall
   ? `Call ${nextNumber}${nextDate ? ` • ${nextDate}` : ""}${nextDesc ? `\n${nextDesc}` : ""}`
   : "";
+
+// Show upcoming link if there's an upcoming call and we're not on it
+const showUpcomingLink =
+  upcomingCall && currentCall && upcomingCall.id !== currentCall.id;
+const upcomingSlug = upcomingCall?.data.slug;
 ---
 
 <nav class="flex items-center justify-between mb-8">
-  <a
-    href="/#archive"
-    data-astro-prefetch
-    class="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-gray-500 hover:text-etc-green transition-colors group"
-  >
-    <Icon
-      name="lucide:chevron-left"
-      class="icon-sm transform group-hover:-translate-x-1 transition-transform"
-    />
-    Archive
-  </a>
-  {
-    (prevSlug || nextSlug) && (
-      <div class="flex items-center gap-1 text-sm font-mono bg-surface-elevated/50 rounded-lg px-1 py-1 border border-etc-green/10">
-        {prevSlug && (
-          <a
-            href={`/calls/${prevSlug}`}
-            data-astro-prefetch
-            class="px-3 py-1 text-gray-300 hover:text-etc-green hover:bg-etc-green/10 rounded transition-colors"
-            title={prevTooltip}
-          >
-            &larr; {prevNumber}
-          </a>
-        )}
-        {prevSlug && nextSlug && <span class="text-gray-600">|</span>}
-        {nextSlug && (
-          <a
-            href={`/calls/${nextSlug}`}
-            data-astro-prefetch
-            class="px-3 py-1 text-gray-300 hover:text-etc-green hover:bg-etc-green/10 rounded transition-colors"
-            title={nextTooltip}
-          >
-            {nextNumber} &rarr;
-          </a>
-        )}
-      </div>
-    )
-  }
+  <NavLink href="/#archive" icon="lucide:chevron-left">Archive</NavLink>
+  <div class="flex items-center gap-4">
+    {
+      prevSlug && (
+        <NavLink
+          href={`/calls/${prevSlug}`}
+          icon="lucide:chevron-left"
+          title={prevTooltip}
+        >
+          {prevNumber}
+        </NavLink>
+      )
+    }
+    {
+      nextSlug && (
+        <NavLink
+          href={`/calls/${nextSlug}`}
+          icon="lucide:chevron-right"
+          iconPosition="right"
+          title={nextTooltip}
+        >
+          {nextNumber}
+        </NavLink>
+      )
+    }
+    {
+      showUpcomingLink && (
+        <NavLink
+          href={`/calls/${upcomingSlug}`}
+          icon="lucide:chevrons-right"
+          iconPosition="right"
+          class="text-amber-600 hover:text-amber-400"
+        >
+          Upcoming
+        </NavLink>
+      )
+    }
+  </div>
 </nav>

@@ -43,6 +43,7 @@ export default defineConfig({
           "chevron-down",
           "chevron-left",
           "chevron-right",
+          "chevrons-right",
           "x",
           "phone",
           "copy",

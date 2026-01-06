@@ -26,26 +26,16 @@ The user should provide:
 3. Find the highest call number
 4. The new call will be number = highest + 1
 
-## Step 3: Generate Title Ideas
+## Step 3: Confirm Title and Date
 
-Based on the date and any provided topic, generate 3-4 title/description ideas for the call:
+1. If the user provided a topic/title, use it directly
+2. If no title was provided, generate a sensible default based on:
+   - Time of year (seasonal themes, holidays)
+   - Call number (milestone numbers like 50, 100)
+3. Before writing, briefly confirm: "Scheduling call #[N] for [DATE] at [TIME] UTC with title '[TITLE]' - creating now."
+4. Keep titles concise (2-5 words)
 
-1. If a topic was provided, create variations around that theme
-2. Consider the time of year (seasonal themes, holidays, notable dates)
-3. Consider the call number (milestone numbers like 50, 100)
-4. Keep titles concise but memorable (2-5 words)
-
-Present the options to the user and ask them to choose one or provide their own.
-
-## Step 4: Research Ongoing Discussions (Quick Scan)
-
-Do a brief WebFetch check on these key repositories for any hot topics:
-- `https://github.com/ethereumclassic/ECIPs/pulls` - Open ECIP proposals
-- `https://github.com/ethereumclassic/ECIPs/discussions` - Active discussions
-
-Note any particularly active or time-sensitive discussions to mention in the skeleton agenda.
-
-## Step 5: Create the Call File
+## Step 4: Create the Call File
 
 1. Generate the filename: `YYYYMMDD_NNN.md` where:
    - YYYYMMDD is the call date (no dashes)
@@ -89,11 +79,6 @@ You can browse all past episodes. You can subscribe to the Calendar or RSS to ne
 
 Agenda TBD.
 
-[If any hot topics were found, add brief placeholders like:]
-<!-- Potential topics to discuss:
-- [Topic from research]
--->
-
 ---
 
 # Call References
@@ -101,12 +86,10 @@ Agenda TBD.
 - https://cc.ethereumclassic.org
 ```
 
-## Step 6: Confirm and Save
+## Step 5: Save and Report
 
-1. Show the user the complete file contents
-2. Ask for confirmation before saving
-3. Upon confirmation, use the Write tool to create the file in `calls/`
-4. Report success with the filename and key details
+1. Write the file directly to `calls/` using the Write tool
+2. Report success with the filename and key details (date, time, call number)
 
 ## Important Notes
 

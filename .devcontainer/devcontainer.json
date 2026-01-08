@@ -1,11 +1,5 @@
 {
   "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
-  "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "22"
-    }
-  },
-  "postCreateCommand": "npm install",
   "customizations": {
     "vscode": {
       "extensions": ["astro-build.astro-vscode", "bradlc.vscode-tailwindcss"]

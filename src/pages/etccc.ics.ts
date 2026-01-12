@@ -7,14 +7,16 @@ import { escapeICS } from "../lib/encode";
 export const GET: APIRoute = async () => {
   const allCalls = await getCalls();
 
-  // Filter out special calls
-  const calls = sortCallsByDate(allCalls.filter((call) => !call.data.special));
+  // Filter out special calls and limit to 10 most recent
+  const calls = sortCallsByDate(
+    allCalls.filter((call) => !call.data.special),
+  ).slice(0, 10);
 
   const now = new Date();
   const nowFormatted = formatICSDate(now);
 
-  // Generate VEVENT for each call
-  const events = calls.map((call) => {
+  // Generate VEVENT for each call (and green room if available)
+  const events = calls.flatMap((call) => {
     const callNumber = call.data.callNumber!;
     const date = call.data.date;
     const time = call.data.time;
@@ -35,15 +37,15 @@ export const GET: APIRoute = async () => {
     const url = `${siteConfig.url}/calls/${slug}`;
 
     let description = `Ethereum Classic Community Call #${callNumber}`;
-    description += `\\n\\n${call.data.description}`;
-    description += `\\n\\nMore info: ${url}`;
+    description += `\n\n${call.data.description}`;
+    description += `\n\nMore info: ${url}`;
     if (call.data.youtube) {
-      description += `\\nRecording: ${call.data.youtube}`;
+      description += `\nRecording: ${call.data.youtube}`;
     }
 
     const location = call.data.location;
 
-    return [
+    const mainEvent = [
       "BEGIN:VEVENT",
       `UID:${call.data.uid}`,
       `DTSTAMP:${nowFormatted}`,
@@ -55,6 +57,42 @@ export const GET: APIRoute = async () => {
       `URL:${url}`,
       "END:VEVENT",
     ].join("\r\n");
+
+    const result = [mainEvent];
+
+    // Add green room event if available
+    const greenRoom = call.data.greenRoom;
+    if (greenRoom) {
+      const grParsed = parseUTCTime(greenRoom.time);
+      const grStartDate = new Date(date);
+      if (grParsed) {
+        grStartDate.setUTCHours(grParsed.hours, grParsed.minutes, 0, 0);
+      }
+      // Green room ends when the main call starts
+      const grEndDate = new Date(startDate);
+
+      const grSummary = `Green Room - ETC Community Call #${callNumber}`;
+      let grDescription = `Pre-call hangout for Ethereum Classic Community Call #${callNumber}`;
+      grDescription += `\n\nJoin us for an unrecorded chat before the main call.`;
+      grDescription += `\n\nMore info: ${url}`;
+
+      const grEvent = [
+        "BEGIN:VEVENT",
+        `UID:${call.data.uid.replace("@", "-greenroom@")}`,
+        `DTSTAMP:${nowFormatted}`,
+        `DTSTART:${formatICSDate(grStartDate)}`,
+        `DTEND:${formatICSDate(grEndDate)}`,
+        `SUMMARY:${escapeICS(grSummary)}`,
+        `DESCRIPTION:${escapeICS(grDescription)}`,
+        `LOCATION:${escapeICS(greenRoom.location)}`,
+        `URL:${url}`,
+        "END:VEVENT",
+      ].join("\r\n");
+
+      result.push(grEvent);
+    }
+
+    return result;
   });
 
   // Build calendar
@@ -68,7 +106,7 @@ export const GET: APIRoute = async () => {
     `X-WR-CALDESC:${siteConfig.description}`,
     "REFRESH-INTERVAL;VALUE=DURATION:PT12H",
     "X-PUBLISHED-TTL:PT12H",
-    ...events.map((e) => e),
+    ...events,
     "END:VCALENDAR",
   ].join("\r\n");
 

@@ -41,7 +41,7 @@ The user should provide:
    - YYYYMMDD is the call date (no dashes)
    - NNN is the zero-padded call number (e.g., 046)
 
-2. Create the file with this structure:
+2. Create the file with this structure (note: `joinLink` can be left blank if not yet available):
 
 ```markdown
 ---
@@ -50,7 +50,7 @@ description: [CHOSEN_TITLE]
 date: [YYYY-MM-DD]
 time: [HHMM] UTC
 location: Zoom
-joinLink: https://us06web.zoom.us/j/89201220070
+joinLink: [link here]
 hosts:
   - Istora
 greenRoom:
@@ -86,15 +86,21 @@ Agenda TBD.
 - https://cc.ethereumclassic.org
 ```
 
-## Step 5: Save and Report
+## Step 5: Validate Build
 
-1. Write the file directly to `calls/` using the Write tool
-2. Report success with the filename and key details (date, time, call number)
+1. Run `npm run build` to validate the new file
+2. If the build fails, fix any schema validation errors
+3. Re-run build until it passes
+
+## Step 6: Save and Report
+
+1. Report success with the filename and key details (date, time, call number)
+2. If there were build errors, mention what was fixed
 
 ## Important Notes
 
 - The greenRoom time should be 1 hour before the main call time
-- Default Zoom link is the standing ETC community call link
+- `joinLink` can be left blank - the UI will hide the "Join Call" button until a link is added
 - The agenda is intentionally sparse - use `/draft-agenda` closer to the call date to flesh it out
 - Keep the description/title short and punchy for easy reference
 - If the user doesn't specify a time, suggest 1400 UTC or 1500 UTC as common options

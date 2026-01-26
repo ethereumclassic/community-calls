@@ -18,13 +18,24 @@ const calendarLinks = getCalendarLinks(event, icsUrl);
     Add to Calendar
   </label>
   <div class="flex flex-wrap gap-2">
+    <!-- Subscribe button (green, opens modal) -->
+    <button
+      type="button"
+      data-modal-trigger="subscribe-modal-global"
+      class="btn btn-sm bg-etc-green/20 border-etc-green/30 hover:bg-etc-green/30 text-etc-green gap-1.5"
+      title="Subscribe to all calls"
+    >
+      <Icon name="lucide:bell" class="icon-sm" />
+      <span class="text-xs">Subscribe</span>
+    </button>
+    <!-- Individual calendar links (neutral) -->
     {
       calendarLinks.map((link) => (
         <a
           href={link.url}
           target="_blank"
           rel="noopener noreferrer"
-          class="btn btn-sm bg-etc-green/10 border-etc-green/20 hover:bg-etc-green/20 text-etc-green gap-1.5"
+          class="btn btn-sm bg-surface-elevated border-gray-600/30 hover:bg-surface-hover text-gray-400 hover:text-gray-300 gap-1.5"
           title={`Add to ${link.label}`}
         >
           <Icon name={link.icon} class="icon-sm" />

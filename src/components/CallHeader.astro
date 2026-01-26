@@ -5,7 +5,10 @@ import TimezoneBar from "./TimezoneBar.astro";
 import GreenRoom from "./GreenRoom.astro";
 import UpcomingBadge from "./UpcomingBadge.astro";
 import LiveBadge from "./LiveBadge.astro";
-import { formatFullDate } from "../lib/dates";
+import AddToCalendarButtons from "./AddToCalendarButtons.astro";
+import { formatFullDate, combineDateAndTime } from "../lib/dates";
+import { siteConfig } from "../lib/config";
+import type { CalendarEvent } from "../lib/calendar-links";
 
 interface Props {
   call: Call;
@@ -16,6 +19,29 @@ const { call } = Astro.props;
 const callNumber = call.data.callNumber!;
 const isUpcoming = call.data.isUpcoming;
 const joinModalId = `join-call-modal-${callNumber}`;
+
+// Build calendar event for add-to-calendar buttons
+const icsUrl = `${siteConfig.url}/calls/${call.data.slug}.ics`;
+const startDate = combineDateAndTime(call.data.date, call.data.time);
+const endDate = new Date(startDate);
+endDate.setUTCHours(endDate.getUTCHours() + 2);
+const callUrl = `${siteConfig.url}/calls/${call.data.slug}`;
+
+let calendarDescription = `Ethereum Classic Community Call #${callNumber}`;
+calendarDescription += `\n\n${call.data.description}`;
+calendarDescription += `\n\nMore info: ${callUrl}`;
+if (call.data.joinLink) {
+  calendarDescription += `\nJoin: ${call.data.joinLink}`;
+}
+
+const calendarEvent: CalendarEvent = {
+  title: `ETC Community Call #${callNumber}: ${call.data.description}`,
+  description: calendarDescription,
+  location: call.data.location,
+  startDate,
+  endDate,
+  url: callUrl,
+};
 ---
 
 <header class="mb-10">
@@ -50,9 +76,9 @@ const joinModalId = `join-call-modal-${callNumber}`;
   </div>
 
   <!-- Timezone Display -->
-  <TimezoneBar time={call.data.time} />
+  <TimezoneBar time={call.data.time} date={call.data.date} />
 
-  <!-- Join Call Button & Green Room (only for upcoming calls with both) -->
+  <!-- Join Call Button & Green Room (only for upcoming calls with join link) -->
   {
     isUpcoming &&
       call.data.joinLink &&
@@ -76,5 +102,14 @@ const joinModalId = `join-call-modal-${callNumber}`;
           />
         </div>
       )
+  }
+
+  <!-- Add to Calendar (for upcoming calls) -->
+  {
+    isUpcoming && !call.data.youtube && (
+      <div class="mt-6">
+        <AddToCalendarButtons event={calendarEvent} icsUrl={icsUrl} />
+      </div>
+    )
   }
 </header>

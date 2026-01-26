@@ -9,7 +9,10 @@ const calls = defineCollection({
     date: z.coerce.date(),
     time: z.string(),
     location: z.string(),
-    joinLink: z.string().url().optional(),
+    joinLink: z.preprocess(
+      (val) => (val === "" || val === null ? undefined : val),
+      z.string().url().optional(),
+    ),
     youtube: z
       .string()
       .regex(/^[a-zA-Z0-9_-]{11}$/, {
@@ -22,7 +25,10 @@ const calls = defineCollection({
       .object({
         time: z.string(),
         location: z.string(),
-        joinLink: z.string().url().optional(),
+        joinLink: z.preprocess(
+          (val) => (val === "" || val === null ? undefined : val),
+          z.string().url().optional(),
+        ),
       })
       .optional(),
     special: z.boolean().optional(),

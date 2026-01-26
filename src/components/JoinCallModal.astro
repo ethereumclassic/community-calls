@@ -1,15 +1,11 @@
 ---
 import { Icon } from "astro-icon/components";
 import type { Call } from "../lib/types";
-import { siteConfig } from "../lib/config";
 import { formatFullDate } from "../lib/dates";
 import JoinCallCountdown from "./JoinCallCountdown";
 import JoinCallButton from "./JoinCallButton";
 import CopyLinkBox from "./CopyLinkBox.astro";
 import TimeBadges from "./TimeBadges.astro";
-import AddToCalendarButtons from "./AddToCalendarButtons.astro";
-import { combineDateAndTime } from "../lib/dates";
-import type { CalendarEvent } from "../lib/calendar-links";
 
 interface Props {
   call: Call;
@@ -19,35 +15,11 @@ interface Props {
 const { call, modalId } = Astro.props;
 
 const callNumber = call.data.callNumber;
-const icsUrl = `${siteConfig.url}/calls/${call.data.slug}.ics`;
 
 // Dynamic location display
 const location = call.data.location;
 const locationIcon =
   location.toLowerCase() === "discord" ? "lucide:headphones" : "lucide:video";
-
-// Build calendar event for add-to-calendar buttons
-const startDate = combineDateAndTime(call.data.date, call.data.time);
-const endDate = new Date(startDate);
-endDate.setUTCHours(endDate.getUTCHours() + 2);
-
-const callUrl = `${siteConfig.url}/calls/${call.data.slug}`;
-
-let calendarDescription = `Ethereum Classic Community Call #${callNumber}`;
-calendarDescription += `\n\n${call.data.description}`;
-calendarDescription += `\n\nMore info: ${callUrl}`;
-if (call.data.joinLink) {
-  calendarDescription += `\nJoin: ${call.data.joinLink}`;
-}
-
-const calendarEvent: CalendarEvent = {
-  title: `ETC Community Call #${callNumber}: ${call.data.description}`,
-  description: calendarDescription,
-  location: call.data.location,
-  startDate,
-  endDate,
-  url: callUrl,
-};
 ---
 
 <dialog id={modalId} class="modal join-call-modal">
@@ -111,11 +83,7 @@ const calendarEvent: CalendarEvent = {
       )
     }
 
-    <!-- Add to Calendar -->
-    <div class="mt-4">
-      <AddToCalendarButtons event={calendarEvent} icsUrl={icsUrl} />
     </div>
-  </div>
   <form method="dialog" class="modal-backdrop bg-black/50 backdrop-blur-sm">
     <button>close</button>
   </form>

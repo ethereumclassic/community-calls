@@ -35,21 +35,19 @@ export default function LocalTime({
     setMounted(true);
   }, [time]);
 
-  if (!localTime) return null;
-
   const dayOffsetDisplay =
     showDayOffset && dayOffset !== 0 ? (dayOffset > 0 ? "+1" : "-1") : null;
 
   if (variant === "badge") {
     return (
       <div
-        className={`flex items-center gap-1.5 px-2 py-1 rounded bg-orange-500/10 border border-orange-400/30 flex-shrink-0 transition-opacity duration-300 ${mounted ? "opacity-100" : "opacity-0"}`}
+        className={`flex items-center gap-1.5 px-2 py-1 rounded bg-orange-500/10 border border-orange-400/30 flex-shrink-0 transition-all duration-500 ease-out ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"}`}
       >
         <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
-        <span className="text-orange-400 font-medium">{tzAbbr}</span>
-        <span className="text-orange-300 font-semibold">{localTime}</span>
+        <span className="text-orange-400 font-medium">{tzAbbr || "Local"}</span>
+        <span className="text-orange-300 font-semibold">{localTime || "--:--"}</span>
         {dayOffsetDisplay && (
-          <span className="text-[9px] text-etc-green/80">
+          <span className="text-xs text-etc-green/80">
             {dayOffsetDisplay}
           </span>
         )}
@@ -60,14 +58,14 @@ export default function LocalTime({
   if (variant === "badge-mobile") {
     return (
       <div
-        className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-orange-500/10 border border-orange-400/30 transition-opacity duration-300 ${mounted ? "opacity-100" : "opacity-0"}`}
+        className={`flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-orange-500/10 border border-orange-400/30 transition-all duration-500 ease-out ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"}`}
       >
         <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
         <span className="text-orange-400 font-mono text-sm font-medium">
-          {tzAbbr}
+          {tzAbbr || "Local"}
         </span>
         <span className="text-orange-300 font-mono text-sm font-bold">
-          {localTime}
+          {localTime || "--:--"}
         </span>
         {dayOffsetDisplay && (
           <span className="text-[10px] font-mono text-etc-green/80">
@@ -81,9 +79,9 @@ export default function LocalTime({
   // Default inline variant
   return (
     <span
-      className={`text-orange-400/80 transition-opacity duration-300 ${mounted ? "opacity-100" : "opacity-0"}`}
+      className={`text-orange-400/80 transition-all duration-500 ease-out ${mounted ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-2"}`}
     >
-      ({tzAbbr} {localTime})
+      ({tzAbbr || "Local"} {localTime || "--:--"})
     </span>
   );
 }

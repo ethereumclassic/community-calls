@@ -17,7 +17,7 @@ const utcDisplay = utcTime
 
 {
   utcTime && (
-    <div class="flex items-center gap-1 text-xs font-mono">
+    <div class="flex items-center gap-2 text-sm font-mono">
       {/* UTC badge */}
       <div class="flex items-center gap-1.5 px-2 py-1 rounded bg-etc-green/10 border border-etc-green/30 flex-shrink-0">
         <LiveDot color="green" size="sm" />
@@ -26,7 +26,7 @@ const utcDisplay = utcTime
       </div>
 
       {/* User's local time (hydrated) */}
-      <LocalTime client:load time={time} variant="badge" showDayOffset />
+      <LocalTime client:only="react" time={time} variant="badge" showDayOffset />
     </div>
   )
 }

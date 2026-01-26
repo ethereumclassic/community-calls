@@ -6,6 +6,7 @@ import TimeBadges from "./TimeBadges.astro";
 
 interface Props {
   time: string; // Format: "1500 UTC"
+  date: Date;
 }
 
 interface TimezoneEntry {
@@ -14,7 +15,9 @@ interface TimezoneEntry {
   abbr: string;
 }
 
-const { time } = Astro.props;
+const { time, date } = Astro.props;
+
+const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
 const timezones: TimezoneEntry[] = [
   { city: "Los Angeles", offset: -8, abbr: "PST" },
@@ -34,37 +37,42 @@ const utcDisplay = utcTime
   : "";
 
 function getTimeDisplay(offset: number) {
-  if (!utcTime) return { time: "", dayOffset: 0 };
-  return calculateLocalTime(utcTime, offset);
+  if (!utcTime) return { time: "", dayOffset: 0, weekday: "" };
+  const result = calculateLocalTime(utcTime, offset);
+  // Calculate the actual weekday based on date and dayOffset
+  const adjustedDate = new Date(date);
+  adjustedDate.setDate(adjustedDate.getDate() + result.dayOffset);
+  const weekday = WEEKDAYS[adjustedDate.getDay()];
+  return { ...result, weekday };
 }
 ---
 
 {
   utcTime && (
-    <div class="timezone-bar mt-4 md:-ml-12 lg:-ml-20">
-      {/* Desktop: Horizontal scrollable bar */}
-      <div class="hidden md:block overflow-x-auto scrollbar-hide edge-fade-mask pb-2 pl-12 lg:pl-20 pr-14">
-        <div class="flex items-center justify-center gap-1 text-xs font-mono min-w-max">
+    <div class="timezone-bar mt-4">
+      {/* Desktop: Inline wrapping list */}
+      <div class="hidden md:block">
+        <div class="flex items-center flex-wrap gap-2 text-sm font-mono">
           {/* UTC and Local time badges */}
           <TimeBadges time={time} />
 
           {/* Static world timezones */}
           {timezones.map((tz) => {
-            const { time: displayTime, dayOffset } = getTimeDisplay(tz.offset);
+            const { time: displayTime, dayOffset, weekday } = getTimeDisplay(tz.offset);
             return (
-              <div class="flex items-center gap-1.5 px-2 py-1 rounded bg-surface/50 border border-etc-green/5 hover:border-etc-green/20 transition-colors flex-shrink-0">
+              <div class="flex items-center gap-1.5 px-2 py-1 rounded bg-surface/50 border border-etc-green/5 hover:border-etc-green/20 transition-colors">
                 <span class="text-gray-500">{tz.city}</span>
                 <span class="text-gray-300">{displayTime}</span>
                 {dayOffset !== 0 && (
-                  <span class="text-[9px] text-etc-green/80">
-                    {dayOffset > 0 ? "+1" : "-1"}
+                  <span class="text-xs text-etc-green/80">
+                    {dayOffset > 0 ? `+1 ${weekday}` : `-1 ${weekday}`}
                   </span>
                 )}
               </div>
             );
           })}
         </div>
-      </div>
+              </div>
 
       {/* Mobile: UTC dropdown + Local time */}
       <div class="md:hidden">
@@ -96,7 +104,7 @@ function getTimeDisplay(offset: number) {
 
             {/* Local time (hydrated) */}
             <LocalTime
-              client:load
+              client:only="react"
               time={time}
               variant="badge-mobile"
               showDayOffset
@@ -106,7 +114,7 @@ function getTimeDisplay(offset: number) {
           {/* Dropdown content - other timezones */}
           <div class="mt-2 p-2 rounded-lg bg-surface border border-etc-green/10 space-y-1">
             {timezones.map((tz) => {
-              const { time: displayTime, dayOffset } = getTimeDisplay(
+              const { time: displayTime, dayOffset, weekday } = getTimeDisplay(
                 tz.offset,
               );
               return (
@@ -125,7 +133,7 @@ function getTimeDisplay(offset: number) {
                     </span>
                     {dayOffset !== 0 && (
                       <span class="text-[10px] font-mono text-etc-green/80">
-                        {dayOffset > 0 ? "+1" : "-1"}
+                        {dayOffset > 0 ? `+1 ${weekday}` : `-1 ${weekday}`}
                       </span>
                     )}
                   </div>

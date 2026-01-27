@@ -1,6 +1,6 @@
 export const siteConfig = {
   url: "https://cc.ethereumclassic.org",
-  name: "ETC Community Calls",
+  name: "Ethereum Classic Community Calls",
   description:
     "Regular open discussions about Ethereum Classic development, ECIPs, and the future of ETC.",
 

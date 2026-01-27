@@ -6,6 +6,7 @@ import CallNavigation from "../components/CallNavigation.astro";
 import CallHeader from "../components/CallHeader.astro";
 import YouTubeEmbed from "../components/YouTubeEmbed.astro";
 import JoinCallModal from "../components/JoinCallModal.astro";
+import { formatShortDate, formatTime, getTimezoneDateNote } from "../lib/dates";
 // import HostList from "../components/HostList.astro";
 
 interface Props {
@@ -22,13 +23,14 @@ const youtubeId = call.data.youtubeId;
 const isUpcoming = call.data.isUpcoming;
 const joinModalId = `join-call-modal-${callNumber}`;
 
-const baseTitle = `ETC Community Call ${callNumber}`;
 const title = call.data.description
-  ? `${baseTitle} - ${call.data.description}`
-  : baseTitle;
+  ? `Call ${callNumber} - ${call.data.description}`
+  : `Call ${callNumber}`;
+const timezoneNote = getTimezoneDateNote(call.data.date, call.data.time);
+const ogDescription = `${formatShortDate(call.data.date)} at ${formatTime(call.data.time)}${timezoneNote}`;
 ---
 
-<PageLayout title={title} description={call.data.description} maxWidth="narrow">
+<PageLayout title={title} description={ogDescription} maxWidth="narrow">
   <AnimatedContainer as="article" delay={100}>
     <CallNavigation
       prevCall={prevCall}

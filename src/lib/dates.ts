@@ -89,3 +89,38 @@ export function formatTime(timeStr: string): string {
   const minutes = parsed.minutes.toString().padStart(2, "0");
   return `${hours}:${minutes} UTC`;
 }
+
+/**
+ * Get timezone date note if the calendar date differs in US or Asia
+ * Returns a parenthetical note like "(Jan 14 in Americas)" or "(Jan 16 in Asia)"
+ */
+export function getTimezoneDateNote(date: Date, timeStr: string): string {
+  const parsed = parseUTCTime(timeStr);
+  if (!parsed) return "";
+
+  const utcHour = parsed.hours;
+
+  // Early UTC times (before 08:00): Americas would be on previous day
+  if (utcHour < 8) {
+    const prevDay = new Date(date);
+    prevDay.setUTCDate(prevDay.getUTCDate() - 1);
+    const formatted = prevDay.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+    return ` (${formatted} in Americas)`;
+  }
+
+  // Late UTC times (15:00 or later): Asia would be on next day
+  if (utcHour >= 15) {
+    const nextDay = new Date(date);
+    nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+    const formatted = nextDay.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
+    return ` (${formatted} in Asia)`;
+  }
+
+  return "";
+}

@@ -105,7 +105,8 @@ export function getTimezoneDateNote(date: Date, timeStr: string): string {
     const prevDay = new Date(date);
     prevDay.setUTCDate(prevDay.getUTCDate() - 1);
     const formatted = prevDay.toLocaleDateString("en-US", {
-      month: "short",
+      weekday: "long",
+      month: "long",
       day: "numeric",
     });
     return ` (${formatted} in Americas)`;
@@ -116,7 +117,8 @@ export function getTimezoneDateNote(date: Date, timeStr: string): string {
     const nextDay = new Date(date);
     nextDay.setUTCDate(nextDay.getUTCDate() + 1);
     const formatted = nextDay.toLocaleDateString("en-US", {
-      month: "short",
+      weekday: "long",
+      month: "long",
       day: "numeric",
     });
     return ` (${formatted} in Asia)`;

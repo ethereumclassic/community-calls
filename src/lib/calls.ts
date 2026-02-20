@@ -1,6 +1,6 @@
 import { getCollection, type CollectionEntry } from "astro:content";
 import { siteConfig } from "./config";
-import { combineDateAndTime } from "./dates";
+import { combineDateAndTime, parseUTCTime } from "./dates";
 
 type RawCall = CollectionEntry<"calls">;
 
@@ -41,18 +41,47 @@ function enrichCall(raw: RawCall): Call {
   // Compute event datetime
   const eventDateTime = combineDateAndTime(data.date, data.time).getTime();
 
-  // Compute isUpcoming
+  // Compute isUpcoming (calls with a YouTube link are never upcoming)
   const now = Date.now();
-  const isUpcoming = eventDateTime > now - siteConfig.upcomingBufferMs;
+  const isUpcoming =
+    !data.youtube && eventDateTime > now - siteConfig.upcomingBufferMs;
 
   // Compute UID for ICS
   const dateStr = data.date.toISOString().split("T")[0].replace(/-/g, "");
   const uid = `etccc-${callNumber}-${dateStr}@cc.ethereumclassic.org`;
 
+  // Resolve greenRoom defaults
+  let greenRoom = data.greenRoom;
+  if (greenRoom) {
+    const sameLocation = greenRoom.sameLocation;
+    const resolvedLocation = greenRoom.location ?? (sameLocation ? data.location : undefined);
+    const resolvedJoinLink = greenRoom.joinLink ?? (sameLocation ? data.joinLink : undefined);
+
+    // Default time to 1 hour before the call
+    let resolvedTime = greenRoom.time;
+    if (!resolvedTime) {
+      const parsed = parseUTCTime(data.time);
+      if (parsed) {
+        const totalMinutes = parsed.hours * 60 + parsed.minutes - 60;
+        const h = Math.floor(((totalMinutes % 1440) + 1440) % 1440 / 60);
+        const m = ((totalMinutes % 1440) + 1440) % 1440 % 60;
+        resolvedTime = `${String(h).padStart(2, "0")}${String(m).padStart(2, "0")} UTC`;
+      }
+    }
+
+    greenRoom = {
+      ...greenRoom,
+      time: resolvedTime,
+      location: resolvedLocation,
+      joinLink: resolvedJoinLink,
+    };
+  }
+
   return {
     ...raw,
     data: {
       ...data,
+      greenRoom,
       callNumber,
       slug,
       youtubeId: data.youtube ?? null,

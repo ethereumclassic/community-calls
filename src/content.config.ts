@@ -23,12 +23,13 @@ const calls = defineCollection({
     hosts: z.array(z.string()).optional(),
     greenRoom: z
       .object({
-        time: z.string(),
-        location: z.string(),
+        time: z.string().optional(),
+        location: z.string().optional(),
         joinLink: z.preprocess(
           (val) => (val === "" || val === null ? undefined : val),
           z.string().url().optional(),
         ),
+        sameLocation: z.boolean().optional(),
       })
       .optional(),
     special: z.boolean().optional(),

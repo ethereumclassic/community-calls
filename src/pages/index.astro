@@ -22,7 +22,7 @@ const totalCalls = regularCalls.length;
 const recordedCalls = regularCalls.filter((c) => c.data.youtube).length;
 ---
 
-<PageLayout title="ETC Community Calls">
+<PageLayout title="Ethereum Classic Community Calls">
   <LandingHero totalCalls={totalCalls} recordedCalls={recordedCalls} />
   <LandingAbout />
   {nextCall && <UpcomingCall call={nextCall} />}

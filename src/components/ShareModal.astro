@@ -1,0 +1,131 @@
+---
+import { Icon } from "astro-icon/components";
+import type { Call } from "../lib/types";
+import { formatFullDate, formatTime, getTimezoneDateNote } from "../lib/dates";
+import { siteConfig } from "../lib/config";
+
+interface Props {
+  call: Call;
+  modalId: string;
+}
+
+const { call, modalId } = Astro.props;
+
+const callNumber = call.data.callNumber;
+const callUrl = `${siteConfig.url}/calls/${call.data.slug}`;
+const timezoneNote = getTimezoneDateNote(call.data.date, call.data.time);
+const dateTime = `${formatFullDate(call.data.date)} at ${formatTime(call.data.time)}${timezoneNote}`;
+
+const snippet = `Join us for ETC Community Call ${callNumber}: ${call.data.description}\n${dateTime} on ${call.data.location}.\nEveryone is welcome.\n${callUrl}`;
+
+const tweetText = `Join us for ETC Community Call ${callNumber}: ${call.data.description}. ${dateTime} on ${call.data.location}. Everyone is welcome.`;
+const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(callUrl)}`;
+const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(callUrl)}&text=${encodeURIComponent(tweetText)}`;
+---
+
+<dialog id={modalId} class="modal share-modal">
+  <div class="modal-box bg-surface border border-etc-green/20 max-w-md">
+    <form method="dialog">
+      <button
+        class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2 text-gray-400 hover:text-gray-200"
+      >
+        <Icon name="lucide:x" class="icon-md" />
+      </button>
+    </form>
+
+    <div class="pt-4">
+      <h3 class="font-mono text-sm uppercase tracking-wider text-gray-500 mb-4">
+        Share this call
+      </h3>
+
+      <pre
+        id={`${modalId}-snippet`}
+        class="p-4 bg-void border border-etc-green/20 rounded-lg text-sm text-gray-300 font-mono whitespace-pre-wrap">{snippet}</pre>
+
+      <!-- Copy & Share buttons -->
+      <div class="flex flex-wrap gap-2 mt-3">
+        <button
+          type="button"
+          class="btn btn-sm bg-etc-green/20 border-etc-green/30 hover:bg-etc-green/30 text-etc-green share-copy-btn gap-1.5"
+          data-snippet-id={`${modalId}-snippet`}
+        >
+          <Icon name="lucide:copy" class="icon-sm copy-icon" />
+          <Icon name="lucide:check" class="icon-sm check-icon hidden" />
+          <span class="copy-text">Copy</span>
+        </button>
+        <a
+          href={twitterUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn-sm bg-surface-elevated border-gray-600/30 hover:bg-surface-hover text-gray-400 hover:text-gray-300 gap-1.5"
+          title="Share on X"
+        >
+          <Icon name="simple-icons:x" class="icon-sm" />
+          <span class="text-xs">Post</span>
+        </a>
+        <a
+          href={telegramUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="btn btn-sm bg-surface-elevated border-gray-600/30 hover:bg-surface-hover text-gray-400 hover:text-gray-300 gap-1.5"
+          title="Share on Telegram"
+        >
+          <Icon name="simple-icons:telegram" class="icon-sm" />
+          <span class="text-xs">Telegram</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop bg-black/50 backdrop-blur-sm">
+    <button>close</button>
+  </form>
+</dialog>
+
+<style>
+  .share-modal::backdrop {
+    background: transparent;
+  }
+</style>
+
+<script is:inline>
+  document.addEventListener("click", async function (e) {
+    // Handle share modal triggers
+    const shareTrigger = e.target.closest("[data-share-trigger]");
+    if (shareTrigger) {
+      const modalId = shareTrigger.getAttribute("data-share-trigger");
+      const modal = document.getElementById(modalId);
+      if (modal && modal.showModal) {
+        e.preventDefault();
+        modal.showModal();
+      }
+    }
+
+    // Handle copy button
+    const copyBtn = e.target.closest(".share-copy-btn");
+    if (!copyBtn) return;
+
+    const snippetId = copyBtn.dataset.snippetId;
+    if (!snippetId) return;
+
+    const snippet = document.getElementById(snippetId);
+    if (!snippet) return;
+
+    const copyIcon = copyBtn.querySelector(".copy-icon");
+    const checkIcon = copyBtn.querySelector(".check-icon");
+    const copyText = copyBtn.querySelector(".copy-text");
+
+    try {
+      await navigator.clipboard.writeText(snippet.textContent);
+      copyIcon?.classList.add("hidden");
+      checkIcon?.classList.remove("hidden");
+      if (copyText) copyText.textContent = "Copied";
+      setTimeout(() => {
+        copyIcon?.classList.remove("hidden");
+        checkIcon?.classList.add("hidden");
+        if (copyText) copyText.textContent = "Copy";
+      }, 2000);
+    } catch (_err) {
+      // fallback
+    }
+  });
+</script>

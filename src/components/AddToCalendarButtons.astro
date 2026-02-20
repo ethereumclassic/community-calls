@@ -5,9 +5,10 @@ import { getCalendarLinks, type CalendarEvent } from "../lib/calendar-links";
 interface Props {
   event: CalendarEvent;
   icsUrl: string;
+  shareModalId?: string;
 }
 
-const { event, icsUrl } = Astro.props;
+const { event, icsUrl, shareModalId } = Astro.props;
 const calendarLinks = getCalendarLinks(event, icsUrl);
 ---
 
@@ -15,9 +16,23 @@ const calendarLinks = getCalendarLinks(event, icsUrl);
   <label
     class="block text-xs font-mono uppercase tracking-wider text-gray-500 mb-2"
   >
-    Add to Calendar
+    Share & Subscribe
   </label>
   <div class="flex flex-wrap gap-2">
+    <!-- Share button (green, opens share modal) -->
+    {
+      shareModalId && (
+        <button
+          type="button"
+          data-share-trigger={shareModalId}
+          class="btn btn-sm bg-etc-green/20 border-etc-green/30 hover:bg-etc-green/30 text-etc-green gap-1.5"
+          title="Share this call"
+        >
+          <Icon name="lucide:share-2" class="icon-sm" />
+          <span class="text-xs">Share</span>
+        </button>
+      )
+    }
     <!-- Subscribe button (green, opens modal) -->
     <button
       type="button"

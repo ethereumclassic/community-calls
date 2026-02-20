@@ -112,11 +112,15 @@ const calendarEvent: CalendarEvent = {
       )
   }
 
-  <!-- Add to Calendar (for upcoming calls) -->
+  <!-- Share & Subscribe (for upcoming calls) -->
   {
     isUpcoming && !call.data.youtube && (
       <div class="mt-6">
-        <AddToCalendarButtons event={calendarEvent} icsUrl={icsUrl} />
+        <AddToCalendarButtons
+          event={calendarEvent}
+          icsUrl={icsUrl}
+          shareModalId={`share-modal-${callNumber}`}
+        />
       </div>
     )
   }

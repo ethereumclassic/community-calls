@@ -6,6 +6,7 @@ import CallNavigation from "../components/CallNavigation.astro";
 import CallHeader from "../components/CallHeader.astro";
 import YouTubeEmbed from "../components/YouTubeEmbed.astro";
 import JoinCallModal from "../components/JoinCallModal.astro";
+import ShareModal from "../components/ShareModal.astro";
 import { formatShortDate, formatTime, getTimezoneDateNote } from "../lib/dates";
 // import HostList from "../components/HostList.astro";
 
@@ -22,6 +23,7 @@ const callNumber = call.data.callNumber!;
 const youtubeId = call.data.youtubeId;
 const isUpcoming = call.data.isUpcoming;
 const joinModalId = `join-call-modal-${callNumber}`;
+const shareModalId = `share-modal-${callNumber}`;
 
 const title = call.data.description
   ? `ETCCC ${callNumber} - ${call.data.description}`
@@ -68,10 +70,15 @@ const ogDescription = `${formatShortDate(call.data.date)} at ${formatTime(call.d
     </AnimatedContainer>
   </AnimatedContainer>
 
-  <!-- Join Call Modal (rendered at root level for proper backdrop) -->
+  <!-- Modals (rendered at root level for proper backdrop) -->
   {
     isUpcoming && call.data.joinLink && !call.data.youtube && (
       <JoinCallModal slot="modals" call={call} modalId={joinModalId} />
+    )
+  }
+  {
+    isUpcoming && !call.data.youtube && (
+      <ShareModal slot="modals" call={call} modalId={shareModalId} />
     )
   }
 </PageLayout>

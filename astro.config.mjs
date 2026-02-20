@@ -34,6 +34,8 @@ export default defineConfig({
           "microsoftoutlook",
           "yahoo",
           "apple",
+          "x",
+          "telegram",
         ],
         // UI icons
         lucide: [
@@ -63,6 +65,7 @@ export default defineConfig({
           "bookmark",
           "newspaper",
           "globe",
+          "share-2",
         ],
       },
     }),

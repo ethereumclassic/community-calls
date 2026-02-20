@@ -54,9 +54,7 @@ joinLink: [link here]
 hosts:
   - Istora
 greenRoom:
-  time: [ONE_HOUR_BEFORE] UTC
-  location: "ETC Discord #dev-meeting"
-  joinLink: https://ethereumclassic.org/discord
+  sameLocation: true
 ---
 
 ## Preamble
@@ -67,7 +65,7 @@ This community call is an open voice chat discussion about Ethereum Classic. Eve
 
 The call will be published on YouTube.
 
-If you are interested, you can join us in the Green Room 1 hour before the next call, in a pre-call hangout that will not be recorded. Find us in the Discord voice channels.
+If you are interested, you can join us in the Green Room 1 hour before the next call, in a hangout that will not be recorded. Find us in the Discord voice channels.
 
 ## Announcements
 
@@ -86,11 +84,11 @@ Agenda TBD.
 - https://cc.ethereumclassic.org
 ```
 
-## Step 5: Validate Build
+## Step 5: Validate
 
-1. Run `npm run build` to validate the new file
-2. If the build fails, fix any schema validation errors
-3. Re-run build until it passes
+1. Check if a dev server is already running (e.g., check for a running `npm run dev` or `astro dev` process)
+2. If a dev server is running, skip the build — the dev server will pick up the new file automatically. Just check the terminal output for any errors.
+3. If no dev server is running, run `npm run build` to validate the new file. If the build fails, fix any schema validation errors and re-run until it passes.
 
 ## Step 6: Save and Report
 
@@ -99,7 +97,9 @@ Agenda TBD.
 
 ## Important Notes
 
-- The greenRoom time should be 1 hour before the main call time
+- Use `greenRoom: { sameLocation: true }` when the green room is in the same Zoom meeting — this inherits the location, joinLink, and defaults the time to 1 hour before
+- If the green room is on Discord or elsewhere, specify `location`, `joinLink`, and optionally `time` explicitly
+- The greenRoom time defaults to 1 hour before the main call if not set
 - `joinLink` can be left blank - the UI will hide the "Join Call" button until a link is added
 - The agenda is intentionally sparse - use `/draft-agenda` closer to the call date to flesh it out
 - Keep the description/title short and punchy for easy reference

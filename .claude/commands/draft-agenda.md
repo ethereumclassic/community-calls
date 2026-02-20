@@ -77,7 +77,7 @@ This community call is an open voice chat discussion about Ethereum Classic. Eve
 
 The call will be published on YouTube.
 
-If you are interested, you can join us in the Green Room 1 hour before the next call, in a pre-call hangout that will not be recorded. Find us in the Discord voice channels.
+If you are interested, you can join us in the Green Room 1 hour before the next call, in a hangout that will not be recorded. Find us in the Discord voice channels.
 
 ## Announcements
 

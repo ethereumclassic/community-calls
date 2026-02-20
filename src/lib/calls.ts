@@ -54,8 +54,10 @@ function enrichCall(raw: RawCall): Call {
   let greenRoom = data.greenRoom;
   if (greenRoom) {
     const sameLocation = greenRoom.sameLocation;
-    const resolvedLocation = greenRoom.location ?? (sameLocation ? data.location : undefined);
-    const resolvedJoinLink = greenRoom.joinLink ?? (sameLocation ? data.joinLink : undefined);
+    const resolvedLocation =
+      greenRoom.location ?? (sameLocation ? data.location : undefined);
+    const resolvedJoinLink =
+      greenRoom.joinLink ?? (sameLocation ? data.joinLink : undefined);
 
     // Default time to 1 hour before the call
     let resolvedTime = greenRoom.time;
@@ -63,8 +65,8 @@ function enrichCall(raw: RawCall): Call {
       const parsed = parseUTCTime(data.time);
       if (parsed) {
         const totalMinutes = parsed.hours * 60 + parsed.minutes - 60;
-        const h = Math.floor(((totalMinutes % 1440) + 1440) % 1440 / 60);
-        const m = ((totalMinutes % 1440) + 1440) % 1440 % 60;
+        const h = Math.floor((((totalMinutes % 1440) + 1440) % 1440) / 60);
+        const m = (((totalMinutes % 1440) + 1440) % 1440) % 60;
         resolvedTime = `${String(h).padStart(2, "0")}${String(m).padStart(2, "0")} UTC`;
       }
     }

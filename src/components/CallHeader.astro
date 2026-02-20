@@ -6,7 +6,12 @@ import GreenRoom from "./GreenRoom.astro";
 import UpcomingBadge from "./UpcomingBadge.astro";
 import LiveBadge from "./LiveBadge.astro";
 import AddToCalendarButtons from "./AddToCalendarButtons.astro";
-import { formatFullDate, combineDateAndTime } from "../lib/dates";
+import {
+  formatFullDate,
+  formatTime,
+  combineDateAndTime,
+  getTimezoneDateNote,
+} from "../lib/dates";
 import { siteConfig } from "../lib/config";
 import type { CalendarEvent } from "../lib/calendar-links";
 
@@ -19,6 +24,7 @@ const { call } = Astro.props;
 const callNumber = call.data.callNumber!;
 const isUpcoming = call.data.isUpcoming;
 const joinModalId = `join-call-modal-${callNumber}`;
+const timezoneNote = getTimezoneDateNote(call.data.date, call.data.time);
 
 // Build calendar event for add-to-calendar buttons
 const icsUrl = `${siteConfig.url}/calls/${call.data.slug}.ics`;
@@ -72,7 +78,9 @@ const calendarEvent: CalendarEvent = {
   </h1>
   <!-- Meta info -->
   <div class="text-base md:text-lg font-mono text-gray-400 mb-8">
-    {formatFullDate(call.data.date)}
+    {formatFullDate(call.data.date)} at {formatTime(call.data.time)}{
+      timezoneNote
+    }
   </div>
 
   <!-- Timezone Display -->

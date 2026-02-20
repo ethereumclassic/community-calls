@@ -72,7 +72,7 @@ export const GET: APIRoute = async () => {
       const grEndDate = new Date(startDate);
 
       const grSummary = `Green Room - ETC Community Call #${callNumber}`;
-      let grDescription = `Pre-call hangout for Ethereum Classic Community Call #${callNumber}`;
+      let grDescription = `Green Room hangout for Ethereum Classic Community Call #${callNumber}`;
       grDescription += `\n\nJoin us for an unrecorded chat before the main call.`;
       grDescription += `\n\nMore info: ${url}`;
 

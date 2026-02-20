@@ -1,6 +1,7 @@
 ---
 import Link from "./Link.astro";
 import LiveDot from "./LiveDot.astro";
+import LocalTime from "./LocalTime";
 import { formatTime } from "../lib/dates";
 
 interface Props {
@@ -22,8 +23,8 @@ const { time, location, joinLink } = Astro.props;
     >
   </div>
   <p class="text-sm text-gray-400">
-    Join us at <span class="text-gray-300">{formatTime(time)}</span> in {
-      joinLink ? (
+    Join us at <span class="text-gray-300">{formatTime(time)}</span> <LocalTime client:load time={time} /> in {
+      joinLink && location.toLowerCase() !== "zoom" ? (
         <Link
           href={joinLink}
           text={location}
@@ -32,6 +33,6 @@ const { time, location, joinLink } = Astro.props;
       ) : (
         <span class="text-gray-300">{location}</span>
       )
-    } for an unrecorded pre-call hangout.
+    } for an unrecorded hangout.
   </p>
 </div>

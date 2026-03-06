@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import icon from "astro-icon";
 import react from "@astrojs/react";
 import rehypeExternalLinks from "rehype-external-links";
+import remarkWebVtt from "./src/plugins/remark-webvtt.js";
 
 // https://astro.build/config
 export default defineConfig({
@@ -14,6 +15,7 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
   markdown: {
+    remarkPlugins: [remarkWebVtt],
     rehypePlugins: [
       [
         rehypeExternalLinks,

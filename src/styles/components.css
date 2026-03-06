@@ -179,3 +179,77 @@
 .icon-xl {
   @apply w-8 h-8;
 }
+
+/* ─────────────────────────────────────────────────────────────────
+   TRANSCRIPT (WebVTT renderer)
+   ───────────────────────────────────────────────────────────────── */
+
+.prose .transcript {
+  max-height: 600px;
+  overflow-y: auto;
+  background: var(--color-surface);
+  border: 1px solid rgba(111, 207, 151, 0.2);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  font-family: var(--font-mono);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.prose .transcript a {
+  border-bottom: none;
+}
+
+.prose .transcript a:hover {
+  border-bottom: none;
+}
+
+.transcript-cue {
+  display: block;
+  padding: 0.25rem 0;
+  text-decoration: none;
+  color: inherit;
+  transition: background var(--transition-fast);
+}
+
+a.transcript-cue {
+  cursor: pointer;
+  border-bottom: none;
+}
+
+a.transcript-cue:hover {
+  background: var(--color-surface-hover);
+  border-bottom: none;
+}
+
+.transcript-ts {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  float: right;
+  margin-left: 1rem;
+}
+
+.transcript-speaker {
+  color: var(--color-etc-green);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.transcript-text {
+  display: block;
+  color: var(--color-text-secondary);
+  margin-top: 0.15rem;
+}
+
+.transcript-cont {
+  padding-top: 0;
+}
+
+.transcript-cue:not(.transcript-cont) {
+  margin-top: 0.75rem;
+}
+
+.transcript-cue:not(.transcript-cont):first-child {
+  margin-top: 0;
+}

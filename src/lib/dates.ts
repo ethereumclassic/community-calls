@@ -144,8 +144,8 @@ export function formatTimezoneLines(date: Date, timeStr: string): string {
       const fmt = new Intl.DateTimeFormat("en-US", {
         timeZone: tz,
         weekday: "short",
-        month: "2-digit",
-        day: "2-digit",
+        month: "long",
+        day: "numeric",
         hour: "2-digit",
         minute: "2-digit",
         hour12: true,
@@ -153,7 +153,7 @@ export function formatTimezoneLines(date: Date, timeStr: string): string {
 
       const get = (type: string) =>
         fmt.find((p) => p.type === type)?.value ?? "";
-      return `${flag} ${label} ${get("weekday")} ${get("month")}-${get("day")} ${get("hour")}:${get("minute")} ${get("dayPeriod")}`;
+      return `${flag} ${label} ${get("weekday")}, ${get("day")} ${get("month")} ${get("hour")}:${get("minute")} ${get("dayPeriod")}`;
     })
     .join("\n");
 }

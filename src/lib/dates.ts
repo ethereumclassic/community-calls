@@ -126,3 +126,34 @@ export function getTimezoneDateNote(date: Date, timeStr: string): string {
 
   return "";
 }
+
+/**
+ * Format date/time as lines for multiple timezones with flag emojis.
+ * e.g. "🇺🇸 EDT Thu 03-19 22:00"
+ */
+export function formatTimezoneLines(date: Date, timeStr: string): string {
+  const combined = combineDateAndTime(date, timeStr);
+  const timezones = [
+    { flag: "\u{1F1FA}\u{1F1F8}", tz: "America/New_York", label: "EST" },
+    { flag: "\u{1F30D}", tz: "UTC", label: "UTC" },
+    { flag: "\u{1F1E8}\u{1F1F3}", tz: "Asia/Shanghai", label: "CST" },
+  ];
+
+  return timezones
+    .map(({ flag, tz, label }) => {
+      const fmt = new Intl.DateTimeFormat("en-US", {
+        timeZone: tz,
+        weekday: "short",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      }).formatToParts(combined);
+
+      const get = (type: string) =>
+        fmt.find((p) => p.type === type)?.value ?? "";
+      return `${flag} ${label} ${get("weekday")} ${get("month")}-${get("day")} ${get("hour")}:${get("minute")} ${get("dayPeriod")}`;
+    })
+    .join("\n");
+}

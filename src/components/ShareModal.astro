@@ -1,7 +1,7 @@
 ---
 import { Icon } from "astro-icon/components";
 import type { Call } from "../lib/types";
-import { formatFullDate, formatTime, getTimezoneDateNote } from "../lib/dates";
+import { formatFullDate, formatTime, formatTimezoneLines, getTimezoneDateNote } from "../lib/dates";
 import { siteConfig } from "../lib/config";
 
 interface Props {
@@ -15,11 +15,12 @@ const callNumber = call.data.callNumber;
 const callUrl = `${siteConfig.url}/calls/${call.data.slug}`;
 const timezoneNote = getTimezoneDateNote(call.data.date, call.data.time);
 const dateTime = `${formatFullDate(call.data.date)} at ${formatTime(call.data.time)}${timezoneNote}`;
+const tzLines = formatTimezoneLines(call.data.date, call.data.time);
 
-const snippet = `Join us for ETC Community Call ${callNumber}: ${call.data.description}\n${dateTime} on ${call.data.location}.\nEveryone is welcome.\n${callUrl}`;
+const snippet = `Ethereum Classic Community Call ${callNumber} \u{1F399}\u{FE0F}\n\n${callUrl}\n\nJoin us on Zoom at:\n\n${tzLines}\n\n...or 1 hour before for the unrecorded Green Room Hangout.\n\n${call.data.description}. All Are Welcome. \u{1F340}\n\n#EthereumClassic #ETCCC #ETC`;
 
-const tweetText = `Join us for ETC Community Call ${callNumber}: ${call.data.description}. ${dateTime} on ${call.data.location}. Everyone is welcome.`;
-const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}&url=${encodeURIComponent(callUrl)}`;
+const tweetText = `Ethereum Classic Community Call ${callNumber} \u{1F399}\u{FE0F}\n\n${callUrl}\n\nJoin us on Zoom at:\n\n${tzLines}\n\n...or 1 hour before for the unrecorded Green Room Hangout.\n\n${call.data.description}. All Are Welcome. \u{1F340}\n\n#EthereumClassic #ETCCC #ETC`;
+const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
 const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(callUrl)}&text=${encodeURIComponent(tweetText)}`;
 ---
 

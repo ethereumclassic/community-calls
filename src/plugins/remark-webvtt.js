@@ -28,30 +28,60 @@ export default function remarkWebVtt() {
 
 function parseWebVtt(text) {
   const lines = text.split("\n");
-  const cues = [];
   let i = 0;
 
-  // Skip WEBVTT header and any blank lines
+  // Skip WEBVTT header
+  if (lines[i]?.trim() === "WEBVTT") i++;
+
+  // Parse optional NOTE comment for offset (e.g. "NOTE offset:-1427270")
+  let offsetMs = 0;
+  while (i < lines.length && lines[i].trim() === "") i++;
+  if (lines[i]?.startsWith("NOTE")) {
+    const noteLines = [lines[i]];
+    i++;
+    while (i < lines.length && lines[i].trim() !== "") {
+      noteLines.push(lines[i]);
+      i++;
+    }
+    const noteText = noteLines.join(" ");
+    const offsetMatch = noteText.match(/offset:\s*(-?\d+)/);
+    if (offsetMatch) offsetMs = parseInt(offsetMatch[1], 10);
+  }
+
+  // Skip to first cue
   while (i < lines.length && !lines[i].includes("-->")) i++;
 
+  const cues = [];
   while (i < lines.length) {
     const line = lines[i];
     const match = line.match(
       /^(\d{2}:\d{2}:\d{2}\.\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}\.\d{3})/,
     );
     if (match) {
-      const start = match[1];
+      const rawStartMs = toMs(match[1]);
+      const rawEndMs = toMs(match[2]);
       i++;
       const textLines = [];
       while (i < lines.length && lines[i].trim() !== "") {
         textLines.push(lines[i]);
         i++;
       }
-      const fullText = escapeHtml(textLines.join(" "));
+      const rawText = textLines.join(" ").trim();
+
+      // [redacted] cues are cut from the video — accumulate their
+      // duration as offset and skip them from the transcript.
+      if (/^\[redacted\]$|:\s*\[redacted\]$/.test(rawText)) {
+        offsetMs -= rawEndMs - rawStartMs;
+        continue;
+      }
+
+      const startMs = rawStartMs + offsetMs;
+      const fullText = escapeHtml(rawText);
       const speakerMatch = fullText.match(/^([^:]+):\s*(.*)/);
+      const seconds = Math.max(0, Math.floor(startMs / 1000));
       cues.push({
-        start: formatTimestamp(start),
-        seconds: toSeconds(start),
+        start: formatMs(Math.max(0, startMs)),
+        seconds,
         speaker: speakerMatch ? speakerMatch[1] : null,
         text: speakerMatch ? speakerMatch[2] : fullText,
       });
@@ -61,21 +91,23 @@ function parseWebVtt(text) {
   return cues;
 }
 
-function toSeconds(ts) {
+function toMs(ts) {
   const parts = ts.split(":");
   return (
-    parseInt(parts[0], 10) * 3600 +
-    parseInt(parts[1], 10) * 60 +
-    Math.floor(parseFloat(parts[2]))
+    parseInt(parts[0], 10) * 3600000 +
+    parseInt(parts[1], 10) * 60000 +
+    Math.round(parseFloat(parts[2]) * 1000)
   );
 }
 
-function formatTimestamp(ts) {
-  const parts = ts.split(":");
-  const h = parseInt(parts[0], 10);
-  const s = parts[2].split(".")[0];
-  if (h > 0) return `${h}:${parts[1]}:${s}`;
-  return `${parseInt(parts[1], 10)}:${s}`;
+function formatMs(ms) {
+  const totalSeconds = Math.floor(ms / 1000);
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+  if (h > 0)
+    return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  return `${m}:${String(s).padStart(2, "0")}`;
 }
 
 function escapeHtml(str) {

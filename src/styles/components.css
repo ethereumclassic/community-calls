@@ -118,6 +118,17 @@
   animation: pulse-glow 3s ease-in-out infinite;
 }
 
+.badge-transcript {
+  background: #f59e0b;
+  color: var(--color-void);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border: none;
+}
+
 /* ─────────────────────────────────────────────────────────────────
    NAVIGATION
    ───────────────────────────────────────────────────────────────── */

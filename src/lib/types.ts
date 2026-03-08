@@ -12,4 +12,5 @@ export interface CallCardProps {
   youtube?: string;
   index?: number;
   special?: boolean;
+  hasTranscript?: boolean;
 }

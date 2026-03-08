@@ -29,6 +29,7 @@ const calls = sortCallsByDate(allCalls.filter((call) => !call.data.isUpcoming));
           youtube={call.data.youtube}
           index={index}
           special={call.data.special}
+          hasTranscript={call.body?.includes("```webvtt")}
         />
       ))
     }

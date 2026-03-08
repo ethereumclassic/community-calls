@@ -13,6 +13,7 @@ const {
   youtube,
   index = 0,
   special = false,
+  hasTranscript = false,
 } = Astro.props;
 
 const glowClass = special ? "border-glow-special-hover" : "border-glow-hover";
@@ -58,14 +59,19 @@ const accentHoverClass = special
     )
   }
 
-  <!-- REC badge bottom right -->
-  {
-    youtube && (
-      <span class="absolute bottom-3 right-3 badge-recording px-2 py-0.5 rounded text-[9px]">
-        REC
-      </span>
-    )
-  }
+  <!-- REC and VTT badges bottom right -->
+  <div class="absolute bottom-3 right-3 flex items-center gap-1.5">
+    {
+      hasTranscript && (
+        <span class="badge-transcript px-2 py-0.5 rounded text-[9px]">VTT</span>
+      )
+    }
+    {
+      youtube && (
+        <span class="badge-recording px-2 py-0.5 rounded text-[9px]">REC</span>
+      )
+    }
+  </div>
 
   <!-- Content -->
   <div class="p-4 pr-18 h-full flex flex-col">

@@ -24,8 +24,8 @@ const recordedCalls = regularCalls.filter((c) => c.data.youtube).length;
 
 <PageLayout title="Ethereum Classic Community Calls">
   <LandingHero totalCalls={totalCalls} recordedCalls={recordedCalls} />
-  <LandingAbout />
   {nextCall && <UpcomingCall call={nextCall} />}
+  <LandingAbout />
   <SubscribeBanner />
   <ArchiveGrid />
 </PageLayout>

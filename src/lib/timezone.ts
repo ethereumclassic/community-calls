@@ -14,18 +14,21 @@ export function calculateLocalTime(
   utcTime: { hours: number; minutes: number },
   offsetHours: number,
 ): { time: string; dayOffset: number } {
-  let hours = utcTime.hours + offsetHours;
-  const minutes = utcTime.minutes;
+  let totalMinutes =
+    utcTime.hours * 60 + utcTime.minutes + Math.round(offsetHours * 60);
   let dayOffset = 0;
 
-  if (hours >= 24) {
-    hours -= 24;
+  if (totalMinutes >= 1440) {
+    totalMinutes -= 1440;
     dayOffset = 1;
   }
-  if (hours < 0) {
-    hours += 24;
+  if (totalMinutes < 0) {
+    totalMinutes += 1440;
     dayOffset = -1;
   }
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
 
   return {
     time: `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`,

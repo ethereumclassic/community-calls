@@ -36,6 +36,16 @@ const nextTooltip = nextCall
 const showUpcomingLink =
   upcomingCall && currentCall && upcomingCall.id !== currentCall.id;
 const upcomingSlug = upcomingCall?.data.slug;
+
+// Hide next arrow if it points to the same call as the upcoming link
+const showNextLink =
+  nextSlug &&
+  !(
+    showUpcomingLink &&
+    nextCall &&
+    upcomingCall &&
+    nextCall.id === upcomingCall.id
+  );
 ---
 
 <nav class="flex items-center justify-between mb-8">
@@ -53,7 +63,7 @@ const upcomingSlug = upcomingCall?.data.slug;
       )
     }
     {
-      nextSlug && (
+      showNextLink && (
         <NavLink
           href={`/calls/${nextSlug}`}
           icon="lucide:chevron-right"

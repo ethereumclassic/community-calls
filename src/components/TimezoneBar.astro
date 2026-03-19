@@ -20,13 +20,13 @@ const { time, date } = Astro.props;
 const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
 const timezones: TimezoneEntry[] = [
-  { city: "Los Angeles", offset: -8, abbr: "PST" },
-  { city: "New York", offset: -5, abbr: "EST" },
+  { city: "NYC", offset: -5, abbr: "EST" },
   { city: "London", offset: 0, abbr: "GMT" },
   { city: "Berlin", offset: 1, abbr: "CET" },
   { city: "Dubai", offset: 4, abbr: "GST" },
+  { city: "New Delhi", offset: 5.5, abbr: "IST" },
   { city: "Bangkok", offset: 7, abbr: "ICT" },
-  { city: "Shanghai", offset: 8, abbr: "CST" },
+  { city: "Beijing", offset: 8, abbr: "CST" },
   { city: "Tokyo", offset: 9, abbr: "JST" },
   { city: "Sydney", offset: 11, abbr: "AEDT" },
 ];

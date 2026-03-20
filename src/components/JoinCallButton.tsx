@@ -5,6 +5,7 @@ interface Props {
   joinLink: string;
   location: string;
   greenRoomLocation?: string;
+  special?: boolean;
 }
 
 const SEVENTY_MINUTES_MS = 70 * 60 * 1000;
@@ -14,6 +15,7 @@ export default function JoinCallButton({
   joinLink,
   location,
   greenRoomLocation,
+  special,
 }: Props) {
   const [canJoin, setCanJoin] = useState(
     () => eventDateTime - Date.now() <= SEVENTY_MINUTES_MS,
@@ -52,11 +54,13 @@ export default function JoinCallButton({
           >
             Join {location} Call
           </button>
-          <p className="text-center text-xs text-gray-500">
-            {greenRoomLocation?.toLowerCase() === location.toLowerCase()
-              ? `Green Room opens 1 hour before in the same ${greenRoomLocation} meeting`
-              : "You can join 1 hour and 10 minutes before the call starts"}
-          </p>
+          {!special && (
+            <p className="text-center text-xs text-gray-500">
+              {greenRoomLocation?.toLowerCase() === location.toLowerCase()
+                ? `Green Room opens 1 hour before in the same ${greenRoomLocation} meeting`
+                : "You can join 1 hour and 10 minutes before the call starts"}
+            </p>
+          )}
         </div>
       )}
     </div>

@@ -35,7 +35,7 @@ const locationIcon =
     <!-- Title and Date -->
     <div class="mb-6 pt-4 text-center">
       <p class="font-mono text-sm text-gray-500">
-        Ethereum Classic Community Call #{callNumber}
+        {call.data.special ? "Special Event" : `Ethereum Classic Community Call #${callNumber}`}
       </p>
       <h3 class="font-display text-5xl text-gray-100 mt-2 mb-3">
         {call.data.description}
@@ -61,6 +61,7 @@ const locationIcon =
             joinLink={call.data.joinLink}
             location={location}
             greenRoomLocation={call.data.greenRoom?.location}
+            special={!!call.data.special}
           />
         </div>
       )

@@ -12,7 +12,7 @@ const allCalls = await getCalls();
 // Separate regular calls for stats and upcoming
 const regularCalls = allCalls.filter((call) => !call.data.special);
 const upcomingCalls = sortCallsByDate(
-  regularCalls.filter((call) => call.data.isUpcoming),
+  allCalls.filter((call) => call.data.isUpcoming),
   "asc",
 );
 

@@ -63,7 +63,7 @@ export const GET: APIRoute = async () => {
     // Add green room event if available
     const greenRoom = call.data.greenRoom;
     if (greenRoom) {
-      const grParsed = parseUTCTime(greenRoom.time);
+      const grParsed = parseUTCTime(greenRoom.time ?? time);
       const grStartDate = new Date(date);
       if (grParsed) {
         grStartDate.setUTCHours(grParsed.hours, grParsed.minutes, 0, 0);
@@ -84,7 +84,7 @@ export const GET: APIRoute = async () => {
         `DTEND:${formatICSDate(grEndDate)}`,
         `SUMMARY:${escapeICS(grSummary)}`,
         `DESCRIPTION:${escapeICS(grDescription)}`,
-        `LOCATION:${escapeICS(greenRoom.location)}`,
+        `LOCATION:${escapeICS(greenRoom.location ?? location)}`,
         `URL:${url}`,
         "END:VEVENT",
       ].join("\r\n");

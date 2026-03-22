@@ -25,9 +25,11 @@ const isUpcoming = call.data.isUpcoming;
 const joinModalId = `join-call-modal-${callNumber}`;
 const shareModalId = `share-modal-${callNumber}`;
 
-const title = call.data.description
-  ? `ETCCC ${callNumber} - ${call.data.description}`
-  : `ETCCC ${callNumber}`;
+const title = call.data.special
+  ? `Special Event - ${call.data.description}`
+  : call.data.description
+    ? `ETCCC ${callNumber} - ${call.data.description}`
+    : `ETCCC ${callNumber}`;
 const timezoneNote = getTimezoneDateNote(call.data.date, call.data.time);
 const ogDescription = `${formatShortDate(call.data.date)} at ${formatTime(call.data.time)}${timezoneNote}`;
 ---

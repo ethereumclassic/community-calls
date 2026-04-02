@@ -12,7 +12,8 @@
     "format": "prettier --write .",
     "typecheck": "astro check",
     "knip": "knip",
-    "quickfix": "run-s lint typecheck knip"
+    "quickfix": "run-s lint typecheck knip",
+    "capture-og": "node scripts/capture-og.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.0",

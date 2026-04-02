@@ -1,0 +1,72 @@
+---
+// OG Image format index - lists all available formats
+import "../../styles/index.css";
+
+const formats = [
+  {
+    slug: "landscape",
+    width: 1200,
+    height: 630,
+    label: "Facebook / LinkedIn / OG",
+    file: "og.png",
+  },
+  {
+    slug: "square",
+    width: 1200,
+    height: 1200,
+    label: "Square",
+    file: "og-square.png",
+  },
+  {
+    slug: "twitter",
+    width: 1200,
+    height: 675,
+    label: "Twitter / X",
+    file: "og-twitter.png",
+  },
+  {
+    slug: "portrait",
+    width: 1080,
+    height: 1350,
+    label: "Portrait",
+    file: "og-portrait.png",
+  },
+  {
+    slug: "wide",
+    width: 1200,
+    height: 600,
+    label: "Slack",
+    file: "og-wide.png",
+  },
+];
+---
+
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <title>OG Image Formats</title>
+  </head>
+  <body class="p-8 max-w-4xl mx-auto">
+    <h1 class="text-2xl font-bold mb-6">OG Image Formats</h1>
+    <div class="space-y-6">
+      {
+        formats.map((f) => (
+          <a
+            href={`/og/${f.slug}`}
+            class="block border border-gray-700 rounded-lg p-4 hover:border-etc-green/40 transition-colors"
+          >
+            <div class="flex justify-between items-center">
+              <div>
+                <span class="font-bold text-gray-200">{f.label}</span>
+                <span class="text-gray-500 font-mono text-sm ml-3">
+                  {f.width}x{f.height}
+                </span>
+              </div>
+              <span class="text-gray-500 font-mono text-sm">{f.file}</span>
+            </div>
+          </a>
+        ))
+      }
+    </div>
+  </body>
+</html>

@@ -1,10 +1,32 @@
 ---
-// OG Image page - for taking screenshots
-// Standard OG image size: 1200x630
-import "../styles/index.css";
+// OG Image pages - for taking screenshots in various social media formats
+import "../../styles/index.css";
 import "@fontsource-variable/jetbrains-mono";
 import "@fontsource/instrument-serif/400.css";
 import "@fontsource/instrument-serif/400-italic.css";
+
+const formats: Record<
+  string,
+  { width: number; height: number; label: string }
+> = {
+  landscape: { width: 1200, height: 630, label: "Facebook / LinkedIn / OG" },
+  square: { width: 1200, height: 1200, label: "Square" },
+  twitter: { width: 1200, height: 675, label: "Twitter / X" },
+  portrait: { width: 1080, height: 1350, label: "Portrait" },
+  wide: { width: 1200, height: 600, label: "Slack" },
+};
+
+export function getStaticPaths() {
+  return ["landscape", "square", "twitter", "portrait", "wide"].map(
+    (format) => ({ params: { format } }),
+  );
+}
+
+const { format } = Astro.params;
+const fmt = formats[format!];
+if (!fmt) return Astro.redirect("/og/landscape");
+
+const isSquareOrTall = fmt.height >= fmt.width;
 ---
 
 <!doctype html>
@@ -12,18 +34,16 @@ import "@fontsource/instrument-serif/400-italic.css";
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ETC Community Calls - OG Image</title>
-    <style>
-      /* Override body for fixed OG dimensions */
+    <title>ETC Community Calls - OG {fmt.label}</title>
+    <style define:vars={{ w: `${fmt.width}px`, h: `${fmt.height}px` }}>
       body {
-        width: 1200px;
-        height: 630px;
+        width: var(--w);
+        height: var(--h);
         overflow: hidden;
         margin: 0;
         padding: 0;
       }
 
-      /* Remove scanline effect for clean screenshot */
       body::before {
         display: none;
       }
@@ -34,13 +54,18 @@ import "@fontsource/instrument-serif/400-italic.css";
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 60px;
-        padding: 60px 80px;
+        gap: 64px;
+        padding: 48px 64px;
         position: relative;
         z-index: 10;
       }
 
-      /* Background decorative elements */
+      .og-container.vertical {
+        flex-direction: column;
+        gap: 40px;
+        padding: 32px 32px;
+      }
+
       .bg-pattern {
         position: absolute;
         inset: 0;
@@ -54,7 +79,6 @@ import "@fontsource/instrument-serif/400-italic.css";
         height: 100%;
       }
 
-      /* Logo section - matches hero exactly */
       .logo-section {
         position: relative;
         flex-shrink: 0;
@@ -72,25 +96,43 @@ import "@fontsource/instrument-serif/400-italic.css";
 
       .logo {
         position: relative;
-        width: 220px;
-        height: 220px;
+        width: 180px;
+        height: 180px;
       }
 
-      /* Text section */
+      .vertical .logo {
+        width: 260px;
+        height: 260px;
+      }
+
+      .vertical .og-title {
+        font-size: 80px;
+      }
+
+      .vertical .og-subtitle {
+        font-size: 24px;
+        max-width: 960px;
+      }
+
       .text-section {
         display: flex;
         flex-direction: column;
         justify-content: center;
       }
 
+      .vertical .text-section {
+        align-items: center;
+        text-align: center;
+      }
+
       .og-title {
         font-family: "Instrument Serif", Georgia, serif;
         font-weight: 400;
-        font-size: 72px;
+        font-size: 64px;
         line-height: 1.1;
         letter-spacing: -0.01em;
         color: #f3f4f6;
-        margin: 0 0 16px 0;
+        margin: 0 0 24px 0;
       }
 
       .og-title-glow {
@@ -103,7 +145,7 @@ import "@fontsource/instrument-serif/400-italic.css";
 
       .og-subtitle {
         font-family: "JetBrains Mono Variable", ui-monospace, monospace;
-        font-size: 22px;
+        font-size: 20px;
         color: #9ca3af;
         line-height: 1.5;
         max-width: 600px;
@@ -114,100 +156,90 @@ import "@fontsource/instrument-serif/400-italic.css";
         color: rgba(111, 207, 151, 0.9);
       }
 
-      /* Border decoration */
       .border-frame {
         position: absolute;
-        inset: 20px;
+        inset: 16px;
         border: 1px solid rgba(111, 207, 151, 0.15);
         border-radius: 12px;
         pointer-events: none;
       }
 
-      /* Corner accents */
       .corner {
         position: absolute;
-        width: 40px;
-        height: 40px;
+        width: 32px;
+        height: 32px;
         border-color: var(--color-etc-green);
         opacity: 0.4;
       }
 
       .corner-tl {
-        top: 20px;
-        left: 20px;
+        top: 16px;
+        left: 16px;
         border-top: 2px solid;
         border-left: 2px solid;
       }
 
       .corner-tr {
-        top: 20px;
-        right: 20px;
+        top: 16px;
+        right: 16px;
         border-top: 2px solid;
         border-right: 2px solid;
       }
 
       .corner-bl {
-        bottom: 20px;
-        left: 20px;
+        bottom: 16px;
+        left: 16px;
         border-bottom: 2px solid;
         border-left: 2px solid;
       }
 
       .corner-br {
-        bottom: 20px;
-        right: 20px;
+        bottom: 16px;
+        right: 16px;
         border-bottom: 2px solid;
         border-right: 2px solid;
       }
     </style>
   </head>
   <body>
-    <!-- Background pattern -->
     <div class="bg-pattern">
-      <svg viewBox="0 0 1200 630" preserveAspectRatio="none">
+      <svg
+        viewBox={`0 0 ${fmt.width} ${fmt.height}`}
+        preserveAspectRatio="none"
+      >
         <path
-          d="M0,315 L300,315 L350,200 L850,200 L900,315 L1200,315"
+          d={`M0,${fmt.height * 0.5} L${fmt.width * 0.25},${fmt.height * 0.5} L${fmt.width * 0.29},${fmt.height * 0.32} L${fmt.width * 0.71},${fmt.height * 0.32} L${fmt.width * 0.75},${fmt.height * 0.5} L${fmt.width},${fmt.height * 0.5}`}
           stroke="#6fcf97"
           stroke-width="2"
           fill="none"></path>
         <path
-          d="M0,450 L200,450 L250,380 L450,380 L500,450 L1200,450"
-          stroke="#6fcf97"
-          stroke-width="2"
-          fill="none"></path>
-        <path
-          d="M0,180 L150,180 L200,250 L400,250 L450,180 L600,180"
+          d={`M0,${fmt.height * 0.71} L${fmt.width * 0.17},${fmt.height * 0.71} L${fmt.width * 0.21},${fmt.height * 0.6} L${fmt.width * 0.38},${fmt.height * 0.6} L${fmt.width * 0.42},${fmt.height * 0.71} L${fmt.width},${fmt.height * 0.71}`}
           stroke="#6fcf97"
           stroke-width="2"
           fill="none"></path>
       </svg>
     </div>
 
-    <!-- Border frame -->
     <div class="border-frame"></div>
 
-    <!-- Corner accents -->
     <div class="corner corner-tl"></div>
     <div class="corner corner-tr"></div>
     <div class="corner corner-bl"></div>
     <div class="corner corner-br"></div>
 
-    <!-- Main content -->
-    <div class="og-container">
-      <!-- Logo -->
+    <div class:list={["og-container", { vertical: isSquareOrTall }]}>
       <div class="logo-section">
         <div class="logo-glow"></div>
         <img src="/etc-logo.svg" alt="ETC Logo" class="logo" />
       </div>
 
-      <!-- Text -->
       <div class="text-section">
         <h1 class="og-title">
           <span>Ethereum Classic</span><br />
           <span class="og-title-glow">Community Calls</span>
         </h1>
         <p class="og-subtitle">
-          Regular open discussions about development,
+          Regular open discussions about development,<br />
           <span class="highlight">ECIPs</span>, and the future of
           <span class="highlight">Ethereum Classic</span>
         </p>

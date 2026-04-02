@@ -27,7 +27,8 @@ const {
 } = Astro.props;
 
 const canonicalUrl = new URL(Astro.url.pathname, siteConfig.url).href;
-const ogImageUrl = ogImage || `${siteConfig.url}${siteConfig.assets.ogImage}`;
+const ogImageBase = ogImage || `${siteConfig.url}${siteConfig.assets.ogImage}`;
+const ogImageUrl = `${ogImageBase}?v=1`;
 
 // JSON-LD structured data
 const jsonLd = {

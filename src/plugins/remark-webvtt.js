@@ -142,5 +142,5 @@ function renderTranscript(cues, youtube) {
     })
     .join("\n");
 
-  return `<div class="transcript">\n${rows}\n</div>`;
+  return `<div class="transcript-wrapper"><div class="transcript">\n${rows}\n</div></div>`;
 }

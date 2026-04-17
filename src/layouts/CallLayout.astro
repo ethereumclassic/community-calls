@@ -84,3 +84,16 @@ const ogDescription = `${formatShortDate(call.data.date)} at ${formatTime(call.d
     )
   }
 </PageLayout>
+
+<script>
+  document.querySelectorAll('.transcript-wrapper').forEach(wrapper => {
+    const btn = document.createElement('button');
+    btn.className = 'transcript-expand';
+    btn.textContent = 'Expand Full Transcript';
+    btn.addEventListener('click', () => {
+      wrapper.classList.toggle('expanded');
+      btn.textContent = wrapper.classList.contains('expanded') ? 'Collapse Transcript' : 'Expand Full Transcript';
+    });
+    wrapper.appendChild(btn);
+  });
+</script>

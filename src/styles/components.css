@@ -195,7 +195,7 @@
    TRANSCRIPT (WebVTT renderer)
    ───────────────────────────────────────────────────────────────── */
 
-.prose .transcript {
+.prose .transcript-wrapper .transcript {
   max-height: 600px;
   overflow-y: auto;
   background: var(--color-surface);
@@ -205,6 +205,30 @@
   font-family: var(--font-mono);
   font-size: 1rem;
   line-height: 1.6;
+}
+
+.prose .transcript-wrapper.expanded .transcript {
+  max-height: none;
+  overflow-y: visible;
+}
+
+.prose .transcript-expand {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  background: var(--color-surface);
+  border: 1px solid rgba(111, 207, 151, 0.2);
+  border-radius: var(--radius-md);
+  color: var(--color-etc-green);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+
+.prose .transcript-expand:hover {
+  background: var(--color-surface-hover);
 }
 
 .prose .transcript a {

@@ -9,3 +9,4 @@ When starting the dev server behind a proxy (e.g. Coder), pass the hostname via 
 - Use neutral language. Pose suggestions as questions rather than making declarative statements. The agenda should facilitate discussion, not advocate positions.
   - Good: "Should this be the focus of the next hard fork?"
   - Bad: "This should be the focus of the next hard fork."
+- No em dashes.

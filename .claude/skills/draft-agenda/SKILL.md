@@ -32,7 +32,18 @@ For each GitHub link found in recent calls:
 1. Use WebFetch to check for updates since the last call date
 2. Look for new comments, newly opened or merged PRs, and new discussions
 
-Use WebSearch to find recent "Ethereum Classic" news and ecosystem developments from the past 2-4 weeks.
+### Ethereum Classic News Since Last Call
+
+Use WebSearch to find Ethereum Classic news and ecosystem developments that have occurred **since the date of the most recent past call**. This is required, not optional.
+
+1. Note the date of the most recent past call (from its frontmatter)
+2. Run WebSearch queries scoped to that window, e.g.:
+   - `"Ethereum Classic" news after:<last-call-date>`
+   - `ETC ecosystem developments since <last-call-date>`
+   - `"Ethereum Classic" exchange OR listing OR partnership after:<last-call-date>`
+   - `ETC mining OR hashrate OR client after:<last-call-date>`
+3. Capture: exchange listings/delistings, regulatory news, ecosystem partnerships, client releases, notable price/market events, conference appearances, and protocol-related announcements
+4. Include the relevant findings in an "ETC in the News" section of the agenda, following the format used in the most recent call. If nothing newsworthy surfaced, still include the section and note that briefly.
 
 ## Step 4: Draft the Agenda
 

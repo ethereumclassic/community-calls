@@ -2,8 +2,21 @@
 import CallCard from "./CallCard.astro";
 import { getCalls, sortCallsByDate } from "../lib/calls";
 
+interface Props {
+  excludeCallNumber?: number;
+}
+
+const { excludeCallNumber } = Astro.props;
+
 const allCalls = await getCalls();
-const calls = sortCallsByDate(allCalls.filter((call) => !call.data.isUpcoming));
+const calls = sortCallsByDate(
+  allCalls.filter(
+    (call) =>
+      !call.data.isUpcoming &&
+      (excludeCallNumber === undefined ||
+        call.data.callNumber !== excludeCallNumber),
+  ),
+);
 ---
 
 <section id="archive" class="scroll-mt-24">

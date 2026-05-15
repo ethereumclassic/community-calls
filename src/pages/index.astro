@@ -3,6 +3,7 @@ import PageLayout from "../layouts/PageLayout.astro";
 import LandingHero from "../components/LandingHero.astro";
 import LandingAbout from "../components/LandingAbout.astro";
 import UpcomingCall from "../components/UpcomingCall.astro";
+import LatestCall from "../components/LatestCall.astro";
 import SubscribeBanner from "../components/SubscribeBanner.astro";
 import ArchiveGrid from "../components/ArchiveGrid.astro";
 import { getCalls, sortCallsByDate } from "../lib/calls";
@@ -15,6 +16,10 @@ const upcomingCalls = sortCallsByDate(
   allCalls.filter((call) => call.data.isUpcoming),
   "asc",
 );
+const latestCall = sortCallsByDate(
+  allCalls.filter((call) => !call.data.isUpcoming && !call.data.special),
+  "desc",
+)[0];
 
 // Stats (only count regular calls)
 const totalCalls = regularCalls.length;
@@ -24,7 +29,8 @@ const recordedCalls = regularCalls.filter((c) => c.data.youtube).length;
 <PageLayout title="Ethereum Classic Community Calls">
   <LandingHero totalCalls={totalCalls} recordedCalls={recordedCalls} />
   {upcomingCalls.map((call) => <UpcomingCall call={call} />)}
+  {latestCall && <LatestCall call={latestCall} />}
   <LandingAbout />
   <SubscribeBanner />
-  <ArchiveGrid />
+  <ArchiveGrid excludeCallNumber={latestCall?.data.callNumber} />
 </PageLayout>

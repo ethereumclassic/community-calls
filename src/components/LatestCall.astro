@@ -1,0 +1,75 @@
+---
+import type { Call } from "../lib/types";
+import { Icon } from "astro-icon/components";
+import { formatFullDate, formatTime } from "../lib/dates";
+import LiveDot from "./LiveDot.astro";
+
+interface Props {
+  call: Call;
+}
+
+const { call } = Astro.props;
+---
+
+<section class="mb-16">
+  <a
+    href={`/calls/${call.data.slug}`}
+    data-astro-prefetch
+    class="block terminal-card latest-card rounded-xl overflow-hidden transition-all duration-300 group"
+  >
+    <!-- Header bar -->
+    <div
+      class="flex items-center justify-between px-6 py-4 bg-etc-green/10 border-b border-etc-green/20"
+    >
+      <div class="flex items-center gap-3">
+        <LiveDot color="green" size="lg" />
+        <span class="text-xs font-mono uppercase tracking-widest text-etc-green"
+          >Latest Call</span
+        >
+      </div>
+      <span
+        class="px-3 py-1 text-xs font-mono uppercase tracking-wider bg-etc-green/20 text-etc-green rounded-full"
+      >
+        #{call.data.callNumber}
+      </span>
+    </div>
+
+    <!-- Content -->
+    <div class="p-6 md:p-8">
+      <div
+        class="flex flex-col md:flex-row md:items-center md:justify-between gap-6"
+      >
+        <div class="flex-1">
+          <h2
+            class="font-display text-3xl md:text-4xl text-gray-100 group-hover:text-etc-green transition-colors mb-3"
+          >
+            {call.data.description}
+          </h2>
+          <div
+            class="flex flex-wrap items-center gap-4 text-sm font-mono text-gray-400"
+          >
+            <span class="flex items-center gap-2">
+              <Icon name="lucide:calendar" class="icon-sm text-etc-green/60" />
+              {formatFullDate(call.data.date)}
+            </span>
+            <span class="flex items-center gap-2">
+              <Icon name="lucide:clock" class="icon-sm text-etc-green/60" />
+              {formatTime(call.data.time)}
+            </span>
+          </div>
+        </div>
+        <div class="flex-shrink-0">
+          <span
+            class="inline-flex items-center gap-2 px-6 py-3 bg-etc-green text-void font-mono text-sm font-semibold uppercase tracking-wider rounded-lg group-hover:bg-etc-green/90 transition-colors"
+          >
+            View Details
+            <Icon
+              name="lucide:chevron-right"
+              class="icon-sm transform group-hover:translate-x-1 transition-transform"
+            />
+          </span>
+        </div>
+      </div>
+    </div>
+  </a>
+</section>

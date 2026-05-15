@@ -87,6 +87,21 @@
     0 0 80px -20px rgba(255, 182, 39, 0.6);
 }
 
+.terminal-card.latest-card {
+  --card-accent: var(--color-etc-green);
+  --card-border: rgba(122, 238, 168, 0.3);
+  box-shadow:
+    0 0 30px -10px var(--color-etc-green),
+    0 0 60px -20px rgba(122, 238, 168, 0.5);
+}
+
+.terminal-card.latest-card:hover {
+  border-color: rgba(122, 238, 168, 0.5);
+  box-shadow:
+    0 0 40px -10px var(--color-etc-green),
+    0 0 80px -20px rgba(122, 238, 168, 0.6);
+}
+
 .terminal-card.special-card {
   --card-accent: var(--color-amber);
   --card-border: rgba(255, 182, 39, 0.2);

@@ -166,3 +166,8 @@ h6,
 .prose pre {
   border: 1px solid rgba(111, 207, 151, 0.2);
 }
+
+.prose blockquote p:first-of-type::before,
+.prose blockquote p:last-of-type::after {
+  content: none;
+}

@@ -12,10 +12,10 @@ const allCalls = await getCalls();
 
 // Separate regular calls for stats and upcoming
 const regularCalls = allCalls.filter((call) => !call.data.special);
-const upcomingCalls = sortCallsByDate(
+const nextUpcomingCall = sortCallsByDate(
   allCalls.filter((call) => call.data.isUpcoming),
   "asc",
-);
+)[0];
 const latestCall = sortCallsByDate(
   allCalls.filter((call) => !call.data.isUpcoming && !call.data.special),
   "desc",
@@ -28,7 +28,7 @@ const recordedCalls = regularCalls.filter((c) => c.data.youtube).length;
 
 <PageLayout title="Ethereum Classic Community Calls">
   <LandingHero totalCalls={totalCalls} recordedCalls={recordedCalls} />
-  {upcomingCalls.map((call) => <UpcomingCall call={call} />)}
+  {nextUpcomingCall && <UpcomingCall call={nextUpcomingCall} />}
   {latestCall && <LatestCall call={latestCall} />}
   <LandingAbout />
   <SubscribeBanner />

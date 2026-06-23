@@ -2,9 +2,11 @@
 // for resolving a transcript/roster name → its display name + served avatar URL.
 // Used by the call-page roster and the transcript renderer.
 //
-// Avatars live next to the YAML in /speakers/ (outside public/); Vite serves
-// and hashes them via the import.meta.glob ?url below, so they ship correctly
-// to prod.
+// Avatars are served from public/speakers/ (shipped verbatim to the site root),
+// so an avatar's URL is just its public path. This must work both in the Astro
+// component graph (CallRoster) and in the config-context Vite graph where the
+// remark transcript plugin runs — a plain public path resolves identically in
+// both, unlike import.meta.glob('?url'), which only emits assets in the former.
 
 import { parse as parseYaml } from "yaml";
 
@@ -34,16 +36,10 @@ const REGISTRY: Record<string, SpeakerRecord> = rawYaml
   ? (parseYaml(rawYaml) ?? {})
   : {};
 
-// filename ("istora.png") → served, hashed URL.
-const AVATAR_URLS = import.meta.glob<string>(
-  "/speakers/*.{png,webp,jpg,jpeg,svg}",
-  { query: "?url", import: "default", eager: true },
-);
-
+// A bare filename in the registry ("istora.png") maps to the public path
+// /speakers/istora.png (the file lives in public/speakers/).
 function avatarUrl(rec: SpeakerRecord): string | null {
-  if (rec.avatar && AVATAR_URLS[`/speakers/${rec.avatar}`]) {
-    return AVATAR_URLS[`/speakers/${rec.avatar}`];
-  }
+  if (rec.avatar) return `/speakers/${rec.avatar}`;
   if (rec.github) return `https://github.com/${rec.github}.png?size=256`;
   return null;
 }

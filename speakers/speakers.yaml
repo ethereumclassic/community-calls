@@ -1,6 +1,6 @@
 # Speaker registry. Keyed by short handle; `aliases` map transcript/ASR name
-# variants to one speaker. `avatar` is a file next to this yaml. Used by the
-# call-page roster and the transcript renderer.
+# variants to one speaker. `avatar` is a filename in public/speakers/. Used by
+# the call-page roster and the transcript renderer.
 istora:
   displayName: Istora
   aliases: [Istora Mandiri]

@@ -1,0 +1,31 @@
+# Speaker registry. Keyed by short handle; `aliases` map transcript/ASR name
+# variants to one speaker. `avatar` is a file next to this yaml. Used by the
+# call-page roster and the transcript renderer.
+istora:
+  displayName: Istora
+  aliases: [Istora Mandiri]
+  avatar: istora.png
+  github: istoramandiri
+diego:
+  displayName: Diego
+  aliases: [Diego L.L., Diego L. L., Diego López León]
+  avatar: diego.png
+lunar:
+  displayName: Lunar
+  aliases: [Lunar Warden]
+  avatar: lunar.webp
+iav:
+  displayName: IAV
+  aliases: [InArgentumVeritas]
+  avatar: iav.png
+cody:
+  displayName: Cody Burns
+  aliases: [Cody, "Cody Burns | >"]
+  github: realcodywburns
+w1g0:
+  displayName: w1g0
+  avatar: w1g0.webp
+weder:
+  displayName: Wedergarten
+  aliases: [weder, wedergarten, "Wedergarten || SSC"]
+  avatar: wedergarten.webp

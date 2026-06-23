@@ -281,9 +281,23 @@ a.transcript-cue:hover {
 }
 
 .transcript-speaker {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: fit-content;
+  margin-bottom: 0.25rem;
   color: var(--color-etc-green);
   font-weight: 600;
   font-size: 0.95rem;
+}
+
+.transcript-avatar {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  border-radius: 9999px;
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 .transcript-text {
@@ -302,4 +316,75 @@ a.transcript-cue:hover {
 
 .transcript-cue:not(.transcript-cont):first-child {
   margin-top: 0;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   CHAPTERED TRANSCRIPT (NOTE chapters → collapsible <details>)
+   ───────────────────────────────────────────────────────────────── */
+
+.prose .transcript-chaptered {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+/* Cues flow inside the open chapter — drop the flat transcript's scroll box. */
+.prose .transcript-chaptered .transcript {
+  max-height: none;
+  overflow: visible;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.transcript-chapter {
+  background: var(--color-surface);
+  border: 1px solid rgba(111, 207, 151, 0.2);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.chapter-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  list-style: none;
+  user-select: none;
+  transition: background var(--transition-fast);
+}
+.chapter-summary::-webkit-details-marker {
+  display: none;
+}
+.chapter-summary::before {
+  content: "▸";
+  color: var(--color-etc-green);
+  font-size: 0.8rem;
+}
+.transcript-chapter[open] > .chapter-summary::before {
+  content: "▾";
+}
+.chapter-summary:hover {
+  background: var(--color-surface-hover);
+}
+
+.chapter-ts {
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 3.5rem;
+}
+a.chapter-ts {
+  border-bottom: none;
+}
+a.chapter-ts:hover {
+  color: var(--color-etc-green);
+  border-bottom: none;
+}
+.chapter-title {
+  color: var(--color-text-primary);
+  font-weight: 600;
 }

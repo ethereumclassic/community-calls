@@ -1,0 +1,55 @@
+---
+import AnimatedContainer from "./AnimatedContainer.astro";
+import { resolveSpeaker } from "../lib/speakers";
+import { initialsFor } from "../lib/text";
+
+interface Props {
+  roster?: string[];
+}
+
+const { roster = [] } = Astro.props;
+
+// Resolve each roster name against the speaker registry for its canonical
+// display name + avatar; unknown names keep their text and fall back to
+// initials.
+const people = roster.map((name) => {
+  const r = resolveSpeaker(name);
+  const displayName = r?.displayName ?? name;
+  return {
+    displayName,
+    avatar: r?.avatar ?? null,
+    initials: initialsFor(displayName),
+  };
+});
+---
+
+{
+  people.length > 0 && (
+    <AnimatedContainer as="section" delay={300} class="mb-10">
+      <div>
+        <div class="flex flex-wrap gap-x-10 gap-y-5">
+          {people.map((p) => (
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-full border border-etc-green/20 overflow-hidden flex items-center justify-center shrink-0">
+                {p.avatar ? (
+                  <img
+                    src={p.avatar}
+                    alt={p.displayName}
+                    width="40"
+                    height="40"
+                    class="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span class="text-etc-green text-sm font-mono">
+                    {p.initials}
+                  </span>
+                )}
+              </div>
+              <div class="text-sm font-mono text-gray-200">{p.displayName}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </AnimatedContainer>
+  )
+}

@@ -45,6 +45,7 @@
     "react-dom": "^19.2.3",
     "rehype-external-links": "^3.0.0",
     "tailwindcss": "^4.1.18",
-    "unist-util-visit": "^5.1.0"
+    "unist-util-visit": "^5.1.0",
+    "yaml": "^2.9.0"
   }
 }

@@ -4,6 +4,7 @@ import PageLayout from "./PageLayout.astro";
 import AnimatedContainer from "../components/AnimatedContainer.astro";
 import CallNavigation from "../components/CallNavigation.astro";
 import CallHeader from "../components/CallHeader.astro";
+import CallRoster from "../components/CallRoster.astro";
 import YouTubeEmbed from "../components/YouTubeEmbed.astro";
 import JoinCallModal from "../components/JoinCallModal.astro";
 import ShareModal from "../components/ShareModal.astro";
@@ -46,6 +47,12 @@ const ogDescription = `${formatShortDate(call.data.date)} at ${formatTime(call.d
     <CallHeader call={call} />
 
     {
+      call.data.roster && call.data.roster.length > 0 && (
+        <CallRoster roster={call.data.roster} />
+      )
+    }
+
+    {
       youtubeId && (
         <YouTubeEmbed
           youtubeId={youtubeId}
@@ -86,14 +93,31 @@ const ogDescription = `${formatShortDate(call.data.date)} at ${formatTime(call.d
 </PageLayout>
 
 <script>
-  document.querySelectorAll('.transcript-wrapper').forEach(wrapper => {
-    const btn = document.createElement('button');
-    btn.className = 'transcript-expand';
-    btn.textContent = 'Expand Full Transcript';
-    btn.addEventListener('click', () => {
-      wrapper.classList.toggle('expanded');
-      btn.textContent = wrapper.classList.contains('expanded') ? 'Collapse Transcript' : 'Expand Full Transcript';
-    });
+  document.querySelectorAll(".transcript-wrapper").forEach((wrapper) => {
+    const btn = document.createElement("button");
+    btn.className = "transcript-expand";
+    if (wrapper.classList.contains("transcript-chaptered")) {
+      // Chaptered: expand/collapse every chapter's <details> at once.
+      btn.textContent = "Expand All Chapters";
+      btn.addEventListener("click", () => {
+        const ds = wrapper.querySelectorAll("details.transcript-chapter");
+        if (!ds.length) return;
+        const open = [...ds].some((d) => !(d as HTMLDetailsElement).open);
+        ds.forEach((d) => ((d as HTMLDetailsElement).open = open));
+        btn.textContent = open
+          ? "Collapse All Chapters"
+          : "Expand All Chapters";
+      });
+    } else {
+      // Flat: lift the scroll cap to show the whole transcript.
+      btn.textContent = "Expand Full Transcript";
+      btn.addEventListener("click", () => {
+        wrapper.classList.toggle("expanded");
+        btn.textContent = wrapper.classList.contains("expanded")
+          ? "Collapse Transcript"
+          : "Expand Full Transcript";
+      });
+    }
     wrapper.appendChild(btn);
   });
 </script>

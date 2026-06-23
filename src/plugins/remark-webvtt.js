@@ -1,4 +1,9 @@
 import { visit } from "unist-util-visit";
+// Astro processes this plugin through Vite/esbuild, so these TS helpers
+// (which use import.meta.glob) bundle into the config graph. The plugin is
+// therefore not loadable by bare Node.
+import { parseChapters } from "../lib/chapters.ts";
+import { resolveSpeaker } from "../lib/speakers.ts";
 
 /**
  * Remark plugin that transforms ```webvtt code blocks into
@@ -16,7 +21,13 @@ export default function remarkWebVtt() {
       const cues = parseWebVtt(node.value);
       if (!cues.length) return;
 
-      const html = renderTranscript(cues, youtube);
+      // A `NOTE chapters` block prepended to the WEBVTT upgrades the flat
+      // transcript to a chaptered, collapsible one. Absent → unchanged flat
+      // render, so existing calls are untouched.
+      const chapters = parseChapters(node.value);
+      const html = chapters.length
+        ? renderChapteredTranscript(cues, chapters, youtube)
+        : renderTranscript(cues, youtube);
 
       parent.children.splice(index, 1, {
         type: "html",
@@ -76,14 +87,17 @@ function parseWebVtt(text) {
       }
 
       const startMs = rawStartMs + offsetMs;
-      const fullText = escapeHtml(rawText);
-      const speakerMatch = fullText.match(/^([^:]+):\s*(.*)/);
+      // Split speaker off the raw (unescaped) text so the speaker string can be
+      // resolved against the registry verbatim (registry aliases hold the raw
+      // Zoom name, e.g. "Cody Burns | >"). Escape the spoken text for output;
+      // the speaker label is escaped at render time.
+      const speakerMatch = rawText.match(/^([^:]+):\s*(.*)/);
       const seconds = Math.max(0, Math.floor(startMs / 1000));
       cues.push({
         start: formatMs(Math.max(0, startMs)),
         seconds,
-        speaker: speakerMatch ? speakerMatch[1] : null,
-        text: speakerMatch ? speakerMatch[2] : fullText,
+        speaker: speakerMatch ? speakerMatch[1].trim() : null,
+        text: escapeHtml(speakerMatch ? speakerMatch[2] : rawText),
       });
     }
     i++;
@@ -118,17 +132,27 @@ function escapeHtml(str) {
     .replace(/"/g, "&quot;");
 }
 
-function renderTranscript(cues, youtube) {
+// Render the cue rows for a list of cues. Speaker labels collapse on
+// consecutive same-speaker cues; prevSpeaker resets per call so each chapter
+// starts with a fresh speaker label.
+function renderCueRows(cues, youtube) {
   let prevSpeaker = null;
-  const rows = cues
+  return cues
     .map((cue) => {
       const sameSpeaker = cue.speaker && cue.speaker === prevSpeaker;
       prevSpeaker = cue.speaker;
 
-      const speaker =
-        cue.speaker && !sameSpeaker
-          ? `<span class="transcript-speaker">${cue.speaker}</span>`
+      let speaker = "";
+      if (cue.speaker && !sameSpeaker) {
+        const resolved = resolveSpeaker(cue.speaker);
+        // Prefer the registry's canonical display name over the raw Zoom label
+        // (e.g. "Cody Burns | >" → "Cody Burns"); fall back to the raw name.
+        const name = escapeHtml(resolved?.displayName ?? cue.speaker);
+        const avatar = resolved?.avatar
+          ? `<img class="transcript-avatar" src="${resolved.avatar}" alt="" width="20" height="20" loading="lazy" />`
           : "";
+        speaker = `<span class="transcript-speaker">${avatar}${name}</span>`;
+      }
       const ts = sameSpeaker
         ? ""
         : `<span class="transcript-ts">${cue.start}</span>`;
@@ -141,6 +165,44 @@ function renderTranscript(cues, youtube) {
       return `<div class="transcript-cue${sameSpeaker ? " transcript-cont" : ""}">${inner}</div>`;
     })
     .join("\n");
+}
 
+function renderTranscript(cues, youtube) {
+  const rows = renderCueRows(cues, youtube);
   return `<div class="transcript-wrapper"><div class="transcript">\n${rows}\n</div></div>`;
+}
+
+// Chaptered transcript: each chapter is a collapsed <details> whose cues are
+// the cues falling in [chapter.start, nextChapter.start). The timestamp is a
+// YouTube deep-link; the title toggles the section. No JS required.
+function renderChapteredTranscript(cues, chapters, youtube) {
+  // Sort by start so an out-of-order NOTE line can't misgroup cues. Cues before
+  // the first chapter fall into it (chapter 1 is anchored at 0:00, so in
+  // practice there are none).
+  const sorted = [...chapters].sort((a, b) => a.start - b.start);
+  const groups = sorted.map(() => []);
+  for (const cue of cues) {
+    let idx = 0;
+    for (let i = 0; i < sorted.length; i++) {
+      if (sorted[i].start <= cue.seconds) idx = i;
+      else break;
+    }
+    groups[idx].push(cue);
+  }
+
+  const sections = sorted
+    .map((ch, i) => {
+      if (!groups[i].length) return ""; // don't render an empty chapter
+      const rows = renderCueRows(groups[i], youtube);
+      const tsLabel = formatMs(ch.start * 1000);
+      const ts = youtube
+        ? `<a class="chapter-ts" href="https://www.youtube.com/watch?v=${youtube}&amp;t=${ch.start}" target="_blank" rel="noopener noreferrer">${tsLabel}</a>`
+        : `<span class="chapter-ts">${tsLabel}</span>`;
+      const summary = `<summary class="chapter-summary">${ts}<span class="chapter-title">${escapeHtml(ch.title)}</span></summary>`;
+      return `<details class="transcript-chapter">${summary}<div class="transcript">\n${rows}\n</div></details>`;
+    })
+    .filter(Boolean)
+    .join("\n");
+
+  return `<div class="transcript-wrapper transcript-chaptered">\n${sections}\n</div>`;
 }

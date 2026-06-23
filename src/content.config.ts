@@ -6,6 +6,12 @@ const calls = defineCollection({
   schema: z.object({
     number: z.number().optional(),
     description: z.string(),
+    // Short one/two-sentence blurb summarizing the call. Distinct from the
+    // long-form `# AI Summary` body.
+    summary: z.string().optional(),
+    // Participants for the call-page roster. Names resolve against the speaker
+    // registry (speakers/speakers.yaml) for display names + avatars.
+    roster: z.array(z.string()).optional(),
     date: z.coerce.date(),
     time: z.string(),
     location: z.string(),

@@ -1,9 +1,9 @@
 import { visit } from "unist-util-visit";
-// Astro processes this plugin through Vite/esbuild, so these TS helpers
-// (which use import.meta.glob) bundle into the config graph. The plugin is
-// therefore not loadable by bare Node.
-import { parseChapters } from "../lib/chapters.ts";
-import { resolveSpeaker } from "../lib/speakers.ts";
+// Single source of truth for the `NOTE chapters` format, shared with the
+// runtime videogen endpoints (Vite/esbuild bundles this TS import into the
+// config graph; the plugin is no longer loadable by bare Node).
+import { parseChapters } from "../lib/videogen/chapters.ts";
+import { resolveSpeaker } from "../lib/videogen/speakers.ts";
 
 /**
  * Remark plugin that transforms ```webvtt code blocks into
@@ -14,6 +14,11 @@ export default function remarkWebVtt() {
   return (tree, vfile) => {
     // Frontmatter is available on the vfile in Astro's remark pipeline
     const youtube = vfile.data?.astro?.frontmatter?.youtube;
+    // Manual offset (seconds) added to every YouTube deep-link `&t=` so the
+    // links land correctly in the uploaded video, which opens with the intro
+    // the render prepends before the recording. Displayed timestamps stay on
+    // the recording timeline; only the link target shifts. Defaults to 0.
+    const youtubeOffset = vfile.data?.astro?.frontmatter?.youtubeOffset ?? 0;
 
     visit(tree, "code", (node, index, parent) => {
       if (node.lang !== "webvtt") return;
@@ -21,13 +26,13 @@ export default function remarkWebVtt() {
       const cues = parseWebVtt(node.value);
       if (!cues.length) return;
 
-      // A `NOTE chapters` block prepended to the WEBVTT upgrades the flat
-      // transcript to a chaptered, collapsible one. Absent → unchanged flat
-      // render, so existing calls are untouched.
+      // A `NOTE chapters` block (prepended by the videogen skill) upgrades the
+      // flat transcript to a chaptered, collapsible one. Absent → unchanged
+      // flat render, so existing calls are untouched.
       const chapters = parseChapters(node.value);
       const html = chapters.length
-        ? renderChapteredTranscript(cues, chapters, youtube)
-        : renderTranscript(cues, youtube);
+        ? renderChapteredTranscript(cues, chapters, youtube, youtubeOffset)
+        : renderTranscript(cues, youtube, youtubeOffset);
 
       parent.children.splice(index, 1, {
         type: "html",
@@ -135,7 +140,7 @@ function escapeHtml(str) {
 // Render the cue rows for a list of cues. Speaker labels collapse on
 // consecutive same-speaker cues; prevSpeaker resets per call so each chapter
 // starts with a fresh speaker label.
-function renderCueRows(cues, youtube) {
+function renderCueRows(cues, youtube, youtubeOffset = 0) {
   let prevSpeaker = null;
   return cues
     .map((cue) => {
@@ -159,7 +164,7 @@ function renderCueRows(cues, youtube) {
       const inner = `${ts}${speaker}<span class="transcript-text">${cue.text}</span>`;
 
       if (youtube) {
-        const url = `https://www.youtube.com/watch?v=${youtube}&amp;t=${cue.seconds}`;
+        const url = `https://www.youtube.com/watch?v=${youtube}&amp;t=${cue.seconds + youtubeOffset}`;
         return `<a href="${url}" target="_blank" rel="noopener noreferrer" class="transcript-cue${sameSpeaker ? " transcript-cont" : ""}">${inner}</a>`;
       }
       return `<div class="transcript-cue${sameSpeaker ? " transcript-cont" : ""}">${inner}</div>`;
@@ -167,18 +172,18 @@ function renderCueRows(cues, youtube) {
     .join("\n");
 }
 
-function renderTranscript(cues, youtube) {
-  const rows = renderCueRows(cues, youtube);
+function renderTranscript(cues, youtube, youtubeOffset = 0) {
+  const rows = renderCueRows(cues, youtube, youtubeOffset);
   return `<div class="transcript-wrapper"><div class="transcript">\n${rows}\n</div></div>`;
 }
 
 // Chaptered transcript: each chapter is a collapsed <details> whose cues are
 // the cues falling in [chapter.start, nextChapter.start). The timestamp is a
 // YouTube deep-link; the title toggles the section. No JS required.
-function renderChapteredTranscript(cues, chapters, youtube) {
+function renderChapteredTranscript(cues, chapters, youtube, youtubeOffset = 0) {
   // Sort by start so an out-of-order NOTE line can't misgroup cues. Cues before
-  // the first chapter fall into it (chapter 1 is anchored at 0:00, so in
-  // practice there are none).
+  // the first chapter fall into it (the videogen skill anchors chapter 1 at
+  // 0:00, so in practice there are none).
   const sorted = [...chapters].sort((a, b) => a.start - b.start);
   const groups = sorted.map(() => []);
   for (const cue of cues) {
@@ -193,10 +198,10 @@ function renderChapteredTranscript(cues, chapters, youtube) {
   const sections = sorted
     .map((ch, i) => {
       if (!groups[i].length) return ""; // don't render an empty chapter
-      const rows = renderCueRows(groups[i], youtube);
+      const rows = renderCueRows(groups[i], youtube, youtubeOffset);
       const tsLabel = formatMs(ch.start * 1000);
       const ts = youtube
-        ? `<a class="chapter-ts" href="https://www.youtube.com/watch?v=${youtube}&amp;t=${ch.start}" target="_blank" rel="noopener noreferrer">${tsLabel}</a>`
+        ? `<a class="chapter-ts" href="https://www.youtube.com/watch?v=${youtube}&amp;t=${ch.start + youtubeOffset}" target="_blank" rel="noopener noreferrer">${tsLabel}</a>`
         : `<span class="chapter-ts">${tsLabel}</span>`;
       const summary = `<summary class="chapter-summary">${ts}<span class="chapter-title">${escapeHtml(ch.title)}</span></summary>`;
       return `<details class="transcript-chapter">${summary}<div class="transcript">\n${rows}\n</div></details>`;

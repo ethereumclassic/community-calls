@@ -1,0 +1,76 @@
+# Glossary of commonly mis-transcribed proper nouns and terms for ETC community
+# calls. The transcript-cleanup step (the `call-markdown` skill) treats each key
+# as the AUTHORITATIVE spelling: it replaces any listed `aliases` (known ASR
+# variants) with the key, and uses the optional `description` to judge whether a
+# fuzzy/uncertain match actually fits the context. When the agent meets a new
+# uncertain proper noun it cannot resolve here, it prompts the user and, once
+# confirmed, appends it to this file so future cleanups get it right.
+#
+# Maintained by hand + the cleanup agent. Update periodically. Call PARTICIPANTS
+# live in speakers.yaml; this file is for names/terms MENTIONED on calls plus
+# project/protocol vocabulary.
+#
+# Shape:  Canonical Name:
+#           description: optional one-line context (helps the agent disambiguate)
+#           aliases: [known ASR mishearings]   # optional
+
+# --- People mentioned on calls ---
+Phyro:
+  description: ETC community contributor / website maintainer
+  aliases: [Firo, Pharo, Fyro]
+Bob Summerwill:
+  description: ETC Cooperative; long-time Ethereum/ETC ecosystem figure
+  aliases: [Bob Sunwell, Bob Summerville, Summerwell, Bob Somerville]
+Charles Hoskinson:
+  description: Cardano founder, Ethereum co-founder
+  aliases: [Charles Oskinson, Oskinson]
+Istora:
+  description: the host (participant; see speakers.yaml) — fix spoken-name slips in the body
+  aliases: [Sora]
+
+# --- Projects / clients / protocol terms ---
+Ethereum Classic:
+  aliases: [Sim Classic, Etherium Classic]
+ethereumclassic.org:
+  aliases: [theoremclassic.org]
+cc.ethereumclassic.org:
+  description: the community-calls site
+  aliases: [cc.theoremclassic.org]
+ECIP-1120:
+  description: Diego's proposed ETC-native alternative (etc1) to adopting eth/69
+eth/69:
+  description: Ethereum wire-protocol version; drops total difficulty from the status message
+  aliases: [F69, eth 69]
+Nethermind:
+  aliases: [Nether mine, Nethermine]
+core-geth:
+  description: the current ETC client (lowercase, hyphenated — the github.com/etclabscore/core-geth repo name)
+  aliases: [CoreGet, Core Geth, Corgeth, CoreGath, CoreGef, Corgieth, Corgath, Colgate, CoreGeth, Core-Geth]
+Geth Classic:
+  description: Diego's new ETC client; a minimal proof-of-work fork of upstream go-ethereum, positioned as core-geth's successor
+  aliases: [GoEthereum Classic, Go Ethereum Classic, going through Classic]
+retc:
+  description: coined name (heard on call 55) for a Rust/reth-based Ethereum Classic client
+  aliases: [RETSE, Retz]
+ETCMC:
+  description: ETC entity referenced on calls (operates a large number of nodes); acronym kept as-is
+go-ethereum:
+  description: the upstream Go Ethereum client Diego forks (the ETC fork of it is Geth Classic)
+  aliases: [GoEthereum, Go Ethereum]
+Besu:
+  description: Hyperledger Besu, an Ethereum execution client
+  aliases: [Vesu]
+NourishMint:
+  description: Istora's green-room app paying on-chain rewards on ETC, launching next call
+  aliases: [Nourishment]
+eth/68:
+  description: Ethereum wire-protocol version (predecessor to eth/69)
+  aliases: [eth 68, ETH68]
+MESS:
+  description: Modified Exponential Subjective Scoring (ETC 51%-attack defense)
+2Miners:
+  aliases: [two miners, 2 miners]
+Antpool:
+  aliases: [AMP pool, Ant pool]
+dApp:
+  aliases: [DAP]

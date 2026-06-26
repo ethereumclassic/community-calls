@@ -25,3 +25,29 @@ pnpm-debug.log*
 
 # VTT download cache
 scripts/.vtt-cache/
+
+# Videogen pipeline cache + outputs
+.cache/
+test-results/
+playwright-report/
+tests/videogen/fixtures/*.m4a
+# Rendered MP4s and the raw/working audio (.m4a, often 70MB+) stay out of git.
+# The committed, distributable audio is the compressed mono <NN>/audio.mp3;
+# vtt/meta/avatars/raw.vtt under public/videogen/<NN>/ are also committable.
+public/videogen/**/*.mp4
+public/videogen/**/*.m4a
+# Renders and working audio are dev-only — never commit them. Covers the
+# public-root handoff output (<YYMMDD>-etccc-<NN>.mp4) and any ad-hoc *-test.mp4.
+# The committable distributable audio is the mp3 under public/videogen/<NN>/.
+public/*.mp4
+public/*.m4a
+
+# Python bytecode cache
+__pycache__/
+*.pyc
+
+# Episode media + reference transcripts are NOT stored in git (see TODO.md on
+# media hosting): raw transcripts and the per-call distributable audio mp3 stay
+# local. (The reusable audiogen jingle IS committed.)
+/transcripts/
+public/videogen/**/*.mp3

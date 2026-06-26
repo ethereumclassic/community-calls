@@ -1,0 +1,143 @@
+---
+import "../styles/index.css";
+import "../styles/videogen.css";
+import "@fontsource-variable/jetbrains-mono";
+import "@fontsource/instrument-serif/400.css";
+import "@fontsource/instrument-serif/400-italic.css";
+import { devOnlyGuard } from "../lib/devOnly";
+
+// Dev-only stage for the videogen driver + live preview. All script + CSS
+// lives in src/lib/videogen/ and src/styles/videogen.css; this page is just
+// the markup shell + a boot call. The build hook in astro.config.mjs strips
+// the route and asset chunks from dist/ so none of this ships to prod.
+const guard = devOnlyGuard(Astro);
+if (guard) return guard;
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <title>videogen</title>
+  </head>
+  <body>
+    <div class="stage unhydrated" id="stage">
+      <div class="header">
+        <div class="left">
+          <img class="logo" src="/etc-logo.svg" alt="ETC" />
+          <div class="show-title">
+            <div class="l1">Ethereum Classic</div>
+            <div class="l2">Community Calls</div>
+          </div>
+        </div>
+        <div class="right">
+          <div class="ep-meta">
+            <span class="num" id="call-num"></span><span id="date"></span>
+          </div>
+          <div class="ep-title" id="title"></div>
+        </div>
+      </div>
+
+      <div class="speaker-card" id="speaker-card">
+        <div class="avatar-circle size-lg" id="avatar">
+          <span id="initials">?</span>
+        </div>
+        <div>
+          <div class="speaker-name" id="speaker">Speaker</div>
+          <div class="speaker-role" id="role">Contributor</div>
+        </div>
+      </div>
+
+      <canvas class="viz" id="viz" width="1920" height="1080"></canvas>
+      <div class="viz ama hidden" id="ama"></div>
+
+      <div class="roster hidden" id="roster"></div>
+
+      <div class="subtitle" id="subtitle"></div>
+
+      <div class="chapter-bar" id="chip">
+        <div class="chapter-label" id="chip-title"></div>
+        <div class="chapter-track" id="chip-track"></div>
+      </div>
+
+      <!-- Center crosshair for visual alignment debugging (?guides=1).
+           Scoped to the stage so it marks the 1920x1080 stage center. -->
+      <div class="center-guides hidden" id="guides">
+        <div class="gv"></div>
+        <div class="gh"></div>
+      </div>
+    </div>
+
+    <div class="slides hidden" id="slides">
+      <div class="slides-inner" id="slides-inner"></div>
+    </div>
+
+    <!-- Fade-to-black overlay for the ending; opacity driven by the transport
+         so both the live preview and the captured frames fade out together. -->
+    <div class="fade-black" id="fade-black"></div>
+
+    <audio id="jingle-audio" preload="auto" class="hidden"></audio>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+    </div>
+
+    <audio id="preview-audio" preload="auto" class="hidden"></audio>
+    <div id="preview-controls" class="preview-controls hidden">
+      <button id="preview-play" aria-label="Play/Pause">▶</button>
+      <input
+        id="preview-scrub"
+        type="range"
+        min="0"
+        max="1"
+        step="0.01"
+        value="0"
+      />
+      <span class="pt" id="preview-time">00:00 / 00:00</span>
+      <button id="preview-restart" class="secondary" aria-label="Restart"
+        >⟲</button
+      >
+      <a id="preview-download" class="dl hidden" target="_blank" rel="noopener"
+        >MP4 ↗</a
+      >
+      <span class="slide-jumps" id="slide-jumps">
+        <button data-slide="hero" class="secondary">hero</button>
+        <button data-slide="title" class="secondary">title</button>
+        <button data-slide="toc" class="secondary">toc</button>
+        <button data-slide="stats" class="secondary">stats</button>
+        <button data-slide="thanks" class="secondary">thanks</button>
+        <button data-slide="logo" class="secondary">logo</button>
+        <button data-slide="off" class="secondary" id="slide-off">×</button>
+      </span>
+    </div>
+
+    <div id="rendered-player" class="rendered-player hidden">
+      <h4>Rendered Output</h4>
+      <video id="rendered-video" controls preload="metadata"></video>
+    </div>
+
+    <div id="landing" class="landing hidden">
+      <h1>videogen</h1>
+      <p>
+        DOM-driven, seekable video stage for ETC Community Calls. Pass a job via <code
+          >?job=&lt;url&gt;</code
+        > (JSON), legacy
+        <code>?audio=&amp;vtt=&amp;speaker=</code>, or have the
+        <code>scripts/videogen.mjs</code> driver inject <code>window.__job</code
+        >. Append <code>&amp;preview=1</code> for transport controls.
+      </p>
+      <p class="samples">
+        Process a call with the <code>/videogen</code> skill (it derives the job
+        from the call markdown and drops the audio under
+        <code>public/videogen/&lt;NN&gt;/</code>), then open
+        <code>?job=/videogen/&lt;NN&gt;/job.json&amp;preview=1</code>.
+      </p>
+      <footer>dev only, gated out of production builds</footer>
+    </div>
+
+    <script>
+      import { boot } from "../lib/videogen/boot";
+      boot();
+    </script>
+  </body>
+</html>

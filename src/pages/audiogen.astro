@@ -1,0 +1,317 @@
+---
+// Dev-only sound-design scratchpad for the ETC Community Call intro/outro
+// jingle, powered by Strudel (https://strudel.cc). Live-edit the pattern, play
+// it, and record a take to WAV. All logic lives in src/lib/audiogen/; Strudel
+// itself loads from a CDN (it's AGPL-3.0, so we never bundle it) and the whole
+// route is stripped from prod by astro.config.mjs. The guard below redirects
+// if a dev build ever reaches a non-dev runtime.
+import { devOnlyGuard } from "../lib/devOnly";
+const guard = devOnlyGuard(Astro);
+if (guard) return guard;
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>audiogen — ETC jingle (Strudel)</title>
+    <!-- Strudel global build (UMD). is:inline so Astro/Vite leaves it alone and
+         it defines window.initStrudel before the module boot runs. -->
+    <script is:inline src="https://unpkg.com/@strudel/web@1.3.0"></script>
+  </head>
+  <body>
+    <main class="wrap">
+      <header>
+        <h1>audiogen</h1>
+        <p class="sub">
+          layered acid composer in
+          <a href="https://strudel.cc" target="_blank" rel="noopener">Strudel</a
+          >. Pick one option per layer (click again to mute it) to compose a
+          track; it recomposes and plays live. State is saved in the URL. Edit
+          the generated code directly (<kbd>Ctrl/Cmd+Enter</kbd> to replay), tweak
+          tempo, or record a take. Dev only, stripped from production.
+        </p>
+      </header>
+
+      <div id="layers" class="layers"></div>
+
+      <textarea id="code" spellcheck="false" autocomplete="off"></textarea>
+
+      <section class="controls">
+        <div class="row">
+          <button id="play" class="primary">▶ Play</button>
+          <button id="stop" class="secondary">■ Stop</button>
+          <button id="record" class="secondary">● Record WAV</button>
+          <button id="play-rec" class="secondary">♪ Play recording</button>
+          <label class="len">
+            tempo <span id="bpm-out">140</span> BPM
+            <input
+              id="bpm"
+              type="range"
+              min="90"
+              max="190"
+              step="1"
+              value="140"
+            />
+          </label>
+        </div>
+
+        <div class="row">
+          <span id="status" class="status">loading…</span>
+          <a id="download" class="dl hidden" download>WAV ↓</a>
+        </div>
+
+        <audio id="preview" controls preload="none" class="hidden"></audio>
+        <!-- committed reference take, high-quality MP3. Served only in dev from
+             assets/audiogen/ by a Vite plugin; never copied into the build. -->
+        <audio
+          id="saved-audio"
+          controls
+          preload="none"
+          src="/audiogen/recording.mp3"
+          class="hidden"></audio>
+      </section>
+
+      <footer>
+        <p>
+          Layer options live in <code>src/lib/audiogen/layers.ts</code> (16 per layer;
+          original "Melting Submarine" tune by Felix Roos, CC BY-NC-SA 4.0). Reference:
+          <a href="https://strudel.cc/learn" target="_blank" rel="noopener"
+            >strudel.cc/learn</a
+          >.
+        </p>
+      </footer>
+    </main>
+
+    <script>
+      import { boot } from "../lib/audiogen/boot";
+      boot();
+    </script>
+
+    <!-- is:global because the layer chips are created in JS; Astro's scoped
+         styles only attach to template elements, so dynamic nodes (the .opt
+         chips + their .active highlight) would otherwise be unstyled. This
+         page is a standalone document, so global is safe here. -->
+    <style is:global>
+      :root {
+        color-scheme: dark;
+        --bg: #0c0e12;
+        --panel: #15181f;
+        --ink: #e8ecf2;
+        --muted: #8b94a3;
+        --acid: #b6ff3a;
+        --border: #262b35;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(
+          120% 80% at 50% -10%,
+          #16201a 0%,
+          var(--bg) 60%
+        );
+        color: var(--ink);
+        font:
+          14px/1.5 ui-monospace,
+          "JetBrains Mono",
+          monospace;
+        display: grid;
+        place-items: center;
+        padding: 2rem;
+      }
+      .wrap {
+        width: min(820px, 100%);
+      }
+      .layers {
+        display: grid;
+        gap: 0.7rem;
+        margin: 1.25rem 0;
+      }
+      .layer {
+        display: grid;
+        gap: 0.35rem;
+      }
+      .layer-head {
+        display: flex;
+        align-items: baseline;
+        gap: 0.5rem;
+      }
+      .layer-name {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+        min-width: 4rem;
+      }
+      .layer-sel {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: var(--acid);
+      }
+      .opts {
+        display: grid;
+        grid-template-columns: repeat(16, 1fr);
+        gap: 0.25rem;
+      }
+      .opt {
+        padding: 0.4rem 0;
+        font-size: 0.72rem;
+        font-weight: 600;
+        background: var(--panel);
+        color: var(--muted);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        cursor: pointer;
+        transition:
+          border-color 0.12s,
+          background 0.12s,
+          color 0.12s,
+          transform 0.05s;
+      }
+      .opt:hover {
+        border-color: var(--acid);
+        color: var(--ink);
+      }
+      .opt:active {
+        transform: translateY(1px);
+      }
+      .opt.active {
+        background: var(--acid);
+        color: #0a0d07;
+        border-color: var(--acid);
+      }
+      @media (max-width: 560px) {
+        .opts {
+          grid-template-columns: repeat(8, 1fr);
+        }
+      }
+      h1 {
+        margin: 0 0 0.25rem;
+        font-size: 2.4rem;
+        letter-spacing: -0.03em;
+        color: var(--acid);
+        text-shadow: 0 0 24px rgba(182, 255, 58, 0.25);
+      }
+      .sub,
+      footer p {
+        color: var(--muted);
+        font-size: 0.85rem;
+      }
+      a {
+        color: var(--acid);
+      }
+      kbd {
+        background: #000;
+        border: 1px solid var(--border);
+        border-radius: 4px;
+        padding: 0.05em 0.4em;
+        font-size: 0.85em;
+      }
+      code {
+        background: #000;
+        color: var(--acid);
+        padding: 0.1em 0.35em;
+        border-radius: 4px;
+        font-size: 0.85em;
+      }
+      textarea#code {
+        width: 100%;
+        height: 340px;
+        margin: 1.25rem 0 1rem;
+        padding: 1rem;
+        background: #07090c;
+        color: #d7e6c4;
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        font:
+          13px/1.6 ui-monospace,
+          "JetBrains Mono",
+          monospace;
+        resize: vertical;
+        tab-size: 2;
+      }
+      textarea#code:focus {
+        outline: none;
+        border-color: var(--acid);
+      }
+      .controls {
+        padding: 1.1rem;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        display: grid;
+        gap: 0.9rem;
+      }
+      .row {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .len {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        margin-left: auto;
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      .len span {
+        color: var(--ink);
+        font-weight: 600;
+      }
+      input[type="range"] {
+        accent-color: var(--acid);
+      }
+      button {
+        font: inherit;
+        font-weight: 600;
+        padding: 0.55rem 1rem;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        cursor: pointer;
+        transition:
+          transform 0.05s,
+          background 0.15s;
+      }
+      button:active {
+        transform: translateY(1px);
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: wait;
+      }
+      .primary {
+        background: var(--acid);
+        color: #0a0d07;
+        border-color: var(--acid);
+      }
+      .secondary {
+        background: #1f242e;
+        color: var(--ink);
+      }
+      .status {
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
+      .dl {
+        margin-left: auto;
+        text-decoration: none;
+        border: 1px solid var(--acid);
+        padding: 0.45rem 0.8rem;
+        border-radius: 8px;
+        font-size: 0.82rem;
+      }
+      .hidden {
+        display: none;
+      }
+      audio {
+        width: 100%;
+      }
+    </style>
+  </body>
+</html>

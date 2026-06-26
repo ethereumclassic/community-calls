@@ -1,12 +1,13 @@
 // Single source of truth for the speaker registry (speakers/speakers.yaml) and
 // for resolving a transcript/roster name → its display name + served avatar URL.
-// Used by the call-page roster and the transcript renderer.
+// Used by the videogen endpoints and the call-page roster. The render driver
+// reads the same YAML directly (it can't go through Vite).
 //
-// Avatars are served from public/speakers/ (shipped verbatim to the site root),
-// so an avatar's URL is just its public path. This must work both in the Astro
-// component graph (CallRoster) and in the config-context Vite graph where the
-// remark transcript plugin runs — a plain public path resolves identically in
-// both, unlike import.meta.glob('?url'), which only emits assets in the former.
+// Avatar images live in public/speakers/ and are referenced by a plain
+// /speakers/<file> URL. They must be a real public asset (not an
+// import.meta.glob ?url): the transcript is built by the remark-webvtt plugin,
+// which runs in Vite's config graph where ?url does NOT emit/hash an asset — it
+// returns an unservable path that 404s in prod. A public/ file always ships.
 
 import { parse as parseYaml } from "yaml";
 
@@ -36,8 +37,6 @@ const REGISTRY: Record<string, SpeakerRecord> = rawYaml
   ? (parseYaml(rawYaml) ?? {})
   : {};
 
-// A bare filename in the registry ("istora.png") maps to the public path
-// /speakers/istora.png (the file lives in public/speakers/).
 function avatarUrl(rec: SpeakerRecord): string | null {
   if (rec.avatar) return `/speakers/${rec.avatar}`;
   if (rec.github) return `https://github.com/${rec.github}.png?size=256`;

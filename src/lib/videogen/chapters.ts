@@ -1,9 +1,16 @@
-// Parses the `NOTE chapters` lines out of a call transcript's ```webvtt block.
-// A chapter list (prepended to the WEBVTT) upgrades the flat transcript on the
-// call page to a chaptered, collapsible one. Consumed by the build-time
-// remark-webvtt plugin (src/plugins/remark-webvtt.js).
+// Pulls the transcript + chapters out of a call markdown body. The transcript
+// is the ```webvtt fenced block; chapters are the `NOTE chapters` lines inside
+// it. This is the runtime (endpoint) counterpart to the build-time parsing in
+// src/plugins/remark-webvtt.js — both read the same `NOTE chapters` format.
 
 type RawChapter = { title: string; start: number };
+
+// Extract the first ```webvtt fenced block's contents from a markdown string.
+// Tolerates CRLF line endings (a Windows-edited markdown file).
+export function extractWebvtt(markdown: string): string | null {
+  const m = markdown.match(/```webvtt[ \t]*\r?\n([\s\S]*?)\r?\n```/);
+  return m ? m[1] : null;
+}
 
 // Parse `NOTE chapters` lines ([h:]mm:ss title) into { start (seconds), title }.
 export function parseChapters(vtt: string): RawChapter[] {

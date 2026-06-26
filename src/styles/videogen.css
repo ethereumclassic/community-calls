@@ -1,0 +1,1088 @@
+/* /videogen page — full-stage layout for the offline driver + live preview.
+   Kept dev-only; the build hook in astro.config.mjs strips both the route
+   and these chunks from dist/. */
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  overflow: hidden;
+}
+body::before {
+  display: none;
+}
+
+.stage {
+  position: relative;
+  width: 1920px;
+  height: 1080px;
+  background:
+    radial-gradient(
+      circle at 30% 20%,
+      rgba(122, 238, 168, 0.08),
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(122, 238, 168, 0.05),
+      transparent 50%
+    ),
+    #0a0a0c;
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+  overflow: hidden;
+}
+
+/* ───────────────────────── Header ───────────────────────── */
+.header {
+  position: absolute;
+  top: 64px;
+  left: 96px;
+  right: 96px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  color: var(--color-text-primary);
+  z-index: 5;
+}
+.header .left {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+}
+.header .logo {
+  width: 64px;
+  height: 64px;
+  flex-shrink: 0;
+}
+/* Mirrors the site header (src/components/Header.astro): JetBrains Mono,
+   "Ethereum Classic" semibold on top, "Community Calls" in ETC green below. */
+.header .show-title {
+  font-family: var(--font-mono);
+  line-height: 1.15;
+}
+.header .show-title .l1 {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+.header .show-title .l2 {
+  font-size: 26px;
+  color: var(--color-etc-green);
+}
+.header .right {
+  text-align: right;
+}
+.header .ep-meta {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.15;
+}
+/* Space the number off the date now that the separator is gone (kept inline
+   so the .right text-align keeps it flush-right). */
+.header .ep-meta .num {
+  margin-right: 0.5em;
+}
+.header .ep-title {
+  font-family: var(--font-display);
+  font-size: 66px;
+  line-height: 1;
+  color: var(--color-etc-green);
+  margin-top: 6px;
+}
+
+/* ───────────────── Legacy single-speaker chip ───────────────── */
+.speaker-card {
+  position: absolute;
+  top: 180px;
+  left: 96px;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  padding: 24px 32px 24px 24px;
+  background: rgba(17, 17, 20, 0.7);
+  border: 1px solid rgba(122, 238, 168, 0.2);
+  border-radius: 18px;
+  backdrop-filter: blur(8px);
+  z-index: 5;
+}
+.speaker-name {
+  font-family: var(--font-display);
+  font-size: 40px;
+  line-height: 1;
+  color: var(--color-text-primary);
+}
+.speaker-role {
+  font-size: 18px;
+  color: var(--color-text-muted);
+  margin-top: 8px;
+  letter-spacing: 0.06em;
+}
+
+/* ────────────────── Roster (participant cards) ──────────────────
+   Cards are absolutely positioned (no flex) because the native card size
+   is 240px to match the active state — flex gaps can't go negative, and we
+   want a tighter visual spacing than 240px per slot. --slot-x is computed
+   by JS so the layout adapts to any participant count. */
+.roster {
+  position: absolute;
+  top: 200px;
+  left: 0;
+  right: 0;
+  height: 280px;
+  z-index: 5;
+  pointer-events: none;
+}
+.participant {
+  position: absolute;
+  top: 0;
+  left: var(--slot-x, 0px);
+  /* Pin to the native avatar width so the card center is always the avatar
+     center, regardless of name length. Without this a long name widens the
+     card and (via align-items:center) pushes the avatar off the slot center,
+     so --slot-x/--center-x no longer land it on the stage centerline. */
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  opacity: 0.55;
+  transform: scale(0.4);
+  transform-origin: 50% 0%;
+  transition:
+    transform 620ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    opacity 620ms ease;
+  will-change: transform, opacity;
+}
+.participant.active {
+  opacity: 1;
+  transform: translateX(var(--center-x, 0px)) translateY(150px) scale(1);
+  z-index: 10;
+}
+
+/* Avatar at native (active) display size so the active card paints 1:1
+   for crispness; inactive shrinks via parent transform. */
+.avatar-circle {
+  width: 240px;
+  height: 240px;
+  border-radius: 50%;
+  background: var(--color-surface-elevated);
+  border: 3px solid rgba(122, 238, 168, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 90px;
+  color: var(--color-etc-green);
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  position: relative;
+  flex-shrink: 0;
+  transition:
+    border-color 620ms ease,
+    box-shadow 620ms ease;
+}
+.avatar-circle.size-lg {
+  width: 240px;
+  height: 240px;
+  font-size: 90px;
+}
+.avatar-circle img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.participant.active .avatar-circle {
+  border-color: var(--color-etc-green);
+  box-shadow:
+    0 0 0 4px rgba(122, 238, 168, 0.18),
+    0 16px 48px rgba(122, 238, 168, 0.25),
+    0 0 80px rgba(122, 238, 168, 0.35);
+}
+.participant .pname {
+  font-family: var(--font-display);
+  font-size: 60px;
+  color: var(--color-etc-green);
+  text-align: center;
+  line-height: 1;
+  /* Overflow the 240px card symmetrically instead of widening it, so the name
+     stays centered under the avatar without shifting it. */
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 620ms ease;
+}
+.participant.active .pname {
+  opacity: 1;
+}
+
+/* ───────────────────────── Viz layer ─────────────────────────
+   Sits behind everything; #viz is the deterministic canvas fallback used by
+   the offline render path, #ama hosts audioMotion-analyzer in preview. */
+.viz {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+#ama canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* Segmented chapter timeline across the bottom. One thin segment per
+   chapter: done = solid green pill, future = faint pill, current expands
+   horizontally (flex-grow) but keeps the same height as its neighbours.
+   The current chapter title sits on the line above. */
+.chapter-bar {
+  position: absolute;
+  left: 24px;
+  right: 24px;
+  bottom: 24px;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  opacity: 0;
+  transition: opacity 400ms ease;
+}
+.chapter-bar.visible {
+  opacity: 1;
+}
+.chapter-label {
+  font-family: var(--font-display);
+  font-size: 40px;
+  color: var(--color-etc-green);
+  line-height: 1;
+  /* Slide right with the current segment as chapters complete. --label-x
+     is set in JS to (idx × (segWidth + gap)) so the label's left edge
+     aligns with the current expanded chapter's left edge. */
+  padding-left: var(--label-x, 0px);
+  opacity: 0;
+  transform: translateY(-3px);
+  transition:
+    opacity 320ms ease,
+    transform 320ms ease,
+    padding-left 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.chapter-label.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.chapter-track {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 10px;
+}
+.chapter-segment {
+  position: relative;
+  height: 10px;
+  flex: 0 0 10px; /* default: thin "pill" for done / future */
+  border-radius: 5px;
+  background: rgba(122, 238, 168, 0.16);
+  overflow: hidden;
+  transition:
+    flex-basis 600ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    flex-grow 600ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    background-color 320ms ease;
+}
+.chapter-segment.done {
+  background: rgba(122, 238, 168, 0.9);
+}
+.chapter-segment.future {
+  background: rgba(122, 238, 168, 0.14);
+}
+.chapter-segment.current {
+  flex: 1 1 0;
+  background: rgba(122, 238, 168, 0.14);
+}
+.chapter-fill {
+  position: absolute;
+  inset: 0;
+  width: 0%;
+  background: linear-gradient(
+    90deg,
+    rgba(122, 238, 168, 0.75),
+    rgba(160, 255, 200, 0.95)
+  );
+  border-radius: 5px;
+  transition: width 220ms linear;
+}
+.chapter-segment.done .chapter-fill {
+  width: 100%;
+  transition: none;
+}
+.chapter-segment.future .chapter-fill {
+  width: 0%;
+  transition: none;
+}
+
+/* ──────────────────── Pre/Post-roll slide deck ────────────────────
+   Full-canvas overlay above the stage. Each slide cross-fades in on its
+   own absolutely-positioned wrapper. */
+.slides {
+  position: absolute;
+  inset: 0;
+  width: 1920px;
+  height: 1080px;
+  background: #0a0a0c;
+  z-index: 100;
+  overflow: hidden;
+}
+
+/* Fade-to-black overlay for the ending. Sits above the stage and the slide
+   overlay (z 100); opacity is set by the preview transport each frame. */
+.fade-black {
+  position: absolute;
+  inset: 0;
+  width: 1920px;
+  height: 1080px;
+  background: #000;
+  opacity: 0;
+  z-index: 500;
+  pointer-events: none;
+}
+
+/* Center crosshair for visual alignment debugging (?guides=1). Sits above
+   everything, never intercepts pointer events. */
+.center-guides {
+  position: absolute;
+  inset: 0;
+  z-index: 1000;
+  pointer-events: none;
+}
+.center-guides .gv,
+.center-guides .gh {
+  position: absolute;
+  background: rgba(255, 0, 128, 0.7);
+}
+.center-guides .gv {
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1px;
+  transform: translateX(-0.5px);
+}
+.center-guides .gh {
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1px;
+  transform: translateY(-0.5px);
+}
+.slides-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 96px;
+  opacity: 0;
+  transition: opacity 700ms ease;
+  /* Opaque background so a slide fully covers the one it's cross-fading with
+     (otherwise the outgoing slide's content shows through the incoming one). */
+  background: var(--color-void, #0a0a0c);
+}
+.slide.visible {
+  opacity: 1;
+}
+
+/* ─────────────────── OG-style shared chrome ───────────────────
+   Decorative SVG line pattern, soft border frame, four corner brackets,
+   and a glowy ETC logo — mirrored from public/og.png. The .og class on
+   the slide root suppresses .slide's flex centring so each variant can
+   own its own layout (logo-left for title/logo, centred for the rest). */
+.slide.og {
+  display: block;
+  padding: 0;
+}
+.og-bg {
+  position: absolute;
+  inset: 0;
+  opacity: 0.04;
+  pointer-events: none;
+}
+.og-bg svg {
+  width: 100%;
+  height: 100%;
+}
+.og-border {
+  position: absolute;
+  inset: 24px;
+  border: 1px solid rgba(122, 238, 168, 0.18);
+  border-radius: 16px;
+  pointer-events: none;
+}
+.og-corner {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  border-color: var(--color-etc-green);
+  opacity: 0.45;
+  pointer-events: none;
+}
+.og-corner-tl {
+  top: 24px;
+  left: 24px;
+  border-top: 2px solid;
+  border-left: 2px solid;
+}
+.og-corner-tr {
+  top: 24px;
+  right: 24px;
+  border-top: 2px solid;
+  border-right: 2px solid;
+}
+.og-corner-bl {
+  bottom: 24px;
+  left: 24px;
+  border-bottom: 2px solid;
+  border-left: 2px solid;
+}
+.og-corner-br {
+  bottom: 24px;
+  right: 24px;
+  border-bottom: 2px solid;
+  border-right: 2px solid;
+}
+
+.og-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 96px;
+  padding: 64px 128px;
+}
+.og-logo-wrap {
+  position: relative;
+  flex-shrink: 0;
+  width: 320px;
+  height: 320px;
+}
+.og-logo-glow {
+  position: absolute;
+  inset: 0;
+  background: rgba(111, 207, 151, 0.25);
+  filter: blur(64px);
+  border-radius: 50%;
+  transform: scale(1.4);
+}
+.og-logo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 30px rgba(122, 238, 168, 0.35));
+}
+.og-logo.big {
+  width: 100%;
+  height: 100%;
+}
+.og-stage.logo-only {
+  justify-content: center;
+}
+
+.og-text {
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+/* "Ethereum Classic Community Calls" on a single line (white + green). */
+.og-wordmark {
+  font-family: var(--font-mono);
+  font-size: 38px;
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  margin-bottom: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+.og-wordmark .l1,
+.og-wordmark .l2 {
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+/* Number + human-readable date. Number uses the header (display) font and is
+   sized up so it reads as the lead-in to the episode name. */
+.og-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+  align-items: baseline;
+  margin-bottom: 18px;
+}
+/* Title-slide text is all white; only the logo carries the green. */
+.og-meta .num,
+.og-meta .date {
+  font-family: var(--font-display);
+  font-size: 60px;
+  line-height: 1;
+  color: var(--color-text-primary);
+}
+.og-title {
+  font-family: var(--font-display);
+  font-size: 168px;
+  line-height: 1;
+  color: var(--color-text-primary);
+  margin: 0;
+  text-shadow: 0 0 38px rgba(160, 255, 200, 0.18);
+}
+/* ── Episode title slide — centred; fonts mirror the main-view header
+   (mono #number/date in white, Instrument-Serif title in green). ───────── */
+.og-content.title-content {
+  gap: 30px;
+  padding: 0 160px;
+}
+.title-meta {
+  display: flex;
+  gap: 28px;
+  align-items: baseline;
+  font-family: var(--font-mono);
+  font-size: 46px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--color-text-primary);
+}
+.title-name {
+  font-family: var(--font-display);
+  font-size: 150px;
+  line-height: 1;
+  margin: 0;
+  text-align: center;
+  color: var(--color-etc-green);
+  text-shadow: 0 0 36px rgba(122, 238, 168, 0.22);
+}
+.title-summary {
+  font-family: var(--font-display);
+  font-size: 50px;
+  line-height: 1.4;
+  margin: 8px 0 0;
+  max-width: 1400px;
+  text-align: center;
+  color: var(--color-text-primary);
+}
+
+/* Centred-content variant used by TOC / Summary / Stats / Thanks */
+.og-content {
+  position: absolute;
+  inset: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 36px;
+}
+.og-heading {
+  font-family: var(--font-display);
+  font-size: 96px;
+  color: var(--color-etc-green);
+  margin: 0;
+  text-shadow: 0 0 32px rgba(160, 255, 200, 0.25);
+  text-align: center;
+}
+
+/* "Topics Discussed" list — two columns of chapter titles (no number or
+   timestamp), each clamped to two lines, under a heading. */
+.og-content.toc-content {
+  inset: 56px;
+  gap: 30px;
+}
+.toc-heading {
+  font-size: 84px;
+}
+.toc-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  column-count: 2;
+  column-gap: 44px;
+  width: 1760px;
+}
+.toc-list li {
+  break-inside: avoid;
+  margin-bottom: 26px;
+  padding: 26px 38px;
+  background: rgba(17, 17, 20, 0.6);
+  border: 1px solid rgba(122, 238, 168, 0.18);
+  border-radius: 14px;
+}
+.toc-list .title {
+  font-family: var(--font-display);
+  font-size: 56px;
+  line-height: 1.18;
+  color: var(--color-text-primary);
+  /* Clamp long titles to two lines. */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Summary body — larger type now that the blurb is short. */
+.summary-body {
+  font-family: var(--font-display);
+  font-size: 62px;
+  line-height: 1.4;
+  color: var(--color-text-primary);
+  max-width: 1500px;
+  margin: 0;
+  text-align: center;
+}
+
+/* ── Hero / main-title slide — reproduces the landing-page hero ─────────── */
+.slide-hero {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(
+      circle at 50% 38%,
+      rgba(122, 238, 168, 0.07),
+      transparent 55%
+    ),
+    var(--color-void, #0a0a0c);
+}
+/* Faint grid (landing body::after). */
+.hero-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image:
+    linear-gradient(var(--color-etc-green) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-etc-green) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.hero-logo-wrap {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  margin-bottom: 52px;
+  /* Clearly-visible bob within the ~4.5s the slide is on screen. Promote to its
+     own compositor layer so the translate is a cheap composite (otherwise the
+     filtered children below re-rasterize every frame and the bob stutters). */
+  animation: hero-float 3.2s ease-in-out infinite;
+  will-change: transform;
+}
+/* Soft green halo that breathes. Animate ONLY opacity — animating its scale
+   would re-rasterize the 56px blur every frame (the choppiness). Static scale. */
+.hero-logo-glow {
+  position: absolute;
+  inset: 0;
+  background: rgba(122, 238, 168, 0.22);
+  border-radius: 50%;
+  filter: blur(56px);
+  transform: scale(1.55);
+  animation: hero-glow 3.2s ease-in-out infinite;
+  will-change: opacity;
+}
+/* Static drop-shadow (a drop-shadow keyframe re-rasterizes the filter every
+   frame); the breathing halo above carries the pulse instead. */
+.hero-logo {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 30px rgba(122, 238, 168, 0.35));
+}
+@keyframes hero-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-24px);
+  }
+}
+@keyframes hero-glow {
+  0%,
+  100% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.hero-title {
+  font-family: var(--font-display);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0 0 40px;
+  font-size: 132px;
+  line-height: 1;
+  color: #f3f4f6;
+  white-space: nowrap;
+}
+/* "Community Calls" carries the green glow via the global .text-glow class. */
+.hero-sub {
+  font-family: var(--font-mono);
+  font-size: 34px;
+  line-height: 1.4;
+  color: #9ca3af;
+  max-width: 1240px;
+  margin: 0;
+}
+.hero-link {
+  color: var(--color-etc-green);
+  text-decoration: underline;
+  text-decoration-color: rgba(122, 238, 168, 0.5);
+  text-underline-offset: 4px;
+}
+/* CRT scanline overlay — the /videogen page disables the global body::before,
+   so the hero carries its own (same recipe as base.css). */
+.hero-scanlines {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.03) 2px,
+    rgba(0, 0, 0, 0.03) 4px
+  );
+}
+
+/* Stats */
+.stats-body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.stats-chart {
+  flex-shrink: 0;
+}
+.stats-svg-wrap {
+  position: relative;
+}
+.stats-pin {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--color-surface-elevated);
+  border: 3px solid var(--color-etc-green);
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 26px;
+  color: var(--color-etc-green);
+}
+.stats-pin img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.stats-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-family: var(--font-mono);
+  font-size: 26px;
+  min-width: 480px;
+}
+.stats-legend li {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 14px;
+  background: rgba(17, 17, 20, 0.6);
+  border-radius: 8px;
+}
+.stats-legend .swatch {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+}
+.stats-legend .name {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--color-text-primary);
+}
+.stats-legend .tval {
+  font-size: 20px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.06em;
+}
+
+/* Thanks slide body + URL chip */
+.thanks-body {
+  font-family: var(--font-mono);
+  font-size: 28px;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+.thanks-url {
+  font-family: var(--font-mono);
+  font-size: 44px;
+  color: var(--color-text-primary);
+  letter-spacing: 0.04em;
+  padding: 16px 32px;
+  border: 1px solid rgba(122, 238, 168, 0.4);
+  border-radius: 14px;
+  background: rgba(17, 17, 20, 0.6);
+  margin-top: 6px;
+}
+
+/* Logo-only slide uses the og-stage with logo-only modifier. */
+.slide-logo .og-logo-wrap {
+  width: 460px;
+  height: 460px;
+}
+
+/* ───────────────────────── Subtitle ─────────────────────────
+   Top-pinned so the caption always starts at the same y and grows
+   downward as lines wrap. JS picks the largest font size that fits — up
+   to 3 lines without overflowing into the chapter bar's safe area. */
+.subtitle {
+  position: absolute;
+  left: 160px;
+  right: 160px;
+  top: 730px;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 46px;
+  line-height: 1.25;
+  color: var(--color-text-primary);
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.6);
+  z-index: 5;
+}
+
+/* ─────────────────── Loading / hydration mask ───────────────────
+   The un-hydrated stage hides everything except the header behind a
+   centred spinner; the boot module removes the class once __ready fires. */
+.stage.unhydrated > *:not(.header) {
+  opacity: 0;
+}
+.loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  background: transparent;
+  pointer-events: none;
+}
+.loading.hidden {
+  display: none !important;
+}
+.spinner {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid rgba(122, 238, 168, 0.18);
+  border-top-color: var(--color-etc-green);
+  animation: vg-spin 0.9s linear infinite;
+}
+@keyframes vg-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.hidden {
+  display: none !important;
+}
+
+/* ─────────────────────── Empty-state landing ─────────────────────── */
+.landing {
+  position: fixed;
+  inset: 0;
+  background: #0a0a0c;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 40px;
+  padding: 64px;
+  z-index: 1000;
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+}
+.landing h1 {
+  font-family: var(--font-display);
+  font-size: 84px;
+  margin: 0;
+  color: var(--color-etc-green);
+  text-shadow: 0 0 40px rgba(122, 238, 168, 0.4);
+}
+.landing p {
+  font-size: 18px;
+  color: var(--color-text-secondary);
+  max-width: 720px;
+  text-align: center;
+  line-height: 1.6;
+  margin: 0;
+}
+.landing p code {
+  background: var(--color-surface-elevated);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 16px;
+  color: var(--color-etc-green);
+}
+.landing .samples {
+  margin-top: 16px;
+  font-size: 15px;
+  line-height: 1.6;
+}
+.landing footer {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 24px;
+}
+
+/* ────────────────────── Preview transport ──────────────────────
+   Floats outside the 1920x1080 stage so it never leaks into recordings. */
+.preview-controls {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 22px;
+  background: rgba(17, 17, 20, 0.92);
+  border: 1px solid rgba(122, 238, 168, 0.35);
+  border-radius: 999px;
+  backdrop-filter: blur(10px);
+  font-family: var(--font-mono);
+  color: var(--color-text-primary);
+  z-index: 999;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+.preview-controls button {
+  appearance: none;
+  background: var(--color-etc-green);
+  color: #0a0a0c;
+  border: 0;
+  border-radius: 999px;
+  width: 44px;
+  height: 44px;
+  font-size: 18px;
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-weight: 700;
+}
+.preview-controls button.secondary {
+  background: transparent;
+  color: var(--color-text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+.preview-controls input[type="range"] {
+  width: 360px;
+  accent-color: var(--color-etc-green);
+}
+.preview-controls .pt {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  letter-spacing: 0.08em;
+  min-width: 110px;
+  text-align: center;
+}
+.preview-controls a.dl {
+  color: var(--color-etc-green);
+  text-decoration: none;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 8px 12px;
+  border: 1px solid rgba(122, 238, 168, 0.35);
+  border-radius: 999px;
+}
+/* Slide-jump buttons in the transport — small mono pills for previewing
+   each pre/post-roll slide on demand. */
+.slide-jumps {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+  padding-left: 12px;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+.slide-jumps button {
+  width: auto !important;
+  height: 30px !important;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  font-family: var(--font-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.slide-jumps button#slide-off {
+  padding: 0 10px;
+  font-size: 16px !important;
+  font-weight: 400 !important;
+  letter-spacing: 0 !important;
+}
+
+/* ─────────────────── Rendered-output overlay ─────────────────── */
+.rendered-player {
+  position: fixed;
+  left: 24px;
+  bottom: 24px;
+  z-index: 998;
+  width: 420px;
+  background: rgba(17, 17, 20, 0.92);
+  border: 1px solid rgba(122, 238, 168, 0.35);
+  border-radius: 14px;
+  backdrop-filter: blur(10px);
+  padding: 14px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+}
+.rendered-player h4 {
+  margin: 0 0 10px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--color-etc-green);
+}
+.rendered-player video {
+  width: 100%;
+  display: block;
+  border-radius: 6px;
+  background: #000;
+}

@@ -1,0 +1,10 @@
+{
+  "_comment": "Per-call diarization metadata, keyed by call id (the calls/<id>.md basename). Only calls that need speaker fixing appear here. 'split' is the Zoom label that conflates two+ people on one connection; 'enroll' maps each real voice to one or more clean reference spans (START-END in seconds or [h:]m:s) used to attribute that label's cues. Calls absent from this file are passed through with their original Zoom labels.",
+  "20260612_054": {
+    "split": "Istora Mandiri",
+    "enroll": {
+      "Istora": ["2:00-2:35"],
+      "Diego": ["26:24-27:53"]
+    }
+  }
+}

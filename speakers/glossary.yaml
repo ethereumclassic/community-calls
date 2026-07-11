@@ -26,7 +26,7 @@ Charles Hoskinson:
   aliases: [Charles Oskinson, Oskinson]
 Istora:
   description: the host (participant; see speakers.yaml) — fix spoken-name slips in the body
-  aliases: [Sora]
+  aliases: [Sora, Historia]
 
 # --- Projects / clients / protocol terms ---
 Ethereum Classic:
@@ -74,3 +74,17 @@ Antpool:
   aliases: [AMP pool, Ant pool]
 dApp:
   aliases: [DAP]
+SaturnDEX:
+  description: decentralized exchange on ETC (guest project, Call 56); order-book DEX rebuilt from the 2017 Saturn Network by Graham's team; app at saturndex.org
+  aliases: [Saturn Desk, Saturn Dex, Saturn decks, SaturnX, Saturn X, Satindex, Sandex]
+Saturn Network:
+  description: original 2017 decentralized-exchange project on ETC that SaturnDEX descends from
+ETCswap:
+  description: automated market maker (AMM) DEX on Ethereum Classic
+  aliases: [ATC swap, ETC swap]
+Mordor:
+  description: the Ethereum Classic proof-of-work testnet
+Bastion:
+  description: name for ECIP-1130, a minimal meta-ECIP EIP bundle (Cancun/Prague/Osaka subset) from Diego and Istora
+Olympia:
+  description: ECIP-1121, a larger ETC hard-fork bundle including governance/treasury/1559-redirect (ECIP-1111/1112/1121)

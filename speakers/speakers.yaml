@@ -29,3 +29,7 @@ weder:
   displayName: Wedergarten
   aliases: [weder, wedergarten, "Wedergarten || SSC"]
   avatar: wedergarten.webp
+graham:
+  displayName: Graham
+  aliases: [SaturnDEX, "Saturn DEX", Graham]
+  avatar: saturndex.png

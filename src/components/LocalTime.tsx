@@ -45,11 +45,11 @@ export default function LocalTime({
       >
         <span className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
         <span className="text-orange-400 font-medium">{tzAbbr || "Local"}</span>
-        <span className="text-orange-300 font-semibold">{localTime || "--:--"}</span>
+        <span className="text-orange-300 font-semibold">
+          {localTime || "--:--"}
+        </span>
         {dayOffsetDisplay && (
-          <span className="text-xs text-etc-green/80">
-            {dayOffsetDisplay}
-          </span>
+          <span className="text-xs text-etc-green/80">{dayOffsetDisplay}</span>
         )}
       </div>
     );

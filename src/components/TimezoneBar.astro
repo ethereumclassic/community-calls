@@ -58,7 +58,11 @@ function getTimeDisplay(offset: number) {
 
           {/* Static world timezones */}
           {timezones.map((tz) => {
-            const { time: displayTime, dayOffset, weekday } = getTimeDisplay(tz.offset);
+            const {
+              time: displayTime,
+              dayOffset,
+              weekday,
+            } = getTimeDisplay(tz.offset);
             return (
               <div class="flex items-center gap-1.5 px-2 py-1 rounded bg-surface/50 border border-etc-green/5 hover:border-etc-green/20 transition-colors">
                 <span class="text-gray-500">{tz.city}</span>
@@ -72,7 +76,7 @@ function getTimeDisplay(offset: number) {
             );
           })}
         </div>
-              </div>
+      </div>
 
       {/* Mobile: UTC dropdown + Local time */}
       <div class="md:hidden">
@@ -114,9 +118,11 @@ function getTimeDisplay(offset: number) {
           {/* Dropdown content - other timezones */}
           <div class="mt-2 p-2 rounded-lg bg-surface border border-etc-green/10 space-y-1">
             {timezones.map((tz) => {
-              const { time: displayTime, dayOffset, weekday } = getTimeDisplay(
-                tz.offset,
-              );
+              const {
+                time: displayTime,
+                dayOffset,
+                weekday,
+              } = getTimeDisplay(tz.offset);
               return (
                 <div class="flex items-center justify-between px-3 py-2 rounded bg-surface-elevated/50 hover:bg-surface-hover transition-colors">
                   <div class="flex items-center gap-2">

@@ -112,8 +112,12 @@ test("renders /videogen roster: call meta + active speaker animation", async ({
   // Roster has all four participants
   const cards = page.locator(".participant");
   await expect(cards).toHaveCount(4);
-  await expect(page.locator('.participant[data-name="Istora Mandiri"]')).toBeVisible();
-  await expect(page.locator('.participant[data-name="Diego L.L."]')).toBeVisible();
+  await expect(
+    page.locator('.participant[data-name="Istora Mandiri"]'),
+  ).toBeVisible();
+  await expect(
+    page.locator('.participant[data-name="Diego L.L."]'),
+  ).toBeVisible();
   await expect(page.locator('.participant[data-name="Lunar"]')).toBeVisible();
   await expect(page.locator('.participant[data-name="IAV"]')).toBeVisible();
 

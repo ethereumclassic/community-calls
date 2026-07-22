@@ -16,14 +16,14 @@ import type { SlideKey } from "./slides";
 // constant is the single source of truth for the crossfade — the browser
 // preview (preview.ts) and the ffmpeg render (scripts/videogen.mjs, via
 // __timings) both read it so they can never drift apart.
-export const JINGLE_OVERLAP_SEC = 8;
+const JINGLE_OVERLAP_SEC = 8;
 
 // The ending: over the final slide (the logo) the audio fades to silence and
 // the picture fades to black, so the video winds down instead of cutting. This
 // is the duration of that fade — kept equal to the logo slide's on-screen time
 // so the fade spans exactly the last slide. Read by the preview (audio + black
 // overlay) and the render (ffmpeg afade), so they stay in lockstep.
-export const END_FADE_SEC = 2.5;
+const END_FADE_SEC = 2.5;
 
 // Per-slide on-screen duration. Changing these here automatically reflows the
 // preview scrubber AND the driver's audio padding (both read this timeline),
@@ -51,7 +51,7 @@ export type Segment = SlideSegment | MainSegment;
 // currentTime tracks `globalT - startGlobal`, and its volume ramps up over
 // [startGlobal, fadeInEnd] and down over [fadeOutStart, endGlobal] so the
 // crossfade under the speaker is computed the same way wherever we play it.
-export type JingleWindow = {
+type JingleWindow = {
   url: string;
   startGlobal: number;
   endGlobal: number;

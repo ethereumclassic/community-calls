@@ -45,7 +45,19 @@ Nethermind:
   aliases: [Nether mine, Nethermine]
 core-geth:
   description: the current ETC client (lowercase, hyphenated — the github.com/etclabscore/core-geth repo name)
-  aliases: [CoreGet, Core Geth, Corgeth, CoreGath, CoreGef, Corgieth, Corgath, Colgate, CoreGeth, Core-Geth]
+  aliases:
+    [
+      CoreGet,
+      Core Geth,
+      Corgeth,
+      CoreGath,
+      CoreGef,
+      Corgieth,
+      Corgath,
+      Colgate,
+      CoreGeth,
+      Core-Geth,
+    ]
 Geth Classic:
   description: Diego's new ETC client; a minimal proof-of-work fork of upstream go-ethereum, positioned as core-geth's successor
   aliases: [GoEthereum Classic, Go Ethereum Classic, going through Classic]
@@ -76,7 +88,8 @@ dApp:
   aliases: [DAP]
 SaturnDEX:
   description: decentralized exchange on ETC (guest project, Call 56); order-book DEX rebuilt from the 2017 Saturn Network by Graham's team; app at saturndex.org
-  aliases: [Saturn Desk, Saturn Dex, Saturn decks, SaturnX, Saturn X, Satindex, Sandex]
+  aliases:
+    [Saturn Desk, Saturn Dex, Saturn decks, SaturnX, Saturn X, Satindex, Sandex]
 Saturn Network:
   description: original 2017 decentralized-exchange project on ETC that SaturnDEX descends from
 ETCswap:

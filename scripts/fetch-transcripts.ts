@@ -8,7 +8,13 @@
  * Requires ~/yt-dlp binary.
  */
 
-import { readFileSync, writeFileSync, readdirSync, mkdirSync, existsSync } from "fs";
+import {
+  readFileSync,
+  writeFileSync,
+  readdirSync,
+  mkdirSync,
+  existsSync,
+} from "fs";
 import { execSync } from "child_process";
 import { join } from "path";
 
@@ -24,7 +30,11 @@ const filterNumber = process.argv[2];
 
 function toMs(ts: string): number {
   const [h, m, s] = ts.split(":");
-  return parseInt(h) * 3600000 + parseInt(m) * 60000 + Math.round(parseFloat(s) * 1000);
+  return (
+    parseInt(h) * 3600000 +
+    parseInt(m) * 60000 +
+    Math.round(parseFloat(s) * 1000)
+  );
 }
 
 interface Cue {
@@ -46,7 +56,9 @@ function cleanVtt(raw: string): Cue[] {
   // For real cues, take only line 2 (new content), strip <c> tags.
   const fragments: Cue[] = [];
   while (i < lines.length) {
-    const m = lines[i].match(/^(\d{2}:\d{2}:\d{2}\.\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}\.\d{3})/);
+    const m = lines[i].match(
+      /^(\d{2}:\d{2}:\d{2}\.\d{3})\s*-->\s*(\d{2}:\d{2}:\d{2}\.\d{3})/,
+    );
     if (m) {
       const start = m[1];
       const end = m[2];
@@ -59,7 +71,8 @@ function cleanVtt(raw: string): Cue[] {
       // Skip transition frames (duration < 100ms)
       if (toMs(end) - toMs(start) < 100) continue;
       // Take only line 2 (new content); fall back to line 1 for single-line cues
-      const contentLine = textLines.length >= 2 ? textLines[1] : textLines[0] ?? "";
+      const contentLine =
+        textLines.length >= 2 ? textLines[1] : (textLines[0] ?? "");
       const text = contentLine
         .replace(/<[^>]+>/g, "")
         .replace(/\s+/g, " ")
@@ -70,7 +83,11 @@ function cleanVtt(raw: string): Cue[] {
   }
 
   // Concatenate all fragments into one stream, tracking timestamp per word
-  interface Word { word: string; start: string; end: string; }
+  interface Word {
+    word: string;
+    start: string;
+    end: string;
+  }
   const words: Word[] = [];
   for (const frag of fragments) {
     for (const w of frag.text.split(/\s+/).filter(Boolean)) {
@@ -153,7 +170,9 @@ for (const file of readdirSync(CALLS_DIR).filter((f) => f.endsWith(".md"))) {
         { stdio: "pipe", timeout: 30_000 },
       );
     } catch (e: any) {
-      console.error(`[${number}] FAILED: ${e.stderr?.toString().slice(0, 200)}`);
+      console.error(
+        `[${number}] FAILED: ${e.stderr?.toString().slice(0, 200)}`,
+      );
       continue;
     }
   } else {
@@ -178,7 +197,10 @@ for (const file of readdirSync(CALLS_DIR).filter((f) => f.endsWith(".md"))) {
   const transcriptSection = `\n---\n\n## Full Transcript\n\n\`\`\`webvtt\n${vttBlock}\`\`\`\n`;
 
   // Strip existing auto-generated transcript section if present, then append fresh
-  const stripped = content.replace(/\n---\n\n## Full Transcript\n\n```webvtt\nWEBVTT\n\nNOTE no-names[\s\S]*?```\n?$/, "");
+  const stripped = content.replace(
+    /\n---\n\n## Full Transcript\n\n```webvtt\nWEBVTT\n\nNOTE no-names[\s\S]*?```\n?$/,
+    "",
+  );
   writeFileSync(mdPath, stripped + transcriptSection);
 
   console.log(`[${number}] done — ${cues.length} cues`);

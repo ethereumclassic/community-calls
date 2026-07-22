@@ -26,7 +26,12 @@ const utcDisplay = utcTime
       </div>
 
       {/* User's local time (hydrated) */}
-      <LocalTime client:only="react" time={time} variant="badge" showDayOffset />
+      <LocalTime
+        client:only="react"
+        time={time}
+        variant="badge"
+        showDayOffset
+      />
     </div>
   )
 }

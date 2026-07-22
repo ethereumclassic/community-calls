@@ -1,4 +1,6 @@
 dist/
 node_modules/
 .astro/
+.claude/
+tmp/
 *.md

@@ -6,9 +6,10 @@
     "astro.config.mjs",
     "netlify/functions/*.ts"
   ],
-  "project": ["src/**/*.{astro,ts,tsx}", "netlify/**/*.ts"],
+  "project": ["src/**/*.{astro,js,ts,tsx}", "netlify/**/*.ts"],
   "ignore": ["**/*.d.ts"],
   "ignoreDependencies": [
+    "vite",
     "tailwindcss",
     "daisyui",
     "@tailwindcss/typography",

@@ -134,9 +134,9 @@ export function getTimezoneDateNote(date: Date, timeStr: string): string {
 export function formatTimezoneLines(date: Date, timeStr: string): string {
   const combined = combineDateAndTime(date, timeStr);
   const timezones = [
-    { flag: "\u{1F1FA}\u{1F1F8}", tz: "America/New_York", label: "EST" },
-    { flag: "\u{1F30D}", tz: "UTC", label: "UTC" },
     { flag: "\u{1F1E8}\u{1F1F3}", tz: "Asia/Shanghai", label: "CST" },
+    { flag: "\u{1F30D}", tz: "UTC", label: "UTC" },
+    { flag: "\u{1F1FA}\u{1F1F8}", tz: "America/New_York", label: "EST" },
   ];
 
   return timezones

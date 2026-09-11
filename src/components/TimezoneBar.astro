@@ -1,5 +1,6 @@
 ---
-import { parseUTCTime, calculateLocalTime } from "../lib/timezone";
+import { parseUTCTime } from "../lib/timezone";
+import { combineDateAndTime } from "../lib/dates";
 import LocalTime from "./LocalTime";
 import LiveDot from "./LiveDot.astro";
 import TimeBadges from "./TimeBadges.astro";
@@ -11,39 +12,61 @@ interface Props {
 
 interface TimezoneEntry {
   city: string;
-  offset: number;
-  abbr: string;
+  tz: string; // IANA zone, so daylight saving is applied per date
+  abbr: string; // generic label, not the seasonal one
 }
 
 const { time, date } = Astro.props;
 
-const WEEKDAYS = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-
 const timezones: TimezoneEntry[] = [
-  { city: "NYC", offset: -5, abbr: "EST" },
-  { city: "London", offset: 0, abbr: "GMT" },
-  { city: "Berlin", offset: 1, abbr: "CET" },
-  { city: "Dubai", offset: 4, abbr: "GST" },
-  { city: "New Delhi", offset: 5.5, abbr: "IST" },
-  { city: "Bangkok", offset: 7, abbr: "ICT" },
-  { city: "Beijing", offset: 8, abbr: "CST" },
-  { city: "Tokyo", offset: 9, abbr: "JST" },
-  { city: "Sydney", offset: 11, abbr: "AEDT" },
+  { city: "NYC", tz: "America/New_York", abbr: "ET" },
+  { city: "London", tz: "Europe/London", abbr: "UK" },
+  { city: "Berlin", tz: "Europe/Berlin", abbr: "CET" },
+  { city: "Dubai", tz: "Asia/Dubai", abbr: "GST" },
+  { city: "New Delhi", tz: "Asia/Kolkata", abbr: "IST" },
+  { city: "Bangkok", tz: "Asia/Bangkok", abbr: "ICT" },
+  { city: "Beijing", tz: "Asia/Shanghai", abbr: "CST" },
+  { city: "Tokyo", tz: "Asia/Tokyo", abbr: "JST" },
+  { city: "Sydney", tz: "Australia/Sydney", abbr: "AET" },
 ];
 
 const utcTime = parseUTCTime(time);
 const utcDisplay = utcTime
   ? `${utcTime.hours.toString().padStart(2, "0")}:${utcTime.minutes.toString().padStart(2, "0")}`
   : "";
+const instant = combineDateAndTime(date, time);
 
-function getTimeDisplay(offset: number) {
+function partsIn(tz: string) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: tz,
+    weekday: "short",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(instant);
+  const get = (type: string) => parts.find((p) => p.type === type)?.value ?? "";
+  return {
+    time: `${get("hour").replace("24", "00")}:${get("minute")}`,
+    weekday: get("weekday").toUpperCase(),
+    // Calendar day as a UTC timestamp, for comparing dates across zones
+    dayStamp: Date.UTC(
+      Number(get("year")),
+      Number(get("month")) - 1,
+      Number(get("day")),
+    ),
+  };
+}
+
+const utcDay = partsIn("UTC").dayStamp;
+
+function getTimeDisplay(tz: string) {
   if (!utcTime) return { time: "", dayOffset: 0, weekday: "" };
-  const result = calculateLocalTime(utcTime, offset);
-  // Calculate the actual weekday based on date and dayOffset
-  const adjustedDate = new Date(date);
-  adjustedDate.setDate(adjustedDate.getDate() + result.dayOffset);
-  const weekday = WEEKDAYS[adjustedDate.getDay()];
-  return { ...result, weekday };
+  const local = partsIn(tz);
+  const dayOffset = Math.round((local.dayStamp - utcDay) / 86_400_000);
+  return { time: local.time, dayOffset, weekday: local.weekday };
 }
 ---
 
@@ -54,7 +77,7 @@ function getTimeDisplay(offset: number) {
       <div class="hidden md:block">
         <div class="flex items-center flex-wrap gap-2 text-sm font-mono">
           {/* UTC and Local time badges */}
-          <TimeBadges time={time} />
+          <TimeBadges time={time} date={date} />
 
           {/* Static world timezones */}
           {timezones.map((tz) => {
@@ -62,7 +85,7 @@ function getTimeDisplay(offset: number) {
               time: displayTime,
               dayOffset,
               weekday,
-            } = getTimeDisplay(tz.offset);
+            } = getTimeDisplay(tz.tz);
             return (
               <div class="flex items-center gap-1.5 px-2 py-1 rounded bg-surface/50 border border-etc-green/5 hover:border-etc-green/20 transition-colors">
                 <span class="text-gray-500">{tz.city}</span>
@@ -109,6 +132,7 @@ function getTimeDisplay(offset: number) {
             {/* Local time (hydrated) */}
             <LocalTime
               client:only="react"
+              date={date}
               time={time}
               variant="badge-mobile"
               showDayOffset
@@ -122,7 +146,7 @@ function getTimeDisplay(offset: number) {
                 time: displayTime,
                 dayOffset,
                 weekday,
-              } = getTimeDisplay(tz.offset);
+              } = getTimeDisplay(tz.tz);
               return (
                 <div class="flex items-center justify-between px-3 py-2 rounded bg-surface-elevated/50 hover:bg-surface-hover transition-colors">
                   <div class="flex items-center gap-2">

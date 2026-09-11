@@ -5,9 +5,10 @@ import LiveDot from "./LiveDot.astro";
 
 interface Props {
   time: string; // Format: "1500 UTC"
+  date: Date;
 }
 
-const { time } = Astro.props;
+const { time, date } = Astro.props;
 
 const utcTime = parseUTCTime(time);
 const utcDisplay = utcTime
@@ -28,6 +29,7 @@ const utcDisplay = utcTime
       {/* User's local time (hydrated) */}
       <LocalTime
         client:only="react"
+        date={date}
         time={time}
         variant="badge"
         showDayOffset

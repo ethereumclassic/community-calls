@@ -6,11 +6,12 @@ import { formatTime } from "../lib/dates";
 
 interface Props {
   time: string;
+  date: Date;
   location: string;
   joinLink?: string;
 }
 
-const { time, location, joinLink } = Astro.props;
+const { time, date, location, joinLink } = Astro.props;
 ---
 
 <div
@@ -24,7 +25,7 @@ const { time, location, joinLink } = Astro.props;
   </div>
   <p class="text-sm text-gray-400">
     Join us at <span class="text-gray-300">{formatTime(time)}</span>
-    <LocalTime client:load time={time} /> in {
+    <LocalTime client:load date={date} time={time} /> in {
       joinLink && location.toLowerCase() !== "zoom" ? (
         <Link
           href={joinLink}

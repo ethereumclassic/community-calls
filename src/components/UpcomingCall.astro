@@ -56,7 +56,11 @@ const { call } = Astro.props;
             <span class="flex items-center gap-2">
               <Icon name="lucide:clock" class="icon-sm text-amber/60" />
               {formatTime(call.data.time)}
-              <LocalTime client:only="react" time={call.data.time} />
+              <LocalTime
+                client:only="react"
+                date={call.data.date}
+                time={call.data.time}
+              />
             </span>
             <!--
             {

@@ -127,18 +127,19 @@ export function getTimezoneDateNote(date: Date, timeStr: string): string {
   return "";
 }
 
+// Timezones listed on the second line of the share post, after UTC.
 const SHARE_TIMEZONES = [
   { flag: "\u{1F1E8}\u{1F1F3}", tz: "Asia/Shanghai", label: "CST" },
-  { flag: "\u{1F30D}", tz: "UTC", label: "UTC" },
-  { flag: "\u{1F1FA}\u{1F1F8}", tz: "America/New_York", label: "EST" },
+  { flag: "\u{1F1FA}\u{1F1F8}", tz: "America/New_York", label: "ET" },
 ];
 
 /**
- * Share-post timezones, condensed for the character-limited X post: the date once (as in UTC), then one line of 24-hour times. A zone
- * that falls on a different calendar day gets its weekday appended.
+ * Share-post timezones, condensed for the character-limited X post: the date
+ * and time in UTC, then the other zones' 24-hour times. A zone that falls on
+ * a different calendar day gets its weekday appended.
  *
- *   Fri 11 Sep
- *   🇨🇳 15:00 CST · 🌍 07:00 UTC · 🇺🇸 03:00 EST
+ *   Fri 11 Sep · 07:00 UTC 🌏
+ *   🇨🇳 15:00 CST · 🇺🇸 03:00 ET
  */
 export function formatTimezoneLinesCompact(
   date: Date,
@@ -164,11 +165,11 @@ export function formatTimezoneLinesCompact(
   };
 
   const utc = partsIn("UTC");
-  const times = SHARE_TIMEZONES.map(({ flag, tz, label }) => {
+  const others = SHARE_TIMEZONES.map(({ flag, tz, label }) => {
     const local = partsIn(tz);
     const dayNote = local.day === utc.day ? "" : ` (${local.weekday})`;
     return `${flag} ${local.time} ${label}${dayNote}`;
   }).join(" \u00B7 ");
 
-  return `${utc.day}\n${times}`;
+  return `${utc.day} \u00B7 ${utc.time} UTC \u{1F30F}\n${others}`;
 }

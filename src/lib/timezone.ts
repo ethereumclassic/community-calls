@@ -2,60 +2,52 @@
  * Client-side timezone utilities for hydration
  */
 
-import { parseUTCTime } from "./dates";
+import { parseUTCTime, combineDateAndTime } from "./dates";
 
 // Re-export for convenience
 export { parseUTCTime };
 
 /**
- * Calculate local time from UTC time and offset
+ * The call's start in the browser's own timezone, evaluated at the call's
+ * date so daylight saving is applied for that day rather than today.
  */
-export function calculateLocalTime(
-  utcTime: { hours: number; minutes: number },
-  offsetHours: number,
-): { time: string; dayOffset: number } {
-  let totalMinutes =
-    utcTime.hours * 60 + utcTime.minutes + Math.round(offsetHours * 60);
-  let dayOffset = 0;
+export function localTimeAt(
+  date: Date | string,
+  timeStr: string,
+): { time: string; dayOffset: number; abbr: string } | null {
+  if (!parseUTCTime(timeStr)) return null;
+  const instant = combineDateAndTime(new Date(date), timeStr);
 
-  if (totalMinutes >= 1440) {
-    totalMinutes -= 1440;
-    dayOffset = 1;
-  }
-  if (totalMinutes < 0) {
-    totalMinutes += 1440;
-    dayOffset = -1;
-  }
+  const time = `${instant.getHours().toString().padStart(2, "0")}:${instant.getMinutes().toString().padStart(2, "0")}`;
 
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
+  const localDay = Date.UTC(
+    instant.getFullYear(),
+    instant.getMonth(),
+    instant.getDate(),
+  );
+  const utcDay = Date.UTC(
+    instant.getUTCFullYear(),
+    instant.getUTCMonth(),
+    instant.getUTCDate(),
+  );
+  const dayOffset = Math.round((localDay - utcDay) / 86_400_000);
 
-  return {
-    time: `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}`,
-    dayOffset,
-  };
+  return { time, dayOffset, abbr: getTimezoneAbbr(instant) };
 }
 
 /**
- * Get the user's timezone abbreviation (e.g., "EST", "PST", "GMT+4")
+ * Get the user's timezone abbreviation at a given instant (e.g., "EDT",
+ * "PST", "GMT+4")
  */
-export function getTimezoneAbbr(): string {
+function getTimezoneAbbr(instant: Date): string {
   try {
     const formatter = new Intl.DateTimeFormat("en-US", {
       timeZoneName: "short",
     });
-    const parts = formatter.formatToParts(new Date());
+    const parts = formatter.formatToParts(instant);
     const tzPart = parts.find((part) => part.type === "timeZoneName");
     return tzPart?.value || "Local";
   } catch {
     return "Local";
   }
-}
-
-/**
- * Get the user's timezone offset in hours (positive = ahead of UTC)
- */
-export function getUserTimezoneOffset(): number {
-  const offsetMinutes = new Date().getTimezoneOffset();
-  return -offsetMinutes / 60;
 }

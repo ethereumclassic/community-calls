@@ -106,6 +106,7 @@ const calendarEvent: CalendarEvent = {
         {call.data.greenRoom && (
           <GreenRoom
             time={call.data.greenRoom.time ?? call.data.time}
+            date={call.data.date}
             location={call.data.greenRoom.location ?? call.data.location}
             joinLink={call.data.greenRoom.joinLink}
           />

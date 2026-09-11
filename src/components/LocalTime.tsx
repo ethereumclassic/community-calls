@@ -1,18 +1,15 @@
 import { useState, useEffect } from "react";
-import {
-  parseUTCTime,
-  calculateLocalTime,
-  getTimezoneAbbr,
-  getUserTimezoneOffset,
-} from "../lib/timezone";
+import { localTimeAt } from "../lib/timezone";
 
 interface Props {
+  date: Date | string; // Call date; local offset is evaluated for this day
   time: string; // Format: "1500 UTC"
   variant?: "inline" | "badge" | "badge-mobile";
   showDayOffset?: boolean;
 }
 
 export default function LocalTime({
+  date,
   time,
   variant = "inline",
   showDayOffset = false,
@@ -23,17 +20,14 @@ export default function LocalTime({
   const [dayOffset, setDayOffset] = useState<number>(0);
 
   useEffect(() => {
-    const utcTime = parseUTCTime(time);
-    if (!utcTime) return;
-
-    const offsetHours = getUserTimezoneOffset();
-    const result = calculateLocalTime(utcTime, offsetHours);
+    const result = localTimeAt(date, time);
+    if (!result) return;
 
     setLocalTime(result.time);
     setDayOffset(result.dayOffset);
-    setTzAbbr(getTimezoneAbbr());
+    setTzAbbr(result.abbr);
     setMounted(true);
-  }, [time]);
+  }, [date, time]);
 
   const dayOffsetDisplay =
     showDayOffset && dayOffset !== 0 ? (dayOffset > 0 ? "+1" : "-1") : null;

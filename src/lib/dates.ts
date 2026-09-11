@@ -127,33 +127,48 @@ export function getTimezoneDateNote(date: Date, timeStr: string): string {
   return "";
 }
 
+const SHARE_TIMEZONES = [
+  { flag: "\u{1F1E8}\u{1F1F3}", tz: "Asia/Shanghai", label: "CST" },
+  { flag: "\u{1F30D}", tz: "UTC", label: "UTC" },
+  { flag: "\u{1F1FA}\u{1F1F8}", tz: "America/New_York", label: "EST" },
+];
+
 /**
- * Format date/time as lines for multiple timezones with flag emojis.
- * e.g. "🇺🇸 EDT Thu 03-19 22:00"
+ * Share-post timezones, condensed for the character-limited X post: the date once (as in UTC), then one line of 24-hour times. A zone
+ * that falls on a different calendar day gets its weekday appended.
+ *
+ *   Fri 11 Sep
+ *   🇨🇳 15:00 CST · 🌍 07:00 UTC · 🇺🇸 03:00 EST
  */
-export function formatTimezoneLines(date: Date, timeStr: string): string {
+export function formatTimezoneLinesCompact(
+  date: Date,
+  timeStr: string,
+): string {
   const combined = combineDateAndTime(date, timeStr);
-  const timezones = [
-    { flag: "\u{1F1E8}\u{1F1F3}", tz: "Asia/Shanghai", label: "CST" },
-    { flag: "\u{1F30D}", tz: "UTC", label: "UTC" },
-    { flag: "\u{1F1FA}\u{1F1F8}", tz: "America/New_York", label: "EST" },
-  ];
+  const partsIn = (tz: string) => {
+    const fmt = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).formatToParts(combined);
+    const get = (type: string) => fmt.find((p) => p.type === type)?.value ?? "";
+    return {
+      day: `${get("weekday")} ${get("day")} ${get("month")}`,
+      weekday: get("weekday"),
+      time: `${get("hour")}:${get("minute")}`,
+    };
+  };
 
-  return timezones
-    .map(({ flag, tz, label }) => {
-      const fmt = new Intl.DateTimeFormat("en-US", {
-        timeZone: tz,
-        weekday: "short",
-        month: "long",
-        day: "numeric",
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      }).formatToParts(combined);
+  const utc = partsIn("UTC");
+  const times = SHARE_TIMEZONES.map(({ flag, tz, label }) => {
+    const local = partsIn(tz);
+    const dayNote = local.day === utc.day ? "" : ` (${local.weekday})`;
+    return `${flag} ${local.time} ${label}${dayNote}`;
+  }).join(" \u00B7 ");
 
-      const get = (type: string) =>
-        fmt.find((p) => p.type === type)?.value ?? "";
-      return `${flag} ${label} ${get("weekday")}, ${get("day")} ${get("month")} ${get("hour")}:${get("minute")} ${get("dayPeriod")}`;
-    })
-    .join("\n");
+  return `${utc.day}\n${times}`;
 }

@@ -1,12 +1,8 @@
 ---
 import { Icon } from "astro-icon/components";
 import type { Call } from "../lib/types";
-import {
-  formatFullDate,
-  formatTime,
-  formatTimezoneLines,
-  getTimezoneDateNote,
-} from "../lib/dates";
+import { formatTimezoneLinesCompact } from "../lib/dates";
+import { TWEET_MAX, tweetLength } from "../lib/tweet";
 import { siteConfig } from "../lib/config";
 
 interface Props {
@@ -18,15 +14,23 @@ const { call, modalId } = Astro.props;
 
 const callNumber = call.data.callNumber;
 const callUrl = `${siteConfig.url}/calls/${call.data.slug}`;
-const timezoneNote = getTimezoneDateNote(call.data.date, call.data.time);
-const dateTime = `${formatFullDate(call.data.date)} at ${formatTime(call.data.time)}${timezoneNote}`;
-const tzLines = formatTimezoneLines(call.data.date, call.data.time);
+const tzLinesCompact = formatTimezoneLinesCompact(
+  call.data.date,
+  call.data.time,
+);
+const agendaSummary = call.data.agendaSummary?.trim();
 
-const snippet = `Ethereum Classic Community Call ${callNumber} \u{1F399}\u{FE0F}\n\n${callUrl}\n\nJoin us on Zoom at:\n\n${tzLines}\n\n...or 1 hour before for the unrecorded Green Room Hangout.\n\n${call.data.description}. All Are Welcome. \u{1F340}\n\n#EthereumClassic #ETCCC #ETC`;
-
-const tweetText = `Ethereum Classic Community Call ${callNumber} \u{1F399}\u{FE0F}\n\n${callUrl}\n\nJoin us on Zoom at:\n\n${tzLines}\n\n...or 1 hour before for the unrecorded Green Room Hangout.\n\n${call.data.description}. All Are Welcome. \u{1F340}\n\n#EthereumClassic #ETCCC #ETC`;
-const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
-const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(callUrl)}&text=${encodeURIComponent(tweetText)}`;
+// One text for the copy button, X, and Telegram. Kept within X's 280 limit,
+// which counts URLs as 23 and emoji as 2.
+const snippet = `ETC Community Call ${callNumber} \u{1F399}\u{FE0F} ${call.data.description}\n\n${agendaSummary ? `${agendaSummary}\n\n` : ""}${tzLinesCompact}\n\nGreen Room 1h before. All welcome \u{1F340}\n\n${callUrl}\n\n#EthereumClassic #ETCCC #ETC`;
+const tweetLen = tweetLength(snippet);
+if (tweetLen > TWEET_MAX) {
+  throw new Error(
+    `Share post for call ${callNumber} is ${tweetLen} characters, over the ${TWEET_MAX} X limit. Shorten agendaSummary in the call's frontmatter.`,
+  );
+}
+const twitterUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(snippet)}`;
+const telegramUrl = `https://t.me/share/url?url=${encodeURIComponent(callUrl)}&text=${encodeURIComponent(snippet)}`;
 ---
 
 <dialog id={modalId} class="modal share-modal">

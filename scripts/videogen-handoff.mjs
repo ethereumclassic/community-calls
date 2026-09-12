@@ -8,6 +8,7 @@
 // Usage: node scripts/videogen-handoff.mjs calls/<YYYYMMDD>_<NNN>.md [--port 4321]
 
 import { readFileSync } from "node:fs";
+import { basename } from "node:path";
 import { parse as parseYaml } from "yaml";
 
 const argv = process.argv.slice(2);
@@ -69,9 +70,13 @@ const chapterLines = chapters
   .map((c, i) => `${i === 0 ? "0:00" : yt(c.start + offset)} ${c.title}`)
   .join("\n");
 
-const file = `${yymmdd}-etccc-${num}.mp4`;
+// The finished render lives in the call's local cache and is served (with
+// Range support) by the dev server's videogen-cache route; the same file is
+// what /videogen/<NN>/review plays.
+const callId = basename(mdPath).replace(/\.md$/, "");
 const out = [
-  `video ready to download: http://localhost:${port}/${file}`,
+  `video ready to download: http://localhost:${port}/videogen-cache/${callId}/render.mp4`,
+  `review page: http://localhost:${port}/videogen/${num}/review`,
   ``,
   `${title} - Ethereum Classic Community Call #${num}`,
   ``,

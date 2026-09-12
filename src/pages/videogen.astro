@@ -51,6 +51,10 @@ if (guard) return guard;
       <canvas class="viz" id="viz" width="1920" height="1080"></canvas>
       <div class="viz ama hidden" id="ama"></div>
 
+      <!-- Display mode: the asset under discussion replaces the waveform
+           (src/lib/videogen/display.ts fills and fades this). -->
+      <div class="display-layer hidden" id="display"></div>
+
       <div class="roster hidden" id="roster"></div>
 
       <div class="subtitle" id="subtitle"></div>

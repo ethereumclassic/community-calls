@@ -29,6 +29,7 @@ import { setupPreviewControls } from "./preview";
 import { loadSidecar, type SidecarMeta } from "./sidecar";
 import { setChapters, updateChip } from "./chip";
 import { buildTimeline, type Timeline } from "./timeline";
+import { setDisplays, updateDisplay } from "./display";
 
 let duration = 0;
 let job: Job | null = null;
@@ -40,6 +41,7 @@ function seek(t: number): void {
   drawViz(t);
   drawSubtitle(t);
   updateChip(t);
+  updateDisplay(t);
 }
 
 // Window globals — used by the headless driver to seek per-frame and by
@@ -93,6 +95,7 @@ async function init(): Promise<void> {
   // and pre/post-roll are skipped when there's no meta.
   sidecar = await loadSidecar(job.meta);
   setChapters(sidecar?.chapters);
+  setDisplays(sidecar?.displays);
 
   if (job.audio) {
     const tmp = new (
@@ -142,6 +145,8 @@ async function init(): Promise<void> {
         prerollMs: number;
         postrollMs: number;
         overlapSec: number;
+        duckLeadSec: number;
+        duckLevel: number;
         endFadeSec: number;
         introUrl?: string;
         outroUrl?: string;
@@ -154,6 +159,8 @@ async function init(): Promise<void> {
     prerollMs: timeline.prerollMs,
     postrollMs: timeline.postrollMs,
     overlapSec: timeline.overlapSec,
+    duckLeadSec: timeline.duckLeadSec,
+    duckLevel: timeline.duckLevel,
     endFadeSec: timeline.endFadeSec,
     introUrl: sidecar?.intro,
     outroUrl: sidecar?.outro,

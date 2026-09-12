@@ -39,6 +39,31 @@ const calls = defineCollection({
     // the `&t=` of the YouTube links is shifted. Defaults to 0.
     youtubeOffset: z.number().optional(),
     hosts: z.array(z.string()).optional(),
+    // Display-mode windows for the video: while the call discusses an asset,
+    // the stage swaps the waveform for the asset (image or video), stacks the
+    // roster to the left, and keeps subtitles/header/chapters in place. Times
+    // are on the transcript clock ([h:]mm:ss[.ms], same as NOTE chapters);
+    // `src` is relative to the call's media dir (./media/x.webp) or a URL.
+    // Read by the videogen sidecar (src/lib/videogen/calls-server.ts).
+    displays: z
+      .array(
+        z.object({
+          from: z.string(),
+          to: z.string(),
+          src: z.string(),
+          // Images: zoom from `zoomFrom` to `zoomTo` across the window (default
+          // a slow 1 -> 1.06 drift), keeping `focus` ("x% y%" of the frame,
+          // default centre) fixed on screen at the zoomed-in end.
+          zoomFrom: z.number().positive().optional(),
+          zoomTo: z.number().positive().optional(),
+          focus: z.string().optional(),
+          // Videos: playback rate (1 = natural) and whether to loop to fill
+          // the window.
+          rate: z.number().positive().optional(),
+          loop: z.boolean().optional(),
+        }),
+      )
+      .optional(),
     greenRoom: z
       .object({
         time: z.string().optional(),

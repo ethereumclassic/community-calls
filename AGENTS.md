@@ -24,6 +24,15 @@ extractor no longer parses the play page), and Playwright's bundled Chromium
 cannot launch in this devcontainer — point
 `PLAYWRIGHT_CHROMIUM_EXECUTABLE` at a Nix-built chromium.
 
+## Call media
+
+The episode markdown is the public record and carries no render settings.
+Video settings (display windows) are in `calls/video/<id>.yaml`. Per-call media
+is not in git: the distributable audio and display clips live on the call's
+GitHub release (`call-<NN>`) and locally under `public/videogen/<NN>/` and
+`.cache/videogen/<id>/`; `node scripts/videogen/media.mjs pull <NN>` fetches
+them. Renders are never stored; YouTube has the published copy.
+
 ## Writing Style for Call Agendas
 
 - Use neutral language. Pose suggestions as questions rather than making declarative statements. The agenda should facilitate discussion, not advocate positions.

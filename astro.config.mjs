@@ -218,7 +218,8 @@ const callsMediaDev = {
 
 // Dev-only: serve a call's local videogen cache (.cache/videogen/<id>/<file>,
 // gitignored) at /videogen-cache/<id>/<file>. This is where the pipeline keeps
-// the finished render and pulled media for review. `render.mp4` also falls
+// the finished render, one-off review clips (clips/) and the call's display
+// media pulled from its GitHub release (media/, see scripts/videogen/media.mjs). `render.mp4` also falls
 // back to the legacy public-root handoff name (<YYMMDD>-etccc-<NN>.mp4), which
 // the Astro dev server itself will not serve.
 /** @type {import('vite').Plugin} */
@@ -229,7 +230,7 @@ const videogenCacheDev = {
     server.middlewares.use((req, res, next) => {
       const path = (req.url ?? "").split("?")[0];
       const m =
-        /^\/videogen-cache\/([A-Za-z0-9_-]+)\/((?:clips\/)?[^/]+)$/.exec(
+        /^\/videogen-cache\/([A-Za-z0-9_-]+)\/((?:clips\/|media\/)?[^/]+)$/.exec(
           decodeURIComponent(path),
         );
       if (!m) return next();

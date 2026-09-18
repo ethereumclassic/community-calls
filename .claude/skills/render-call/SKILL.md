@@ -41,22 +41,29 @@ gitignored (70 MB+) and never committed. Verify the page boots against
 The stage has a **display mode**: for a window of the call the waveform is
 replaced by an asset (image or clip), the roster slides into a small stack on
 the left, and header / subtitles / chapter bar stay put with a vignette
-underneath. Windows come from the call markdown frontmatter:
+underneath. Windows live in the call's **video file**, `calls/video/<id>.yaml`
+(committed; keeps render settings out of the episode markdown):
 
 ```yaml
 displays:
   - from: "20:03.2"          # transcript clock, [h:]mm:ss[.ms] (cue starts)
     to: "22:18.5"
-    src: ./media/lady-justice-reference.webp   # calls/media/<file>, or a URL
+    src: lady-justice-reference.webp   # bare file name (see below), or a URL
     zoomFrom: 2.9            # image only: open on a close-up (focus) and
     zoomTo: 1                #   settle out to the whole picture
     focus: "50% 16%"         #   point held on screen at max zoom
   - from: "22:18.5"
     to: "22:50.5"
-    src: ./media/etc-rebrand-concept.mp4
+    src: etc-rebrand-concept.mp4
     rate: 0.5                # video only: playback rate
     loop: true               #   loop to fill the window
 ```
+
+A `src` file name resolves to `calls/media/<file>` if that committed still
+exists, otherwise to the call's media cache `.cache/videogen/<id>/media/<file>`.
+Clips go in the cache, never in git: `node scripts/videogen/media.mjs push <NN>`
+zips them with the audio onto the call's GitHub release (`call-<NN>`), and
+`pull <NN>` restores both on a fresh checkout.
 
 - Abutting windows share one layout session (only a cross-fade between them).
 - **Propose windows from the transcript.** Scan the cleaned transcript for
@@ -66,7 +73,9 @@ displays:
   60fps capture of an animated page; a plain `recordVideo` capture of a
   software-GL page paints ~11 fps and judders). Crop dashboards to the part
   being discussed. Ask the user for assets you cannot fetch (X posts, photos).
-- Assets go in `calls/media/` (committable, served in dev at `/calls-media/`).
+- Small committed stills go in `calls/media/`; clips go in the cache and the
+  release (above). Name cache files without the call number (the release is
+  already per call).
 - Check the windows before rendering: `scripts/videogen/shot-display.mjs` seeks the
   page to chosen main-local times and screenshots them.
 - The title card carries the brand art from `VIDEOGEN_CONFIG.titleArt`.

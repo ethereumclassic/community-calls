@@ -1,0 +1,12 @@
+# Video settings for Call 60 (Decentralism). See src/lib/videogen/video-file.ts.
+# Media: `node scripts/videogen/media.mjs pull 60` fills .cache/videogen/20260918_060/media/
+displays:
+  # codeaholic's screen share, cropped to the PR comment column (no browser
+  # chrome, Zoom panel or chat), starting after the recursive self-share.
+  - from: "32:26.0"
+    to: "37:06.0"
+    src: share-precompile-results.mp4
+  # Slow scroll of the rogue core-geth incident report on classix.dev.
+  - from: "49:52.7"
+    to: "53:27.8"
+    src: rogue-report-scroll.mp4

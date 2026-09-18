@@ -1,0 +1,18 @@
+# Video settings for Call 59 (Justice). See src/lib/videogen/video-file.ts.
+# Media: `node scripts/videogen/media.mjs pull 59` fills .cache/videogen/20260911_059/media/
+displays:
+  - from: "20:03.2"
+    to: "22:18.5"
+    src: lady-justice-reference.webp # committed still in calls/media/
+    zoomFrom: 2.9
+    zoomTo: 1
+    focus: "50% 16%"
+  - from: "22:18.5"
+    to: "22:50.5"
+    src: etc-rebrand-concept.mp4
+    rate: 0.5
+    loop: true
+  - from: "53:44.3"
+    to: "54:34.1"
+    src: triforce-globe.mp4
+    loop: true

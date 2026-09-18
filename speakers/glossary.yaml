@@ -30,6 +30,9 @@ Chandler Guo:
   aliases: [Chandler Gao Go, Chandler Gao]
 Kevin Lord:
   description: Classic Kevin, ETC community manager (participant; see speakers.yaml)
+Ronin:
+  description: Discord user behind the September 2026 rogue ethereumclassic/core-geth release
+  aliases: [Ronan, rodent]
 Istora:
   description: the host (participant; see speakers.yaml) — fix spoken-name slips in the body
   aliases: [Sora, Historia]
@@ -45,8 +48,8 @@ ETC Grants DAO:
 Ethereum Classic:
   aliases: [Sim Classic, Etherium Classic, Athen Classic]
 Fukuii:
-  description: new ETC client project (fukuii-project/fukuii-cli)
-  aliases: [Fukui]
+  description: new ETC client project (fukuii-project/fukuii-cli), forked from IOHK's Mantis
+  aliases: [Fukui, Fuki]
 Kimi K3:
   description: LLM used in the Classix pen test that found core-geth DoS vectors
   aliases: [KimiK3]
@@ -60,6 +63,20 @@ Decentralist Manifesto:
   aliases: [Decentrist Manifesto]
 memetic ordnance:
   aliases: [memetic ordinance]
+ML-DSA:
+  description: NIST post-quantum signature scheme; codeaholic's precompile ECIP verifies it
+  aliases: [MLDSA, ML DSA, MLTSA]
+precompile:
+  aliases: [pre-compile, recompile, free compile]
+CIRCL:
+  description: Cloudflare's cryptography library, used by the ML-DSA precompile
+  aliases: [Circle]
+gwei:
+  aliases: [Juan Gui, gway]
+Liberland:
+  aliases: [Lieberland]
+Clarity Act:
+  description: US crypto market-structure bill (blocked in the Senate, September 2026)
 ethereumclassic.org:
   aliases: [theoremclassic.org]
 cc.ethereumclassic.org:

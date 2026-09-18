@@ -12,7 +12,7 @@ diego:
   avatar: diego.png
 lunar:
   displayName: Lunar
-  aliases: [Lunar Warden]
+  aliases: [Lunar Warden, LW, Luna]
   avatar: lunar.webp
 iav:
   displayName: IAV

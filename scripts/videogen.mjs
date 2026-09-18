@@ -501,6 +501,116 @@ async function renderRealtime(durSec) {
   await mkdir(framesDir, { recursive: true });
   const captureLog = [];
 
+  // Encode while capturing: every CHUNK_FRAMES captured frames, the frames so
+  // far (minus a margin still being written) are encoded into a CFR segment
+  // with an exact frame count and deleted, so the disk never holds more than
+  // a couple of chunks of JPEGs (a full 107-min call is ~55 GB of them). The
+  // encoder is niced and capped at 8 threads so the realtime capture keeps
+  // its cadence; segments are stream-copied together at the end.
+  const CHUNK_FRAMES = Math.max(
+    600,
+    Math.trunc(Number(process.env.VIDEOGEN_CHUNK_FRAMES ?? 6000)),
+  );
+  const segsDir = join(workDir, "segs");
+  await mkdir(segsDir, { recursive: true });
+  const segments = []; // { path, frames }
+  let emittedFrames = 0; // CFR frames written across all segments
+  let encodedUpTo = 0; // captureLog index of the next chunk's first frame
+  let encodeChain = Promise.resolve();
+  let encodeFailed = null;
+
+  // Encode captured frames [from, to) as one segment. `endT` is the wallclock
+  // time the segment must end at (the arrival of frame `to`, or the last
+  // frame + one nominal frame for the final chunk); the segment gets exactly
+  // round(endT * fps) - emittedFrames output frames so the CFR timeline never
+  // drifts at a seam.
+  async function encodeChunk(from, to, endT) {
+    const startT = captureLog[from].t;
+    const want = Math.round(endT * fps) - emittedFrames;
+    if (want <= 0) return;
+    const lines = ["ffconcat version 1.0"];
+    for (let i = from; i < to; i++) {
+      const cur = captureLog[i];
+      const nextT = i + 1 < to ? captureLog[i + 1].t : endT;
+      lines.push(`file '${cur.name}'`);
+      lines.push(`duration ${Math.max(0.001, nextT - cur.t).toFixed(4)}`);
+    }
+    // Repeat the last frame with a second of slack so -frames:v can always be
+    // satisfied whatever the rounding of the durations above.
+    lines.push(`file '${captureLog[to - 1].name}'`);
+    lines.push(`duration 1.0`);
+    lines.push(`file '${captureLog[to - 1].name}'`);
+    const listPath = join(framesDir, `seg${segments.length}.ffconcat`);
+    await writeFile(listPath, lines.join("\n"));
+    const segPath = join(
+      segsDir,
+      `seg${String(segments.length).padStart(4, "0")}.mp4`,
+    );
+    segments.push({ path: segPath, frames: want });
+    emittedFrames += want;
+    await run("nice", [
+      "-n",
+      "10",
+      ffmpegPath,
+      "-y",
+      "-loglevel",
+      "error",
+      "-threads",
+      "8",
+      "-f",
+      "concat",
+      "-safe",
+      "0",
+      "-i",
+      listPath,
+      "-an",
+      "-c:v",
+      "libx264",
+      "-preset",
+      "medium",
+      "-crf",
+      "20",
+      "-pix_fmt",
+      "yuv420p",
+      "-r",
+      String(fps),
+      "-vsync",
+      "cfr",
+      "-frames:v",
+      String(want),
+      "-video_track_timescale",
+      String(fps * 256),
+      segPath,
+    ]);
+    if (debug)
+      console.error(
+        `  seg ${segments.length - 1}: frames ${from}-${to - 1} (${startT.toFixed(2)}s-${endT.toFixed(2)}s) -> ${want} cfr frames`,
+      );
+    await Promise.all(
+      captureLog
+        .slice(from, to)
+        .map((f) =>
+          rm(join(framesDir, f.name), { force: true }).catch(() => {}),
+        ),
+    );
+  }
+
+  // Queue a chunk encode for everything captured so far, leaving a margin of
+  // frames whose files may still be in flight.
+  function scheduleChunk() {
+    const MARGIN = 120;
+    const to = captureLog.length - MARGIN;
+    if (to - encodedUpTo < CHUNK_FRAMES) return;
+    const from = encodedUpTo;
+    encodedUpTo = to;
+    const endT = captureLog[to].t;
+    encodeChain = encodeChain
+      .then(() => encodeChunk(from, to, endT))
+      .catch((e) => {
+        encodeFailed = encodeFailed ?? e;
+      });
+  }
+
   const client = await context.newCDPSession(page);
   let frames = 0;
   let stopped = false;
@@ -528,6 +638,7 @@ async function renderRealtime(durSec) {
     } catch {
       /* */
     }
+    scheduleChunk();
     try {
       await client.send("Page.screencastFrameAck", { sessionId });
     } catch {
@@ -637,30 +748,32 @@ async function renderRealtime(durSec) {
         "#preview-play exists and __renderEnded resolved)",
     );
 
-  // Build a concat-demuxer list using each frame's real arrival time. This
-  // keeps video playback locked to wallclock regardless of cadence wobble
-  // (the previous fixed-framerate hint accumulated drift).
+  // Clip mode: drop any frames captured past the window (the transport keeps
+  // going into the postroll until we stop the screencast).
   if (clipMode) {
-    // Drop any frames captured past the window (the transport keeps going
-    // into the postroll until we stop the screencast).
     const keep = captureLog.filter((f) => f.t <= mainSec);
     if (keep.length) ((captureLog.length = 0), captureLog.push(...keep));
+    if (encodedUpTo > captureLog.length) encodedUpTo = captureLog.length;
   }
-  const concatLines = ["ffconcat version 1.0"];
-  for (let i = 0; i < captureLog.length; i++) {
-    const cur = captureLog[i];
-    const next = captureLog[i + 1];
-    const dur = next ? Math.max(0.001, next.t - cur.t) : 0.04;
-    concatLines.push(`file '${cur.name}'`);
-    concatLines.push(`duration ${dur.toFixed(4)}`);
-  }
-  if (captureLog.length > 0) {
-    concatLines.push(`file '${captureLog[captureLog.length - 1].name}'`);
-  }
-  const concatPath = join(framesDir, "frames.ffconcat");
-  await writeFile(concatPath, concatLines.join("\n"));
 
   console.log("▸ encoding…");
+  // Let queued chunks finish, then encode the tail: the last frame is held
+  // for one nominal frame time, and the segment ends there.
+  await encodeChain;
+  if (encodeFailed) throw encodeFailed;
+  if (encodedUpTo < captureLog.length) {
+    const last = captureLog[captureLog.length - 1];
+    await encodeChunk(encodedUpTo, captureLog.length, last.t + 1 / fps);
+  }
+  const listPath = join(segsDir, "segments.txt");
+  await writeFile(
+    listPath,
+    segments.map((sg) => `file '${sg.path}'`).join("\n") + "\n",
+  );
+  const totalFrames = segments.reduce((n, sg) => n + sg.frames, 0);
+  console.log(
+    `▸ ${segments.length} segment(s), ${totalFrames} frames (${(totalFrames / fps).toFixed(2)}s); muxing audio…`,
+  );
   const finalOut = withTimestamp(out);
   const ffArgs = [
     "-y",
@@ -669,7 +782,7 @@ async function renderRealtime(durSec) {
     "-safe",
     "0",
     "-i",
-    concatPath,
+    listPath,
     "-itsoffset",
     String(vizOffsetSec),
     "-i",
@@ -679,22 +792,14 @@ async function renderRealtime(durSec) {
     "-map",
     "1:a:0",
     "-c:v",
-    "libx264",
-    "-preset",
-    "medium",
-    "-crf",
-    "20",
-    "-pix_fmt",
-    "yuv420p",
-    "-r",
-    String(fps),
-    "-vsync",
-    "cfr",
+    "copy",
     "-c:a",
     "aac",
     "-b:a",
     "192k",
     "-shortest",
+    "-movflags",
+    "+faststart",
     finalOut,
   ];
   const ff = spawn(ffmpegPath, ffArgs, {
@@ -713,6 +818,7 @@ async function renderRealtime(durSec) {
   // Best-effort cleanup of frame dir to free disk (the rest of workDir is
   // removed in the top-level finally).
   await rm(framesDir, { recursive: true, force: true }).catch(() => {});
+  await rm(segsDir, { recursive: true, force: true }).catch(() => {});
   out = finalOut;
 }
 

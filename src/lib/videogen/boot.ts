@@ -98,15 +98,31 @@ async function init(): Promise<void> {
   setDisplays(sidecar?.displays);
 
   if (job.audio) {
-    const tmp = new (
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext })
-        .webkitAudioContext
-    )();
-    const buf = await decodeAudio(job.audio, tmp);
-    await tmp.close();
-    duration = buf.duration;
-    setSpectrum(computeSpectrum(buf, { fps, bands }));
+    // Decode through an OfflineAudioContext at a low sample rate: the decoded
+    // PCM is only used for the deterministic fallback spectrum (the realtime
+    // render drives the analyser from the <audio> element), and decoding at the
+    // native 48 kHz makes a 107-minute call a 1.2 GB float buffer, which
+    // Chromium refuses ("Unable to decode audio data"). At 16 kHz the same
+    // call is ~400 MB and the spectrum still covers speech.
+    const SPECTRUM_RATE = 16000;
+    try {
+      const tmp = new OfflineAudioContext(1, SPECTRUM_RATE, SPECTRUM_RATE);
+      const buf = await decodeAudio(job.audio, tmp);
+      duration = buf.duration;
+      setSpectrum(computeSpectrum(buf, { fps, bands }));
+    } catch (e) {
+      // Fall back to the media element for the duration and run without the
+      // precomputed spectrum (the live analyser still works).
+      console.warn("videogen: audio decode failed, using element duration", e);
+      duration = await new Promise<number>((resolve, reject) => {
+        const a = new Audio();
+        a.preload = "metadata";
+        a.onloadedmetadata = () => resolve(a.duration);
+        a.onerror = () => reject(new Error("audio metadata failed"));
+        a.src = job!.audio;
+      });
+      setSpectrum(null);
+    }
   }
 
   w.__duration = duration;

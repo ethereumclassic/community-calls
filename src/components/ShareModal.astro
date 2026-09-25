@@ -22,7 +22,7 @@ const agendaSummary = call.data.agendaSummary?.trim();
 
 // One text for the copy button, X, and Telegram. Kept within X's 280 limit,
 // which counts URLs as 23 and emoji as 2.
-const snippet = `ETC Community Call ${callNumber} \u{1F399}\u{FE0F} ${call.data.description}\n\n${agendaSummary ? `${agendaSummary}\n\n` : ""}${tzLinesCompact}\n\nGreen Room 1h before. All welcome \u{1F340}\n\n${callUrl}\n\n#EthereumClassic #ETCCC #ETC`;
+const snippet = `ETC Community Call ${callNumber} \u{1F399}\u{FE0F} ${call.data.description}\n\n${agendaSummary ? `${agendaSummary}\n\n` : ""}${tzLinesCompact}\n\n${call.data.greenRoom ? "Green Room 1h before. " : ""}All welcome \u{1F340}\n\n${callUrl}\n\n#EthereumClassic #ETCCC #ETC`;
 const tweetLen = tweetLength(snippet);
 if (tweetLen > TWEET_MAX) {
   throw new Error(

@@ -9,8 +9,26 @@ export type Chapter = {
   end: number;
 };
 
+// A display-mode window: between start and end (transcript clock, seconds)
+// the stage shows `src` instead of the waveform. kind is derived from the
+// file extension server-side so the page never has to sniff.
+export type Display = {
+  start: number;
+  end: number;
+  src: string;
+  kind: "image" | "video";
+  // image motion: scale across the window, holding `focus` on screen
+  zoomFrom?: number;
+  zoomTo?: number;
+  focus?: string; // "x% y%" of the frame
+  // video playback
+  rate?: number;
+  loop?: boolean;
+};
+
 export type SidecarMeta = {
   summary?: string;
+  displays?: Display[];
   hosts?: string[];
   episodeUrl?: string;
   chapters?: Chapter[];

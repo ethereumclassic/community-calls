@@ -49,6 +49,80 @@ mostly extraction + packaging, not new rendering work.
 - Does the player replace the YouTube embed on call pages, or sit alongside it?
 - Mobile layout for a 16:9 stage.
 
+## Episode media hosting (decided: GitHub Releases, one per call)
+
+Decided 2026-09-18. Per-call media lives on a GitHub Release of this repo,
+tagged `call-<NN>`, holding exactly two assets: the distributable audio
+`<NN>-audio.mp3` and `<NN>-assets.zip` with the display clips, plus the
+YouTube and show-notes links in the notes. Nothing else goes on the releases
+page. Renders are not stored anywhere (YouTube has the published copy; the
+release plus the markdown and `calls/video/<id>.yaml` reproduce it). Raw Zoom
+recordings and transcripts stay on Zoom. Git LFS was rejected: Netlify cannot
+serve LFS objects and one render would exhaust the free bandwidth quota.
+
+Tooling: `node scripts/videogen/media.mjs push|pull|status <NN>`. Local layout:
+`public/videogen/<NN>/<NN>-audio.mp3` (gitignored) and
+`.cache/videogen/<id>/media/<file>` (gitignored); committed stills stay in
+`calls/media/`. Display `src` values in `calls/video/<id>.yaml` are bare file
+names resolved by convention (calls/media first, then the cache).
+
+- [ ] The pipeline token needs release write access (fine-grained PAT:
+      Contents: read and write on the repo) before `push` works; first pushes
+      pending for calls 59 and 60.
+- [ ] Backfill older calls' audio lazily, when a call is next touched.
+- [ ] Inline audio player: point it at the release asset URL
+      (`https://github.com/<repo>/releases/download/call-<NN>/<NN>-audio.mp3`).
+# TODO
+
+## Inline audio player (videogen-driven, no YouTube)
+
+Upload MP3s of all episodes and build a **dynamic in-browser playback
+component** that reuses the videogen stage but is driven by `mp3 + JS` in real
+time instead of a pre-rendered MP4. The result is a nice inline player embedded
+on the call pages (and/or archive) that shows the synced visuals — roster with
+active-speaker focus, captions, chapter chip, audioMotion viz, pre/post-roll
+slides — **without relying on a YouTube embed**.
+
+### Why
+- Removes the dependency on YouTube for playback on our own site.
+- We already render these visuals; this surfaces them live instead of only as a
+  downloadable MP4.
+- One source of truth: the call markdown already provides transcript, chapters,
+  participants, and summary via the videogen endpoints.
+
+### The good news: most of this already exists
+The videogen **preview transport** (`src/lib/videogen/preview.ts`) is already a
+browser player: it plays the audio element, drives the unified timeline
+(preroll slides → main → postroll), syncs the roster/subtitles/chip/viz, and
+scrubs across the whole thing. Productionizing it as an embeddable component is
+mostly extraction + packaging, not new rendering work.
+
+### Rough plan
+- [ ] **Audio hosting** — upload per-episode MP3s somewhere durable and cheap
+      (decide where: object storage / CDN; NOT committed to the repo — same
+      policy as the gitignored `.m4a`/`.mp4`). Wire a stable per-episode URL.
+- [ ] **Extract a reusable player** from `videogen.astro` + `preview.ts` — a
+      self-contained component (stage markup + boot) that takes a job
+      (`/videogen/<NN>/job.json` from the existing endpoints) and an audio URL,
+      and runs the live transport. Drop the dev-only gating for this path.
+- [ ] **Embed on call pages** — an inline `<VideogenPlayer call={n} />` that
+      lazy-loads (audioMotion, audio decode) and is responsive (the stage is
+      authored at 1920×1080; scale it down to fit the content column).
+- [ ] **Make it not dev-only** — currently the route + endpoints are stripped
+      from prod by the build hook. The player path needs to ship: serve the
+      job/meta/transcript (already markdown-derived) in prod, keep the heavy
+      render driver dev-only.
+- [ ] **Perf** — the full-episode audio decode is heavy (the preview already
+      pays this). Consider streaming/seekable decode, or only decoding on play.
+- [ ] **UX** — chapter markers on the scrubber, click-to-jump (chapters already
+      exist in the timeline), captions toggle, keyboard controls.
+
+### Open questions
+- Where do the MP3s live, and how big across all ~58 episodes? (see
+  [Episode media hosting](#episode-media-hosting-git-lfs-vs-external-netlify-serving))
+- Does the player replace the YouTube embed on call pages, or sit alongside it?
+- Mobile layout for a 16:9 stage.
+
 ## Episode media hosting (git-lfs vs external; Netlify serving)
 
 Decide how per-episode audio (and any inline-served video) is stored and served

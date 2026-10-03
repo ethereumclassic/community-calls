@@ -10,6 +10,9 @@ import type { AstroGlobal } from "astro";
 // Usage in a page's frontmatter:
 //   const guard = devOnlyGuard(Astro);
 //   if (guard) return guard;
-export function devOnlyGuard(Astro: AstroGlobal): Response | undefined {
+// Only `redirect` is needed, so pages with typed params (getStaticPaths) fit too.
+export function devOnlyGuard(
+  Astro: Pick<AstroGlobal, "redirect">,
+): Response | undefined {
   if (!import.meta.env.DEV) return Astro.redirect("/");
 }

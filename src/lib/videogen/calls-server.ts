@@ -14,6 +14,7 @@ import { VIDEOGEN_CONFIG } from "./config";
 import { resolveSpeaker } from "./speakers";
 import type { Job, Participant } from "./job";
 import type { SidecarMeta, Chapter } from "./sidecar";
+import { buildDisplays } from "./video-file";
 
 type Entry = CollectionEntry<"calls">;
 
@@ -104,5 +105,7 @@ export function buildMeta(entry: Entry, vtt: string): SidecarMeta {
     intro: VIDEOGEN_CONFIG.intro,
     outro: VIDEOGEN_CONFIG.outro,
     chapters,
+    // Display windows come from calls/video/<id>.yaml, not the markdown.
+    displays: buildDisplays(entry.id),
   };
 }

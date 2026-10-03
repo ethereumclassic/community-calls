@@ -75,9 +75,14 @@ In order, skipping what's already done:
 2. **`call-markdown`** — runs the missing text stage(s) (clean / chapters /
    summary / write), each with its own confirm gate. This produces the complete
    `calls/<id>.md`.
-3. **Confirm before rendering.** This is the key gate: only proceed to video once
+3. **Propose display windows.** Scan the cleaned transcript for assets the
+   call talks about (sites, dashboards, releases, designs, clips) and propose
+   `displays:` windows with times and a source for each; capture what is
+   public, ask for the rest. See `render-call` Step 1b. Confirm before adding
+   them to the frontmatter.
+4. **Confirm before rendering.** This is the key gate: only proceed to video once
    the user approves. Many runs legitimately stop here.
-4. **`render-call`** — draft → final MP4 + the paste-ready YouTube handoff.
+5. **`render-call`** — draft → final MP4 + the paste-ready YouTube handoff.
 
 Invoke each sub-skill rather than re-implementing it; this file is only the
 conductor.

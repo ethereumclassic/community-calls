@@ -6,6 +6,7 @@
 // there are no more hard-coded pre/post-roll waits here.
 
 import { fmtDateLong } from "./format";
+import { VIDEOGEN_CONFIG } from "./config";
 import { renderSpeakerStats } from "./stats";
 import type { Cue } from "./vtt";
 import type { Participant, CallMeta } from "./job";
@@ -86,24 +87,29 @@ function heroSlide(): HTMLElement {
   return root;
 }
 
-// Episode card: centred #number/date, the title in green, and the "In this
-// episode" summary below it (the standalone summary slide is gone). Fonts match
-// the main call view's header — mono meta, Instrument-Serif green title.
+// Episode card: #number/date, the title in green, and the "In this episode"
+// summary, left-aligned as a text column, with the brand artwork (the Lady
+// Justice wireframe, VIDEOGEN_CONFIG.titleArt) standing on the right. Fonts
+// match the main call view's header — mono meta, Instrument-Serif green title.
 function titleSlide(
   call: CallMeta | undefined,
   summary: string | undefined,
 ): HTMLElement {
   const root = document.createElement("div");
   root.className = "slide-title og";
+  const art = VIDEOGEN_CONFIG.titleArt;
   root.innerHTML = `
     ${CHROME}
-    <div class="og-content title-content">
-      <div class="title-meta">
-        ${call?.number != null ? `<span class="num">#${call.number}</span>` : ""}
-        ${call?.date ? `<span class="date">${fmtDateLong(call.date)}</span>` : ""}
+    <div class="og-content title-content${art ? " has-art" : ""}">
+      <div class="title-text">
+        <div class="title-meta">
+          ${call?.number != null ? `<span class="num">#${call.number}</span>` : ""}
+          ${call?.date ? `<span class="date">${fmtDateLong(call.date)}</span>` : ""}
+        </div>
+        <h1 class="title-name">${call?.title ?? ""}</h1>
+        ${summary ? `<p class="title-summary">${summary}</p>` : ""}
       </div>
-      <h1 class="title-name">${call?.title ?? ""}</h1>
-      ${summary ? `<p class="title-summary">${summary}</p>` : ""}
+      ${art ? `<div class="title-art"><img src="${art}" alt="" /></div>` : ""}
     </div>`;
   return root;
 }

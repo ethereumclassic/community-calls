@@ -213,13 +213,102 @@ body::before {
   text-align: center;
   line-height: 1;
   /* Overflow the 240px card symmetrically instead of widening it, so the name
-     stays centered under the avatar without shifting it. */
+     stays centered under the avatar without shifting it. Positioned off the
+     avatar (not in flow) so the display-mode stack can move it beside the
+     avatar without changing the card's box. */
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  margin-top: 32px;
+  transform: translateX(-50%);
   white-space: nowrap;
   opacity: 0;
   transition: opacity 620ms ease;
 }
+/* Display-mode stack: the name sits to the right of the small avatar. Sized up
+   so it still reads after the card's 0.34 scale. */
+.participant.stacked .pname {
+  top: 50%;
+  left: 100%;
+  margin: 0 0 0 40px;
+  transform: translateY(-50%);
+  font-size: 168px;
+  text-align: left;
+}
 .participant.active .pname {
   opacity: 1;
+}
+
+/* ───────────────────────── Display layer ─────────────────────────
+   Sits between the waveform (z 1) and the chrome (z 5+): the asset under
+   discussion on black, faded in/out by display.ts. The bottom gradient keeps
+   the subtitle legible over a bright image. */
+.display-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: #000;
+  opacity: 0;
+  overflow: hidden;
+}
+.display-layer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  /* Vignette so the chrome always reads over any asset: a dark column under
+     the speaker stack, a band under the header, a heavier band under the
+     subtitles and chapter bar, and a soft radial falloff toward every edge. */
+  background:
+    linear-gradient(
+      90deg,
+      rgba(0, 0, 0, 0.82) 0,
+      rgba(0, 0, 0, 0.6) 200px,
+      rgba(0, 0, 0, 0) 520px
+    ),
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.78) 0,
+      rgba(0, 0, 0, 0.45) 150px,
+      rgba(0, 0, 0, 0) 320px
+    ),
+    linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.85) 0,
+      rgba(0, 0, 0, 0.6) 240px,
+      rgba(0, 0, 0, 0) 460px
+    ),
+    radial-gradient(
+      ellipse at 50% 50%,
+      rgba(0, 0, 0, 0) 40%,
+      rgba(0, 0, 0, 0.35) 75%,
+      rgba(0, 0, 0, 0.7) 100%
+    );
+}
+.display-item {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+}
+/* Subtitles over a bright asset need a much heavier shadow than over the
+   waveform. */
+.stage.display-mode .subtitle {
+  text-shadow:
+    0 2px 4px rgba(0, 0, 0, 1),
+    0 0 18px rgba(0, 0, 0, 0.95),
+    0 4px 36px rgba(0, 0, 0, 0.9),
+    0 0 70px rgba(0, 0, 0, 0.8);
+}
+.display-item img,
+.display-item video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  transform-origin: 50% 50%;
 }
 
 /* ───────────────────────── Viz layer ─────────────────────────
@@ -576,6 +665,60 @@ body::before {
   max-width: 1400px;
   text-align: center;
   color: var(--color-text-primary);
+}
+/* With artwork: text becomes a left-aligned column and the art stands on the
+   right, full height of the card. The art breathes very slowly (it is on
+   screen for ~6s) so the card is not a still. */
+.title-content.has-art {
+  flex-direction: row-reverse; /* art on the left, text on the right */
+  align-items: center;
+  justify-content: space-between;
+  gap: 110px;
+  padding: 0 120px 0 40px;
+}
+.title-content.has-art .title-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-width: 1060px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 30px;
+}
+.title-content.has-art .title-name {
+  text-align: left;
+  font-size: 150px;
+}
+.title-content.has-art .title-summary {
+  text-align: left;
+  font-size: 44px;
+  max-width: 1000px;
+}
+.title-art {
+  flex: 0 0 auto;
+  width: 600px;
+  height: 920px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.title-art img {
+  height: 100%;
+  width: auto;
+  object-fit: contain;
+  /* The artwork is a wireframe on pure black; screen-blend it so its black
+     dissolves into the slide background instead of printing a rectangle. */
+  mix-blend-mode: screen;
+  animation: title-art-drift 7s ease-in-out both;
+  will-change: transform;
+}
+@keyframes title-art-drift {
+  from {
+    transform: scale(1);
+  }
+  to {
+    transform: scale(1.05);
+  }
 }
 
 /* Centred-content variant used by TOC / Summary / Stats / Thanks */

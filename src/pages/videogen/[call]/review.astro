@@ -1,0 +1,557 @@
+---
+import "../../../styles/index.css";
+import { devOnlyGuard } from "../../../lib/devOnly";
+import {
+  callPaths,
+  getCall,
+  getTranscript,
+  buildMeta,
+} from "../../../lib/videogen/calls-server";
+import { parseVtt } from "../../../lib/videogen/vtt";
+import { buildTimeline } from "../../../lib/videogen/timeline";
+
+// Dev-only review page for a call's rendered video: a wide scrubber with the
+// chapters and display windows marked on the video clock, keyboard transport,
+// and one-off clip renders of any range (via the videogenClipJobs dev plugin)
+// that play back from .cache/videogen/<id>/clips/. Stripped from prod with
+// the rest of /videogen (DEV_ROUTES in astro.config.mjs).
+export const getStaticPaths = callPaths;
+
+const guard = devOnlyGuard(Astro);
+if (guard) return guard;
+
+const entry = await getCall(String(Astro.params.call));
+const vtt = entry && getTranscript(entry);
+if (!entry || !vtt)
+  return new Response("call or transcript not found", { status: 404 });
+
+const meta = buildMeta(entry, vtt);
+const cues = parseVtt(vtt);
+// Same head-trim rule as boot.ts: the call starts 1s before the first cue.
+const firstStart = cues.length ? Math.min(...cues.map((c) => c.start)) : 0;
+const mainAudioOffsetSec = Math.max(0, firstStart - 1.0);
+const lastEnd = cues.length ? Math.max(...cues.map((c) => c.end)) : 0;
+const timeline = buildTimeline({
+  meta,
+  mainDurationSec: Math.max(0, lastEnd + 1.0 - mainAudioOffsetSec),
+  mainAudioOffsetSec,
+  includeSlides: true,
+});
+const prerollSec = timeline.prerollMs / 1000;
+// transcript clock -> video clock
+const vt = (rec: number) => prerollSec + (rec - mainAudioOffsetSec);
+
+const review = {
+  id: entry.id,
+  number: entry.data.number,
+  title: entry.data.description,
+  prerollSec,
+  mainAudioOffsetSec,
+  totalSec: timeline.totalDuration,
+  renderUrl: `/videogen-cache/${entry.id}/render.mp4`,
+  cacheBase: `/videogen-cache/${entry.id}/`,
+  chapters: (meta.chapters ?? []).map((c) => ({
+    title: c.title,
+    t: vt(c.start),
+  })),
+  displays: (meta.displays ?? []).map((d) => ({
+    label: d.src.split("/").pop(),
+    a: vt(d.start),
+    b: vt(d.end),
+  })),
+};
+---
+
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <title>review · call {review.number}</title>
+    <style>
+      body {
+        margin: 0;
+        background: #0a0a0c;
+        color: #e5e7eb;
+        font:
+          14px/1.4 ui-monospace,
+          "JetBrains Mono",
+          monospace;
+      }
+      .wrap {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 16px;
+      }
+      h1 {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 10px;
+        color: #7aeea8;
+      }
+      h1 span {
+        color: #8b8f98;
+        font-weight: 400;
+      }
+      video {
+        width: 100%;
+        background: #000;
+        display: block;
+        border-radius: 8px;
+      }
+      .bar {
+        position: relative;
+        height: 34px;
+        margin: 14px 0 6px;
+        background: #16161a;
+        border-radius: 6px;
+        cursor: pointer;
+        user-select: none;
+      }
+      .bar .played {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        background: rgba(122, 238, 168, 0.25);
+        border-radius: 6px 0 0 6px;
+        pointer-events: none;
+      }
+      .bar .buffered {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.06);
+        pointer-events: none;
+      }
+      .bar .head {
+        position: absolute;
+        top: -4px;
+        bottom: -4px;
+        width: 2px;
+        background: #7aeea8;
+        pointer-events: none;
+      }
+      .bar .mark {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: rgba(255, 255, 255, 0.35);
+      }
+      .bar .mark.chapter {
+        background: rgba(122, 238, 168, 0.7);
+      }
+      .bar .mark.window {
+        background: rgba(255, 200, 80, 0.85);
+      }
+      .bar .win {
+        position: absolute;
+        top: 24px;
+        height: 8px;
+        background: rgba(255, 200, 80, 0.35);
+        border-radius: 2px;
+        pointer-events: none;
+      }
+      .bar .sel {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        background: rgba(120, 160, 255, 0.22);
+        border-left: 2px solid rgba(120, 160, 255, 0.9);
+        border-right: 2px solid rgba(120, 160, 255, 0.9);
+        pointer-events: none;
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin: 8px 0;
+      }
+      button,
+      input {
+        font: inherit;
+        background: #1c1c22;
+        color: #e5e7eb;
+        border: 1px solid #2a2a33;
+        border-radius: 6px;
+        padding: 6px 10px;
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: #7aeea8;
+      }
+      button.win {
+        border-color: rgba(255, 200, 80, 0.6);
+      }
+      button.primary {
+        background: #7aeea8;
+        color: #0a0a0c;
+        font-weight: 600;
+      }
+      input[type="text"] {
+        width: 110px;
+        cursor: text;
+      }
+      .time {
+        font-size: 22px;
+        color: #7aeea8;
+        min-width: 220px;
+      }
+      .hint {
+        color: #8b8f98;
+        font-size: 12px;
+      }
+      .legend span {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        margin-right: 4px;
+        border-radius: 2px;
+        vertical-align: middle;
+      }
+      .missing {
+        padding: 24px;
+        border: 1px dashed #2a2a33;
+        border-radius: 8px;
+        color: #8b8f98;
+      }
+      .clips {
+        margin-top: 18px;
+        border-top: 1px solid #2a2a33;
+        padding-top: 12px;
+      }
+      .clip {
+        display: grid;
+        grid-template-columns: 420px 1fr;
+        gap: 14px;
+        align-items: start;
+        padding: 10px 0;
+        border-bottom: 1px solid #1c1c22;
+      }
+      .clip video {
+        width: 420px;
+        border-radius: 6px;
+      }
+      .clip .st {
+        color: #8b8f98;
+        font-size: 12px;
+      }
+      .clip .st.done {
+        color: #7aeea8;
+      }
+      .clip .st.failed {
+        color: #ff6f8a;
+      }
+      .clip pre {
+        max-height: 120px;
+        overflow: auto;
+        font-size: 11px;
+        color: #8b8f98;
+        background: #111114;
+        padding: 8px;
+        border-radius: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>
+        #{review.number}
+        {review.title}
+        <span>· review</span>
+      </h1>
+      <video id="v" src={review.renderUrl} preload="metadata" controls></video>
+      <div class="missing hidden" id="missing">
+        No render in the cache for this call. Expected
+        <code>.cache/videogen/{review.id}/render.mp4</code>
+        (or the legacy public-root handoff mp4). One-off clips below still work.
+      </div>
+      <div class="bar" id="bar">
+        <div class="buffered" id="buf"></div>
+        <div class="played" id="played"></div>
+        <div class="sel hidden" id="sel"></div>
+        <div class="head" id="head"></div>
+      </div>
+      <div class="row">
+        <span class="time" id="t">0:00.00 / …</span>
+        <button id="play">play / pause (K)</button>
+        <button data-d="-30">−30s</button><button data-d="-5">−5s</button
+        ><button data-d="-1">−1s</button>
+        <button data-d="-0.0166667">−1f</button><button data-d="0.0166667"
+          >+1f</button
+        >
+        <button data-d="1">+1s</button><button data-d="5">+5s</button><button
+          data-d="30">+30s</button
+        >
+        <input type="text" id="jump" placeholder="m:ss or sec" /><button id="go"
+          >go</button
+        >
+        <button id="rate">speed: 1×</button>
+      </div>
+      <div class="row" id="chapters"></div>
+      <div class="row" id="windows"></div>
+      <p class="hint legend">
+        <span style="background: rgba(122, 238, 168, 0.7)"></span>chapters
+        &nbsp; <span style="background: rgba(255, 200, 80, 0.85)"></span>display
+        windows &nbsp;
+        <span style="background: rgba(120, 160, 255, 0.5)"></span>clip range
+        &nbsp; · keys: ←/→ 5s · shift+←/→ 30s · ,/. one frame · J/L 10s · K play
+        · 0–9 jump to tenths · I / O set clip in / out at the playhead
+      </p>
+
+      <div class="clips">
+        <div class="row">
+          <strong>Render a clip</strong>
+          <input type="text" id="cin" placeholder="in (video clock)" />
+          <input type="text" id="cout" placeholder="out" />
+          <button id="use-window">use hovered window</button>
+          <button id="use-sel">use I/O range</button>
+          <button class="primary" id="render">render clip</button>
+          <span class="hint" id="render-msg"></span>
+        </div>
+        <p class="hint">
+          Clips re-render that range from the live page with the current code
+          and markdown, so they show edits before a full re-render. In/out are
+          on the video clock; a clip takes as long as it is, plus encode.
+        </p>
+        <div id="clips"></div>
+      </div>
+    </div>
+
+    <script is:inline define:vars={{ review }}>
+      const R = review;
+      const v = document.getElementById("v"),
+        bar = document.getElementById("bar"),
+        played = document.getElementById("played"),
+        head = document.getElementById("head"),
+        buf = document.getElementById("buf"),
+        sel = document.getElementById("sel"),
+        tEl = document.getElementById("t");
+      const fmt = (s) => {
+        const m = Math.floor(s / 60),
+          r = s - m * 60;
+        return `${m}:${r.toFixed(2).padStart(5, "0")}`;
+      };
+      const dur = () => (isFinite(v.duration) && v.duration) || R.totalSec;
+      const seek = (t) => {
+        v.currentTime = Math.max(0, Math.min(dur(), t));
+      };
+      let hoveredWindow = null;
+      let selIn = null,
+        selOut = null;
+
+      function mark(cls, t, title, w, onHover) {
+        const m = document.createElement("div");
+        m.className = "mark " + cls;
+        m.style.left = (t / dur()) * 100 + "%";
+        m.title = `${title} @ ${fmt(t)}`;
+        m.addEventListener("click", (e) => {
+          e.stopPropagation();
+          seek(t);
+        });
+        bar.appendChild(m);
+        if (w) {
+          const s = document.createElement("div");
+          s.className = "win";
+          s.style.left = (t / dur()) * 100 + "%";
+          s.style.width = ((w - t) / dur()) * 100 + "%";
+          bar.appendChild(s);
+        }
+        if (onHover) m.addEventListener("mouseenter", onHover);
+      }
+      function btn(row, cls, label, t, onHover) {
+        const b = document.createElement("button");
+        b.className = cls;
+        b.textContent = `${label} ${fmt(t)}`;
+        b.onclick = () => seek(t);
+        if (onHover) b.addEventListener("mouseenter", onHover);
+        document.getElementById(row).appendChild(b);
+      }
+      function build() {
+        R.chapters.forEach((c) => {
+          mark("chapter", c.t, c.title);
+          btn("chapters", "", c.title, c.t);
+        });
+        R.displays.forEach((d) => {
+          const hover = () => (hoveredWindow = d);
+          mark("window", d.a, d.label, d.b, hover);
+          btn("windows", "win", d.label, d.a - 3, hover);
+        });
+      }
+      v.addEventListener("loadedmetadata", build);
+      v.addEventListener("error", () => {
+        document.getElementById("missing").classList.remove("hidden");
+        build();
+      });
+      function tick() {
+        const p = (v.currentTime / dur()) * 100;
+        played.style.width = p + "%";
+        head.style.left = p + "%";
+        tEl.textContent = `${fmt(v.currentTime)} / ${fmt(dur())}`;
+        if (v.buffered.length) {
+          const i = v.buffered.length - 1;
+          buf.style.left = (v.buffered.start(i) / dur()) * 100 + "%";
+          buf.style.width =
+            ((v.buffered.end(i) - v.buffered.start(i)) / dur()) * 100 + "%";
+        }
+        if (selIn != null && selOut != null && selOut > selIn) {
+          sel.classList.remove("hidden");
+          sel.style.left = (selIn / dur()) * 100 + "%";
+          sel.style.width = ((selOut - selIn) / dur()) * 100 + "%";
+        } else sel.classList.add("hidden");
+        requestAnimationFrame(tick);
+      }
+      tick();
+      let dragging = false;
+      const posToTime = (e) => {
+        const r = bar.getBoundingClientRect();
+        return ((e.clientX - r.left) / r.width) * dur();
+      };
+      bar.addEventListener("pointerdown", (e) => {
+        dragging = true;
+        bar.setPointerCapture(e.pointerId);
+        seek(posToTime(e));
+      });
+      bar.addEventListener("pointermove", (e) => {
+        if (dragging) seek(posToTime(e));
+      });
+      bar.addEventListener("pointerup", () => (dragging = false));
+      document.getElementById("play").onclick = () =>
+        v.paused ? v.play() : v.pause();
+      document
+        .querySelectorAll("button[data-d]")
+        .forEach(
+          (b) =>
+            (b.onclick = () => seek(v.currentTime + parseFloat(b.dataset.d))),
+        );
+      const rates = [1, 1.5, 2, 4, 0.5];
+      let ri = 0;
+      document.getElementById("rate").onclick = (e) => {
+        ri = (ri + 1) % rates.length;
+        v.playbackRate = rates[ri];
+        e.target.textContent = `speed: ${rates[ri]}×`;
+      };
+      function parseTime(s) {
+        s = String(s).trim();
+        if (/^\d+(\.\d+)?$/.test(s)) return parseFloat(s);
+        const m = s.match(/^(?:(\d+):)?(\d+):(\d+(?:\.\d+)?)$/);
+        if (!m) return NaN;
+        return (m[1] ? +m[1] * 3600 : 0) + +m[2] * 60 + +m[3];
+      }
+      const go = () => {
+        const t = parseTime(document.getElementById("jump").value);
+        if (!isNaN(t)) seek(t);
+      };
+      document.getElementById("go").onclick = go;
+      document.getElementById("jump").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") go();
+        e.stopPropagation();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.target.tagName === "INPUT") return;
+        const f = 1 / 60;
+        if (e.key === "ArrowLeft") seek(v.currentTime - (e.shiftKey ? 30 : 5));
+        else if (e.key === "ArrowRight")
+          seek(v.currentTime + (e.shiftKey ? 30 : 5));
+        else if (e.key === ",") seek(v.currentTime - f);
+        else if (e.key === ".") seek(v.currentTime + f);
+        else if (e.key === "j" || e.key === "J") seek(v.currentTime - 10);
+        else if (e.key === "l" || e.key === "L") seek(v.currentTime + 10);
+        else if (e.key === "k" || e.key === "K" || e.key === " ") {
+          v.paused ? v.play() : v.pause();
+        } else if (e.key === "i" || e.key === "I") {
+          selIn = v.currentTime;
+          cin.value = fmt(selIn);
+        } else if (e.key === "o" || e.key === "O") {
+          selOut = v.currentTime;
+          cout.value = fmt(selOut);
+        } else if (/^[0-9]$/.test(e.key)) seek(dur() * (+e.key / 10));
+        else return;
+        e.preventDefault();
+      });
+
+      // ── one-off clips ────────────────────────────────────────────────────
+      const cin = document.getElementById("cin"),
+        cout = document.getElementById("cout"),
+        msg = document.getElementById("render-msg"),
+        clipsEl = document.getElementById("clips");
+      document.getElementById("use-window").onclick = () => {
+        if (!hoveredWindow) return (msg.textContent = "hover a window first");
+        cin.value = fmt(hoveredWindow.a - 3);
+        cout.value = fmt(hoveredWindow.b + 3);
+      };
+      document.getElementById("use-sel").onclick = () => {
+        if (selIn == null || selOut == null)
+          return (msg.textContent = "press I and O at the playhead first");
+        cin.value = fmt(selIn);
+        cout.value = fmt(selOut);
+      };
+      // video clock -> main-local seconds for the driver's --start
+      const toMain = (t) => Math.max(0, t - R.prerollSec);
+      document.getElementById("render").onclick = async () => {
+        const a = parseTime(cin.value),
+          b = parseTime(cout.value);
+        if (isNaN(a) || isNaN(b) || b <= a)
+          return (msg.textContent = "need in < out on the video clock");
+        msg.textContent = "starting…";
+        const r = await fetch(R.cacheBase + "render", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            start: +toMain(a).toFixed(3),
+            duration: +(b - a).toFixed(3),
+            label: `${fmt(a)} → ${fmt(b)}`,
+          }),
+        });
+        msg.textContent = r.ok ? "rendering…" : `error ${r.status}`;
+        poll();
+      };
+      let pollTimer = 0;
+      async function poll() {
+        clearTimeout(pollTimer);
+        const list = await fetch(R.cacheBase + "jobs.json").then((r) =>
+          r.json(),
+        );
+        render(list);
+        if (list.some((j) => j.state === "running"))
+          pollTimer = setTimeout(poll, 3000);
+      }
+      function render(list) {
+        clipsEl.innerHTML = "";
+        for (const j of list) {
+          const el = document.createElement("div");
+          el.className = "clip";
+          const left = document.createElement("div");
+          if (j.state === "done" && j.file) {
+            const cv = document.createElement("video");
+            cv.controls = true;
+            cv.preload = "metadata";
+            cv.src = R.cacheBase + j.file;
+            left.appendChild(cv);
+          } else {
+            left.className = "st " + j.state;
+            left.textContent = j.state === "running" ? "rendering…" : "failed";
+          }
+          const right = document.createElement("div");
+          const title = document.createElement("div");
+          title.textContent = `${j.label || j.name} · main-local ${j.start}s + ${j.duration}s`;
+          const st = document.createElement("div");
+          st.className = "st " + j.state;
+          st.textContent = `${j.state} · started ${j.startedAt}${j.finishedAt ? " · finished " + j.finishedAt : ""}`;
+          right.appendChild(title);
+          right.appendChild(st);
+          if (j.state !== "done" && j.log) {
+            const pre = document.createElement("pre");
+            pre.textContent = j.log.split("\r").pop();
+            right.appendChild(pre);
+          }
+          el.appendChild(left);
+          el.appendChild(right);
+          clipsEl.appendChild(el);
+        }
+      }
+      poll();
+    </script>
+  </body>
+</html>

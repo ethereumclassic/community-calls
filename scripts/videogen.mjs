@@ -103,6 +103,15 @@ const role = args.role ?? "";
 const debug = !!args.debug;
 const realtime = !!args.realtime;
 const limitDurationSec = numArg("duration", null);
+// --start <sec>: begin the render at main-local time `sec` (seconds into the
+// trimmed call, i.e. transcript time minus the head trim) instead of at the
+// top. Used to re-render one window of a call (e.g. a display-mode segment)
+// for splicing into an existing full render; with --start there is no preroll
+// in the capture, --duration counts from the start point.
+const startSec = numArg("start", null);
+// --clip: with --start, stop at the end of the window instead of running on
+// into the postroll slides; for one-off clips rendered for review.
+const clipMode = !!args.clip;
 // AMA's AnalyserNode + Web Audio buffer chain introduces ~150-250ms of
 // lag between an audio sample being played and AMA's bars reacting to it.
 // Delay the audio track by this much in the muxed MP4 so the viz "catches
@@ -113,6 +122,7 @@ if (fps <= 0) die("--fps must be > 0");
 if (port <= 0) die("--port must be > 0");
 if (limitDurationSec != null && limitDurationSec <= 0)
   die("--duration must be > 0");
+if (startSec != null && startSec < 0) die("--start must be >= 0");
 if (realtime && !jobArg)
   die("--realtime requires --job (it drives the live preview transport)");
 
@@ -129,7 +139,7 @@ if (jobArg) {
 }
 
 const workDir = await mkdtemp(join(tmpdir(), "videogen-"));
-const audioPath = join(workDir, "audio.m4a");
+let audioPath = join(workDir, "audio.m4a");
 
 console.log(`▸ work dir: ${workDir}`);
 
@@ -155,18 +165,25 @@ if (jobArg) {
   const buf = Buffer.from(await audioRes.arrayBuffer());
   const rawAudio = join(workDir, "audio-in");
   await writeFile(rawAudio, buf);
-  console.log("▸ re-encoding audio…");
-  await run(ffmpegPath, [
-    "-y",
-    "-i",
-    rawAudio,
-    "-vn",
-    "-c:a",
-    "aac",
-    "-b:a",
-    "192k",
-    audioPath,
-  ]);
+  if (startSec != null) {
+    // Window renders (clips, re-rendered segments) only need a slice; the mix
+    // graph in buildConcatAudio decodes the source directly, so skip the
+    // minute-long re-encode of the whole call.
+    audioPath = rawAudio;
+  } else {
+    console.log("▸ re-encoding audio…");
+    await run(ffmpegPath, [
+      "-y",
+      "-i",
+      rawAudio,
+      "-vn",
+      "-c:a",
+      "aac",
+      "-b:a",
+      "192k",
+      audioPath,
+    ]);
+  }
 } else {
   console.log("▸ extracting audio…");
   await run(ffmpegPath, [
@@ -360,6 +377,7 @@ async function renderPerFrame(durSec) {
       String(fps),
       "-i",
       "-",
+      ...(startSec ? ["-ss", String(startSec)] : []),
       "-i",
       audioPath,
       "-map",
@@ -398,7 +416,7 @@ async function renderPerFrame(durSec) {
     clip: { x: 0, y: 0, width: 1920, height: 1080 },
   };
   for (let f = 0; f < totalFrames; f++) {
-    await page.evaluate((t) => window.__seek(t), f / fps);
+    await page.evaluate((t) => window.__seek(t), (startSec ?? 0) + f / fps);
     const buf = await page.screenshot(shotOpts);
     if (!ff.stdin.write(buf)) {
       await new Promise((r) => ff.stdin.once("drain", r));
@@ -424,11 +442,20 @@ async function renderRealtime(durSec) {
   const timings = await page.evaluate(() => window.__timings);
   if (!timings)
     die("page did not expose window.__timings — sidecar meta missing?");
-  const prerollSec = timings.prerollMs / 1000;
-  const postrollSec = timings.postrollMs / 1000;
+  // With --start the capture opens on the stage mid-call: no preroll slides,
+  // no intro jingle, and the main window is measured from the start point.
+  const startAt = startSec ?? 0;
+  if (startAt >= timings.mainDurationSec)
+    die(
+      `--start ${startAt}s is past the end of the call (${timings.mainDurationSec.toFixed(2)}s)`,
+    );
+  const prerollSec = startSec != null ? 0 : timings.prerollMs / 1000;
+  const postrollSec =
+    clipMode && startSec != null ? 0 : timings.postrollMs / 1000;
+  const mainAvail = timings.mainDurationSec - startAt;
   const mainSec = limitDurationSec
-    ? Math.min(limitDurationSec, timings.mainDurationSec)
-    : timings.mainDurationSec;
+    ? Math.min(limitDurationSec, mainAvail)
+    : mainAvail;
   // Crossfade window: cap at half the (possibly --duration-capped) main length
   // so intro and outro never overlap — same rule as timeline.ts so the MP4 and
   // the on-page preview agree on the outro start.
@@ -438,7 +465,8 @@ async function renderRealtime(durSec) {
   );
   const totalSec = prerollSec + mainSec + postrollSec;
   console.log(
-    `▸ realtime capture: ${totalSec.toFixed(2)}s (${prerollSec}s preroll + ${mainSec.toFixed(2)}s main + ${postrollSec}s postroll)`,
+    `▸ realtime capture: ${totalSec.toFixed(2)}s (${prerollSec}s preroll + ${mainSec.toFixed(2)}s main + ${postrollSec}s postroll)` +
+      (startSec != null ? ` starting ${startAt}s into the call` : ""),
   );
 
   // Build the audio track: intro jingle over the preroll, the main call audio,
@@ -447,16 +475,21 @@ async function renderRealtime(durSec) {
   // so it lines up with the captured video.
   const fullAudio = join(workDir, "full-audio.m4a");
   await buildConcatAudio(fullAudio, {
-    introUrl: timings.introUrl,
+    introUrl: startSec != null ? undefined : timings.introUrl,
     outroUrl: timings.outroUrl,
     mainPath: audioPath,
     // Head-trim offset: the main audio starts here (cuts leading silence), so
-    // the rendered audio matches the trimmed call the browser plays.
-    mainOffsetSec: Math.max(0, timings.mainAudioOffsetSec ?? 0),
+    // the rendered audio matches the trimmed call the browser plays. A --start
+    // moves the audio in-point along with the picture.
+    mainOffsetSec: Math.max(0, timings.mainAudioOffsetSec ?? 0) + startAt,
     prerollSec,
     mainSec,
     postrollSec,
     overlapSec,
+    // Duck: intro drops to duckLevel over the last duckLeadSec of the preroll
+    // (same numbers the page's timeline uses, see timeline.ts).
+    duckLeadSec: Math.max(0, Math.min(timings.duckLeadSec ?? 0, prerollSec)),
+    duckLevel: timings.duckLevel ?? 1,
     endFadeSec: Math.max(0, Math.min(timings.endFadeSec ?? 0, postrollSec)),
   });
 
@@ -467,6 +500,116 @@ async function renderRealtime(durSec) {
   const framesDir = join(workDir, "frames");
   await mkdir(framesDir, { recursive: true });
   const captureLog = [];
+
+  // Encode while capturing: every CHUNK_FRAMES captured frames, the frames so
+  // far (minus a margin still being written) are encoded into a CFR segment
+  // with an exact frame count and deleted, so the disk never holds more than
+  // a couple of chunks of JPEGs (a full 107-min call is ~55 GB of them). The
+  // encoder is niced and capped at 8 threads so the realtime capture keeps
+  // its cadence; segments are stream-copied together at the end.
+  const CHUNK_FRAMES = Math.max(
+    600,
+    Math.trunc(Number(process.env.VIDEOGEN_CHUNK_FRAMES ?? 6000)),
+  );
+  const segsDir = join(workDir, "segs");
+  await mkdir(segsDir, { recursive: true });
+  const segments = []; // { path, frames }
+  let emittedFrames = 0; // CFR frames written across all segments
+  let encodedUpTo = 0; // captureLog index of the next chunk's first frame
+  let encodeChain = Promise.resolve();
+  let encodeFailed = null;
+
+  // Encode captured frames [from, to) as one segment. `endT` is the wallclock
+  // time the segment must end at (the arrival of frame `to`, or the last
+  // frame + one nominal frame for the final chunk); the segment gets exactly
+  // round(endT * fps) - emittedFrames output frames so the CFR timeline never
+  // drifts at a seam.
+  async function encodeChunk(from, to, endT) {
+    const startT = captureLog[from].t;
+    const want = Math.round(endT * fps) - emittedFrames;
+    if (want <= 0) return;
+    const lines = ["ffconcat version 1.0"];
+    for (let i = from; i < to; i++) {
+      const cur = captureLog[i];
+      const nextT = i + 1 < to ? captureLog[i + 1].t : endT;
+      lines.push(`file '${cur.name}'`);
+      lines.push(`duration ${Math.max(0.001, nextT - cur.t).toFixed(4)}`);
+    }
+    // Repeat the last frame with a second of slack so -frames:v can always be
+    // satisfied whatever the rounding of the durations above.
+    lines.push(`file '${captureLog[to - 1].name}'`);
+    lines.push(`duration 1.0`);
+    lines.push(`file '${captureLog[to - 1].name}'`);
+    const listPath = join(framesDir, `seg${segments.length}.ffconcat`);
+    await writeFile(listPath, lines.join("\n"));
+    const segPath = join(
+      segsDir,
+      `seg${String(segments.length).padStart(4, "0")}.mp4`,
+    );
+    segments.push({ path: segPath, frames: want });
+    emittedFrames += want;
+    await run("nice", [
+      "-n",
+      "10",
+      ffmpegPath,
+      "-y",
+      "-loglevel",
+      "error",
+      "-threads",
+      "8",
+      "-f",
+      "concat",
+      "-safe",
+      "0",
+      "-i",
+      listPath,
+      "-an",
+      "-c:v",
+      "libx264",
+      "-preset",
+      "medium",
+      "-crf",
+      "20",
+      "-pix_fmt",
+      "yuv420p",
+      "-r",
+      String(fps),
+      "-vsync",
+      "cfr",
+      "-frames:v",
+      String(want),
+      "-video_track_timescale",
+      String(fps * 256),
+      segPath,
+    ]);
+    if (debug)
+      console.error(
+        `  seg ${segments.length - 1}: frames ${from}-${to - 1} (${startT.toFixed(2)}s-${endT.toFixed(2)}s) -> ${want} cfr frames`,
+      );
+    await Promise.all(
+      captureLog
+        .slice(from, to)
+        .map((f) =>
+          rm(join(framesDir, f.name), { force: true }).catch(() => {}),
+        ),
+    );
+  }
+
+  // Queue a chunk encode for everything captured so far, leaving a margin of
+  // frames whose files may still be in flight.
+  function scheduleChunk() {
+    const MARGIN = 120;
+    const to = captureLog.length - MARGIN;
+    if (to - encodedUpTo < CHUNK_FRAMES) return;
+    const from = encodedUpTo;
+    encodedUpTo = to;
+    const endT = captureLog[to].t;
+    encodeChain = encodeChain
+      .then(() => encodeChunk(from, to, endT))
+      .catch((e) => {
+        encodeFailed = encodeFailed ?? e;
+      });
+  }
 
   const client = await context.newCDPSession(page);
   let frames = 0;
@@ -495,6 +638,7 @@ async function renderRealtime(durSec) {
     } catch {
       /* */
     }
+    scheduleChunk();
     try {
       await client.send("Page.screencastFrameAck", { sessionId });
     } catch {
@@ -519,9 +663,29 @@ async function renderRealtime(durSec) {
     )
     .catch(() => {});
 
+  if (startSec != null) {
+    // Mid-call start: position the transport first and wait for the resting
+    // slide overlay to finish fading out, so the first captured frame is the
+    // stage and not the tail of the hero card.
+    await page.evaluate((s) => window.__seekMain(s), startAt);
+    await page
+      .waitForFunction(
+        () => {
+          const el = document.querySelector("#slides");
+          if (!el || el.classList.contains("hidden")) return true;
+          return parseFloat(getComputedStyle(el).opacity) < 0.01;
+        },
+        null,
+        { timeout: 5000 },
+      )
+      .catch(() => {});
+    // ...and let the stage's own CSS transitions (active card, chapter
+    // label) finish before the first frame is taken.
+    await new Promise((r) => setTimeout(r, 800));
+  }
   await client.send("Page.startScreencast", {
     format: "jpeg",
-    quality: 95,
+    quality: 90, // intermediate frames; 95 needs ~47 GB for a 65-min call
     everyNthFrame: 1,
   });
   // Tiny pause so the first paint flush after startScreencast lands.
@@ -531,12 +695,22 @@ async function renderRealtime(durSec) {
   // --duration caps mainSec, tell the transport to end the main segment early
   // (window.__capMainAt) so postroll fires at the right time instead of after
   // the full audio (which can be 86 minutes).
-  await page.evaluate((mainLimit) => {
-    if (mainLimit > 0 && typeof window.__capMainAt === "function") {
-      window.__capMainAt(mainLimit);
-    }
-    document.getElementById("preview-play").click();
-  }, limitDurationSec ?? -1);
+  await page.evaluate(
+    ({ mainLimit, start }) => {
+      if (mainLimit > 0 && typeof window.__capMainAt === "function") {
+        window.__capMainAt(mainLimit);
+      }
+      if (start > 0 && typeof window.__seekMain === "function") {
+        window.__seekMain(start);
+      }
+      document.getElementById("preview-play").click();
+    },
+    {
+      // __capMainAt is on the main-local clock, so the cap is start + length.
+      mainLimit: limitDurationSec ? startAt + mainSec : -1,
+      start: startAt,
+    },
+  );
 
   const t0 = Date.now();
   const progress = setInterval(() => {
@@ -550,7 +724,10 @@ async function renderRealtime(durSec) {
   // Safety overshoot of 15s in case __renderEnded never fires.
   await Promise.race([
     page.evaluate(() => window.__renderEnded),
-    new Promise((r) => setTimeout(r, totalSec * 1000 + 15_000)),
+    // Clip mode: the window is the whole capture, so stop right after it.
+    new Promise((r) =>
+      setTimeout(r, clipMode ? mainSec * 1000 + 250 : totalSec * 1000 + 15_000),
+    ),
   ]);
 
   clearInterval(progress);
@@ -571,24 +748,32 @@ async function renderRealtime(durSec) {
         "#preview-play exists and __renderEnded resolved)",
     );
 
-  // Build a concat-demuxer list using each frame's real arrival time. This
-  // keeps video playback locked to wallclock regardless of cadence wobble
-  // (the previous fixed-framerate hint accumulated drift).
-  const concatLines = ["ffconcat version 1.0"];
-  for (let i = 0; i < captureLog.length; i++) {
-    const cur = captureLog[i];
-    const next = captureLog[i + 1];
-    const dur = next ? Math.max(0.001, next.t - cur.t) : 0.04;
-    concatLines.push(`file '${cur.name}'`);
-    concatLines.push(`duration ${dur.toFixed(4)}`);
+  // Clip mode: drop any frames captured past the window (the transport keeps
+  // going into the postroll until we stop the screencast).
+  if (clipMode) {
+    const keep = captureLog.filter((f) => f.t <= mainSec);
+    if (keep.length) ((captureLog.length = 0), captureLog.push(...keep));
+    if (encodedUpTo > captureLog.length) encodedUpTo = captureLog.length;
   }
-  if (captureLog.length > 0) {
-    concatLines.push(`file '${captureLog[captureLog.length - 1].name}'`);
-  }
-  const concatPath = join(framesDir, "frames.ffconcat");
-  await writeFile(concatPath, concatLines.join("\n"));
 
   console.log("▸ encoding…");
+  // Let queued chunks finish, then encode the tail: the last frame is held
+  // for one nominal frame time, and the segment ends there.
+  await encodeChain;
+  if (encodeFailed) throw encodeFailed;
+  if (encodedUpTo < captureLog.length) {
+    const last = captureLog[captureLog.length - 1];
+    await encodeChunk(encodedUpTo, captureLog.length, last.t + 1 / fps);
+  }
+  const listPath = join(segsDir, "segments.txt");
+  await writeFile(
+    listPath,
+    segments.map((sg) => `file '${sg.path}'`).join("\n") + "\n",
+  );
+  const totalFrames = segments.reduce((n, sg) => n + sg.frames, 0);
+  console.log(
+    `▸ ${segments.length} segment(s), ${totalFrames} frames (${(totalFrames / fps).toFixed(2)}s); muxing audio…`,
+  );
   const finalOut = withTimestamp(out);
   const ffArgs = [
     "-y",
@@ -597,7 +782,7 @@ async function renderRealtime(durSec) {
     "-safe",
     "0",
     "-i",
-    concatPath,
+    listPath,
     "-itsoffset",
     String(vizOffsetSec),
     "-i",
@@ -607,22 +792,14 @@ async function renderRealtime(durSec) {
     "-map",
     "1:a:0",
     "-c:v",
-    "libx264",
-    "-preset",
-    "medium",
-    "-crf",
-    "20",
-    "-pix_fmt",
-    "yuv420p",
-    "-r",
-    String(fps),
-    "-vsync",
-    "cfr",
+    "copy",
     "-c:a",
     "aac",
     "-b:a",
     "192k",
     "-shortest",
+    "-movflags",
+    "+faststart",
     finalOut,
   ];
   const ff = spawn(ffmpegPath, ffArgs, {
@@ -641,6 +818,7 @@ async function renderRealtime(durSec) {
   // Best-effort cleanup of frame dir to free disk (the rest of workDir is
   // removed in the top-level finally).
   await rm(framesDir, { recursive: true, force: true }).catch(() => {});
+  await rm(segsDir, { recursive: true, force: true }).catch(() => {});
   out = finalOut;
 }
 
@@ -686,6 +864,23 @@ async function buildConcatAudio(outPath, opts) {
   const ov = Math.max(0, overlapSec);
   const endFade = Math.max(0, endFadeSec ?? 0);
   const ms = (s) => Math.round(s * 1000); // adelay wants integer milliseconds
+  // Duck envelope (mirrors timeline.ts): level reached at the speaker, and the
+  // lead time over which the jingle gets there.
+  const duckLevel = Math.min(1, Math.max(0, opts.duckLevel ?? 1));
+  const lead = Math.max(0, Math.min(opts.duckLeadSec ?? 0, prerollSec));
+  // Piecewise-linear ffmpeg `volume` expression over local time t from a list
+  // of [t, v] points; the caller wraps it in quotes inside the filter graph.
+  const envelopeExpr = (pts) => {
+    let expr = String(pts[pts.length - 1][1]);
+    for (let i = pts.length - 1; i >= 1; i--) {
+      const [ta, va] = pts[i - 1];
+      const [tb, vb] = pts[i];
+      const seg =
+        tb > ta ? `${va}+(${vb}-${va})*(t-${ta})/${tb - ta}` : String(vb);
+      expr = `if(lt(t\,${tb})\,${seg}\,${expr})`;
+    }
+    return `if(lt(t\,${pts[0][0]})\,${pts[0][1]}\,${expr})`;
+  };
 
   const args = ["-y"];
   if (introIn) args.push("-i", introIn);
@@ -705,9 +900,16 @@ async function buildConcatAudio(outPath, opts) {
   // preroll+ov]. Trimmed so it doesn't bleed further into the call. The fade is
   // only emitted when ov > 0 (afade with d=0 is a degenerate no-op/error).
   if (introIdx >= 0 && prerollSec > 0) {
-    const fade = ov > 0 ? `,afade=t=out:st=${prerollSec}:d=${ov}` : "";
+    // Full over the slides, duck to duckLevel by the first word, then tail
+    // to silence over the overlap.
+    const env = envelopeExpr([
+      [0, 1],
+      [prerollSec - lead, 1],
+      [prerollSec, duckLevel],
+      [prerollSec + ov, 0],
+    ]);
     filters.push(
-      `[${introIdx}:a]atrim=duration=${prerollSec + ov},asetpts=PTS-STARTPTS${fade}[pre]`,
+      `[${introIdx}:a]atrim=duration=${prerollSec + ov},asetpts=PTS-STARTPTS,volume='${env}':eval=frame[pre]`,
     );
     mixLabels.push("[pre]");
   }
@@ -723,9 +925,16 @@ async function buildConcatAudio(outPath, opts) {
   // that fade-in lands under the last `ov` seconds of the call.
   if (outroIdx >= 0 && postrollSec > 0) {
     const outroDelay = prerollSec + mainSec - ov;
-    const fade = ov > 0 ? `,afade=t=in:st=0:d=${ov}` : "";
+    // Mirror of the intro: up to duckLevel under the closing words, then to
+    // full over the first `lead` seconds of the postroll.
+    const outLead = Math.min(lead, postrollSec);
+    const env = envelopeExpr([
+      [0, 0],
+      [ov, duckLevel],
+      [ov + outLead, 1],
+    ]);
     filters.push(
-      `[${outroIdx}:a]atrim=duration=${ov + postrollSec},asetpts=PTS-STARTPTS${fade},adelay=${ms(outroDelay)}|${ms(outroDelay)}[post]`,
+      `[${outroIdx}:a]atrim=duration=${ov + postrollSec},asetpts=PTS-STARTPTS,volume='${env}':eval=frame,adelay=${ms(outroDelay)}|${ms(outroDelay)}[post]`,
     );
     mixLabels.push("[post]");
   }

@@ -13,6 +13,7 @@ import {
 } from "./dom";
 import { fmt } from "./format";
 import { ensureAma } from "./ama";
+import { setDisplayPlaying } from "./display";
 import { renderedUrl, type Job, type Participant } from "./job";
 import type { SidecarMeta } from "./sidecar";
 import type { Cue } from "./vtt";
@@ -97,8 +98,16 @@ export function setupPreviewControls(ctx: Ctx): void {
   const w = window as unknown as {
     __renderEnded: Promise<void>;
     __capMainAt: (sec: number) => void;
+    __seekMain: (sec: number) => void;
   };
   w.__renderEnded = endedPromise;
+  // Driver hook: position the transport at main-local `sec` (paused) so a
+  // render can start mid-call — used to re-render one window of the video
+  // (e.g. a display-mode segment) and splice it into an existing full render.
+  w.__seekMain = (sec: number) => {
+    if (!timeline) return;
+    seekTo(timeline.mainStart + Math.max(0, sec));
+  };
   // Driver hook: cap the main segment at `sec` so postroll fires without
   // waiting out the full (up to 86 min) audio. Replaces the old synthetic
   // `ended` dispatch.
@@ -330,6 +339,7 @@ export function setupPreviewControls(ctx: Ctx): void {
 
   function finish(): void {
     playing = false;
+    setDisplayPlaying(false);
     cancelAnimationFrame(raf);
     previewAudio.pause();
     pauseJingle();
@@ -339,6 +349,7 @@ export function setupPreviewControls(ctx: Ctx): void {
 
   function pause(): void {
     playing = false;
+    setDisplayPlaying(false);
     cancelAnimationFrame(raf);
     previewAudio.pause();
     pauseJingle();
@@ -351,6 +362,7 @@ export function setupPreviewControls(ctx: Ctx): void {
     // AMA must attach inside the user gesture (Chrome autoplay policy).
     await ensureAma().catch(() => {});
     playing = true;
+    setDisplayPlaying(true);
     previewPlay.textContent = "⏸";
     activeIdx = -1; // force media re-entry for the current segment
     lastWall = performance.now();

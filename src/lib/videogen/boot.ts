@@ -29,6 +29,7 @@ import { setupPreviewControls } from "./preview";
 import { loadSidecar, type SidecarMeta } from "./sidecar";
 import { setChapters, updateChip } from "./chip";
 import { buildTimeline, type Timeline } from "./timeline";
+import { setDisplays, updateDisplay } from "./display";
 
 let duration = 0;
 let job: Job | null = null;
@@ -40,6 +41,7 @@ function seek(t: number): void {
   drawViz(t);
   drawSubtitle(t);
   updateChip(t);
+  updateDisplay(t);
 }
 
 // Window globals — used by the headless driver to seek per-frame and by
@@ -93,17 +95,34 @@ async function init(): Promise<void> {
   // and pre/post-roll are skipped when there's no meta.
   sidecar = await loadSidecar(job.meta);
   setChapters(sidecar?.chapters);
+  setDisplays(sidecar?.displays);
 
   if (job.audio) {
-    const tmp = new (
-      window.AudioContext ||
-      (window as unknown as { webkitAudioContext: typeof AudioContext })
-        .webkitAudioContext
-    )();
-    const buf = await decodeAudio(job.audio, tmp);
-    await tmp.close();
-    duration = buf.duration;
-    setSpectrum(computeSpectrum(buf, { fps, bands }));
+    // Decode through an OfflineAudioContext at a low sample rate: the decoded
+    // PCM is only used for the deterministic fallback spectrum (the realtime
+    // render drives the analyser from the <audio> element), and decoding at the
+    // native 48 kHz makes a 107-minute call a 1.2 GB float buffer, which
+    // Chromium refuses ("Unable to decode audio data"). At 16 kHz the same
+    // call is ~400 MB and the spectrum still covers speech.
+    const SPECTRUM_RATE = 16000;
+    try {
+      const tmp = new OfflineAudioContext(1, SPECTRUM_RATE, SPECTRUM_RATE);
+      const buf = await decodeAudio(job.audio, tmp);
+      duration = buf.duration;
+      setSpectrum(computeSpectrum(buf, { fps, bands }));
+    } catch (e) {
+      // Fall back to the media element for the duration and run without the
+      // precomputed spectrum (the live analyser still works).
+      console.warn("videogen: audio decode failed, using element duration", e);
+      duration = await new Promise<number>((resolve, reject) => {
+        const a = new Audio();
+        a.preload = "metadata";
+        a.onloadedmetadata = () => resolve(a.duration);
+        a.onerror = () => reject(new Error("audio metadata failed"));
+        a.src = job!.audio;
+      });
+      setSpectrum(null);
+    }
   }
 
   w.__duration = duration;
@@ -142,6 +161,8 @@ async function init(): Promise<void> {
         prerollMs: number;
         postrollMs: number;
         overlapSec: number;
+        duckLeadSec: number;
+        duckLevel: number;
         endFadeSec: number;
         introUrl?: string;
         outroUrl?: string;
@@ -154,6 +175,8 @@ async function init(): Promise<void> {
     prerollMs: timeline.prerollMs,
     postrollMs: timeline.postrollMs,
     overlapSec: timeline.overlapSec,
+    duckLeadSec: timeline.duckLeadSec,
+    duckLevel: timeline.duckLevel,
     endFadeSec: timeline.endFadeSec,
     introUrl: sidecar?.intro,
     outroUrl: sidecar?.outro,

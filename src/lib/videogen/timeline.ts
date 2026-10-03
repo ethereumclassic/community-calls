@@ -16,7 +16,16 @@ import type { SlideKey } from "./slides";
 // constant is the single source of truth for the crossfade — the browser
 // preview (preview.ts) and the ffmpeg render (scripts/videogen.mjs, via
 // __timings) both read it so they can never drift apart.
-const JINGLE_OVERLAP_SEC = 8;
+const JINGLE_OVERLAP_SEC = 10;
+
+// The jingle is ducked before the speaker starts: over the last
+// JINGLE_DUCK_LEAD_SEC of the preroll it drops from full to JINGLE_DUCK_LEVEL,
+// so by the first word it is already quiet, and then tails from that level to
+// silence over JINGLE_OVERLAP_SEC. The outro mirrors it: rises to the duck
+// level under the closing words, then to full over the first
+// JINGLE_DUCK_LEAD_SEC of the postroll.
+const JINGLE_DUCK_LEAD_SEC = 4;
+const JINGLE_DUCK_LEVEL = 0.25;
 
 // The ending: over the final slide (the logo) the audio fades to silence and
 // the picture fades to black, so the video winds down instead of cutting. This
@@ -30,7 +39,7 @@ const END_FADE_SEC = 2.5;
 // so the two can no longer drift apart.
 const SLIDE_MS: Record<SlideKey, number> = {
   hero: 4500,
-  title: 6000,
+  title: 9000,
   toc: 4000,
   stats: 5500,
   thanks: 3500,
@@ -48,15 +57,14 @@ type MainSegment = { kind: "main"; start: number; end: number };
 export type Segment = SlideSegment | MainSegment;
 
 // A jingle placed on the global timeline. Audio is region-aware: the element's
-// currentTime tracks `globalT - startGlobal`, and its volume ramps up over
-// [startGlobal, fadeInEnd] and down over [fadeOutStart, endGlobal] so the
-// crossfade under the speaker is computed the same way wherever we play it.
+// currentTime tracks `globalT - startGlobal`, and its volume follows a
+// piecewise-linear envelope (global time -> 0..1) so the duck and crossfade
+// under the speaker are computed the same way wherever we play it.
 type JingleWindow = {
   url: string;
   startGlobal: number;
   endGlobal: number;
-  fadeInEnd: number;
-  fadeOutStart: number;
+  envelope: { t: number; v: number }[]; // sorted by t
 };
 
 export type Timeline = {
@@ -68,6 +76,10 @@ export type Timeline = {
   postrollMs: number;
   // Effective crossfade window (clamped to the call length for short renders).
   overlapSec: number;
+  // Duck: seconds before the call over which the intro drops to duckLevel
+  // (mirrored after the call for the outro).
+  duckLeadSec: number;
+  duckLevel: number;
   intro: JingleWindow | null;
   outro: JingleWindow | null;
   // Final audio-fade / fade-to-black window: [totalDuration - endFadeSec,
@@ -80,18 +92,23 @@ export type Timeline = {
 };
 
 // Volume of a jingle window at a global time, or null when it isn't playing.
-// Linear ramps, matching ffmpeg afade's default (tri) curve so preview and
-// render agree.
+// Linear between envelope points, matching the ffmpeg `volume` expression the
+// render driver builds from the same numbers so preview and render agree.
 export function jingleVolumeAt(w: JingleWindow, t: number): number | null {
   if (t < w.startGlobal || t >= w.endGlobal) return null;
-  let v = 1;
-  if (w.fadeInEnd > w.startGlobal && t < w.fadeInEnd) {
-    v = (t - w.startGlobal) / (w.fadeInEnd - w.startGlobal);
+  const pts = w.envelope;
+  if (pts.length === 0) return 1;
+  if (t <= pts[0].t) return pts[0].v;
+  for (let i = 1; i < pts.length; i++) {
+    const a = pts[i - 1];
+    const b = pts[i];
+    if (t <= b.t) {
+      const f = b.t > a.t ? (t - a.t) / (b.t - a.t) : 1;
+      const v = a.v + (b.v - a.v) * f;
+      return v < 0 ? 0 : v > 1 ? 1 : v;
+    }
   }
-  if (w.endGlobal > w.fadeOutStart && t > w.fadeOutStart) {
-    v = Math.min(v, (w.endGlobal - t) / (w.endGlobal - w.fadeOutStart));
-  }
-  return v < 0 ? 0 : v > 1 ? 1 : v;
+  return pts[pts.length - 1].v;
 }
 
 type TimelineSpec = {
@@ -158,16 +175,25 @@ export function buildTimeline(spec: TimelineSpec): Timeline {
     Math.min(JINGLE_OVERLAP_SEC, (mainEnd - mainStart) / 2),
   );
 
-  // Intro: starts at t=0 over the pre-roll slides at full volume, then bleeds
-  // `overlapSec` into the call and fades out under the first speaker.
+  // Duck lead can't be longer than the preroll it sits in (short renders).
+  const duckLeadSec = Math.max(0, Math.min(JINGLE_DUCK_LEAD_SEC, mainStart));
+  const duckLevel = JINGLE_DUCK_LEVEL;
+
+  // Intro: opens full over the pre-roll slides, ducks to duckLevel over the
+  // last duckLeadSec before the call, then tails to silence over `overlapSec`
+  // under the first speaker.
   const intro: JingleWindow | null =
     useSlides && meta?.intro && prerollMs > 0
       ? {
           url: meta.intro,
           startGlobal: 0,
           endGlobal: mainStart + overlapSec,
-          fadeInEnd: 0, // no fade-in; it opens at full
-          fadeOutStart: mainStart,
+          envelope: [
+            { t: 0, v: 1 },
+            { t: mainStart - duckLeadSec, v: 1 },
+            { t: mainStart, v: duckLevel },
+            { t: mainStart + overlapSec, v: 0 },
+          ],
         }
       : null;
 
@@ -182,16 +208,24 @@ export function buildTimeline(spec: TimelineSpec): Timeline {
     ? Math.max(0, Math.min(END_FADE_SEC, totalDuration - mainEnd))
     : 0;
 
+  // Outro: rises to duckLevel under the closing words, up to full over the
+  // first duckLeadSec of the postroll, then out to silence over the final
+  // slide (the fade-to-black window) so it ends in silence.
+  const outLead = Math.max(0, Math.min(duckLeadSec, totalDuration - mainEnd));
+  const outFadeStart = Math.max(mainEnd + outLead, totalDuration - endFadeSec);
   const outro: JingleWindow | null =
     useSlides && meta?.outro && t > mainEnd
       ? {
           url: meta.outro,
           startGlobal: outroStart,
           endGlobal: totalDuration,
-          fadeInEnd: mainEnd,
-          // Fade the outro out over the final slide so it ends in silence
-          // (kept after fadeInEnd so the in-ramp always finishes first).
-          fadeOutStart: Math.max(mainEnd, totalDuration - endFadeSec),
+          envelope: [
+            { t: outroStart, v: 0 },
+            { t: mainEnd, v: duckLevel },
+            { t: mainEnd + outLead, v: 1 },
+            { t: outFadeStart, v: 1 },
+            { t: totalDuration, v: 0 },
+          ],
         }
       : null;
 
@@ -203,6 +237,8 @@ export function buildTimeline(spec: TimelineSpec): Timeline {
     prerollMs,
     postrollMs: (totalDuration - mainEnd) * 1000,
     overlapSec,
+    duckLeadSec,
+    duckLevel,
     intro,
     outro,
     endFadeSec,

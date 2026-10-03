@@ -36,6 +36,56 @@ FF=$(node -e "console.log(require('ffmpeg-static'))")
 gitignored (70 MB+) and never committed. Verify the page boots against
 `/videogen/<NN>/job.json` and the roster resolves before rendering.
 
+## Step 1b — Display windows (assets shown while they are discussed)
+
+The stage has a **display mode**: for a window of the call the waveform is
+replaced by an asset (image or clip), the roster slides into a small stack on
+the left, and header / subtitles / chapter bar stay put with a vignette
+underneath. Windows live in the call's **video file**, `calls/video/<id>.yaml`
+(committed; keeps render settings out of the episode markdown):
+
+```yaml
+displays:
+  - from: "20:03.2"          # transcript clock, [h:]mm:ss[.ms] (cue starts)
+    to: "22:18.5"
+    src: lady-justice-reference.webp   # bare file name (see below), or a URL
+    zoomFrom: 2.9            # image only: open on a close-up (focus) and
+    zoomTo: 1                #   settle out to the whole picture
+    focus: "50% 16%"         #   point held on screen at max zoom
+  - from: "22:18.5"
+    to: "22:50.5"
+    src: etc-rebrand-concept.mp4
+    rate: 0.5                # video only: playback rate
+    loop: true               #   loop to fill the window
+```
+
+A `src` file name resolves to `calls/media/<file>` if that committed still
+exists, otherwise to the call's media cache `.cache/videogen/<id>/media/<file>`.
+Clips go in the cache, never in git: `node scripts/videogen/media.mjs push <NN>`
+zips them with the audio onto the call's GitHub release (`call-<NN>`), and
+`pull <NN>` restores both on a fresh checkout.
+
+- Abutting windows share one layout session (only a cross-fade between them).
+- **Propose windows from the transcript.** Scan the cleaned transcript for
+  anything named or pointed to (a site, a dashboard, a release, a design, a
+  clip) and list candidates with times and a source. Capture public pages with
+  Playwright (see `scripts/videogen/capture-page-vt.mjs` for a virtual-time
+  60fps capture of an animated page; a plain `recordVideo` capture of a
+  software-GL page paints ~11 fps and judders). Crop dashboards to the part
+  being discussed. Ask the user for assets you cannot fetch (X posts, photos).
+- Small committed stills go in `calls/media/`; clips go in the cache and the
+  release (above). Name cache files without the call number (the release is
+  already per call).
+- Check the windows before rendering: `scripts/videogen/shot-display.mjs` seeks the
+  page to chosen main-local times and screenshots them.
+- The title card carries the brand art from `VIDEOGEN_CONFIG.titleArt`.
+
+**Before any render, probe the live visualiser.** Load
+`/videogen?job=…&preview=1`, `__seekMain(t)` into the call, click play, and
+confirm `#ama canvas` exists and `#viz` is hidden
+(`scripts/videogen/probe-ama.mjs`). A 504 "Outdated Optimize Dep" on the analyser
+import leaves the deterministic canvas in place and the waveform wrong.
+
 ## Step 2 — Render (the full final by default)
 
 > **`--realtime` is mandatory. Copy the command below verbatim.**
@@ -72,14 +122,14 @@ VIDEOGEN_RENDER=1 __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS="$(hostname)" \
 SRV=$!
 until [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:$PORT/videogen/<NN>/job.json)" = 200 ]; do sleep 2; done
 node scripts/videogen.mjs --realtime --job /videogen/<NN>/job.json \
-  --out public/<YYMMDD>-etccc-<NN>.mp4 --fps 60 --port "$PORT"
+  --out .cache/videogen/<id>/render.mp4 --fps 60 --port "$PORT"
 kill "$SRV"
 ```
 
 With `VIDEOGEN_RENDER=1` the server has HMR off, so editing the site on a separate
 dev server can't abort the render. (`videogen.mjs` appends a timestamp to the
-output name, e.g. `<YYMMDD>-etccc-<NN>-<stamp>.mp4` — rename it to the canonical
-`<YYMMDD>-etccc-<NN>.mp4` in Step 3.)
+output name, e.g. `render-<stamp>.mp4` — rename it to the canonical
+`render.mp4` in Step 3.)
 
 1. **Start a dedicated render server on its own random port, with HMR disabled.**
    The `/videogen` route is dev-only (it can't run under `astro preview`), so this
@@ -98,13 +148,13 @@ output name, e.g. `<YYMMDD>-etccc-<NN>-<stamp>.mp4` — rename it to the canonic
    → 200) before rendering.
 2. **Render the full final** — this is the default; do **not** make a draft unless
    the user explicitly asks for one (drafts are a dev-only convenience). The final
-   renders to the clean handoff name at the **public root** —
-   `<YYMMDD>-etccc-<NN>.mp4` (`date` frontmatter without dashes, last two year
-   digits) — so the download URL is tidy and self-identifying. It is gitignored
-   (`public/*-etccc-*.mp4`).
+   renders into the call's local cache, `.cache/videogen/<id>/render.mp4`
+   (gitignored; `<id>` is the markdown basename). Renders are never stored
+   anywhere else: YouTube has the published copy and the cache plus the markdown
+   reproduce it.
    ```bash
    node scripts/videogen.mjs --realtime --job /videogen/<NN>/job.json \
-     --out public/<YYMMDD>-etccc-<NN>.mp4 --fps 60 --port "$PORT"
+     --out .cache/videogen/<id>/render.mp4 --fps 60 --port "$PORT"
    ```
    The render is real-time (**wall-clock ≈ audio length**), so an 80-min call is an
    ~80-min background job — launch it and let it run. With HMR off on this server,
@@ -120,7 +170,7 @@ output name, e.g. `<YYMMDD>-etccc-<NN>-<stamp>.mp4` — rename it to the canonic
    capture:
    ```bash
    # duration MUST exceed the call audio (preroll + postroll are added)
-   ffprobe -v error -show_entries format=duration -of csv=p=0 public/<YYMMDD>-etccc-<NN>.mp4
+   ffprobe -v error -show_entries format=duration -of csv=p=0 .cache/videogen/<id>/render.mp4
    ffprobe -v error -show_entries format=duration -of csv=p=0 public/videogen/<NN>/<NN>-audio.mp3
    ```
    If the two are equal, you rendered the deterministic path — re-render with
@@ -147,6 +197,18 @@ output name, e.g. `<YYMMDD>-etccc-<NN>-<stamp>.mp4` — rename it to the canonic
    <PORT>` holding the port. Kill by matching that child, and never
    `pkill -f "astro dev"` from a shell whose own command line contains that
    string — it matches itself and kills your shell (exit 144).
+
+## Step 2b — Re-rendering one window instead of the whole call
+
+`scripts/videogen.mjs --realtime --start <main-local-sec> --duration <sec>`
+renders a window (no preroll; main-local = transcript time minus the head
+trim from `window.__timings`). To splice it into a finished render see
+`scripts/videogen/splice.sh`: build the replacement piece with two `xfade`
+dissolves so it is exactly keyframe-to-keyframe long, split the base with the
+**segment muxer** (`-f segment -segment_times …`, frame-exact; a `-ss/-to`
+stream copy lands a frame early and late), concat, and put the base audio
+back. Seams show a waveform mismatch, so prefer a full re-render when more
+than a couple of windows change.
 
 ## Step 2c — (only if the call had a screen share) composite it on
 
@@ -219,30 +281,30 @@ position. Only the left header is restored, matching Call 56.
 Always test the two transitions on short slices (`-t` for the head, `-copyts -ss`
 for the tail) before committing to the full-length encode.
 
-## Step 3 — Output / handoff (serve + paste-ready YouTube block)
+## Step 3 — Output / handoff (review page + paste-ready YouTube block)
 
-Hand the user a downloadable video and everything to publish it.
+Hand the user a reviewable, downloadable video and everything to publish it.
 
-1. **Rename the render output to the canonical name** the handoff expects:
+1. **Rename the render output to the canonical name**:
    ```bash
-   mv public/<YYMMDD>-etccc-<NN>-*.mp4 public/<YYMMDD>-etccc-<NN>.mp4
+   mv .cache/videogen/<id>/render-*.mp4 .cache/videogen/<id>/render.mp4
    ```
-2. **Serve the file with a plain static server**, not the Astro dev server — the
-   Astro dev server does **not** serve a root-level `public/*.mp4` (it 404s even on
-   a fresh start; the subdir `<NN>-audio.mp3` serves fine, but the final at the
-   public root does not). Stop the render server, free the port, then:
-   ```bash
-   (cd public && nix run nixpkgs#python3 -- -m http.server "$PORT" --bind 0.0.0.0 &)
-   curl -s -I "http://localhost:$PORT/<YYMMDD>-etccc-<NN>.mp4" | head -1   # expect 200 video/mp4
-   ```
+2. **Review it on the working dev server** (port 4321, HMR on — not the render
+   server). `/videogen/<NN>/review` is the dev-only review page: a wide
+   scrubber with chapters and display windows marked, keyboard transport, a
+   Range-served download of the render, and one-off clip renders of any range
+   (`I`/`O` at the playhead, or "use hovered window", then "render clip"; clips
+   land in `.cache/videogen/<id>/clips/` and play inline). The render itself is
+   served at `/videogen-cache/<id>/render.mp4`. No separate static server: the
+   `videogen-cache-dev` plugin in `astro.config.mjs` serves the cache with Range
+   support, which the Astro dev server alone would not do for a big mp4.
 3. **Print the handoff block** (title / summary / chapters, `0:00` forced first):
    ```bash
-   node scripts/videogen-handoff.mjs calls/<id>.md --port "$PORT"
+   node scripts/videogen-handoff.mjs calls/<id>.md --port 4321
    ```
-   The download URL it prints (`http://localhost:$PORT/<YYMMDD>-etccc-<NN>.mp4`) is
-   served by the static server. Leave it running so the user can download.
 It reads the markdown (frontmatter + `NOTE chapters`) and emits, ready to paste:
-- the **download URL** (`http://localhost:<port>/<YYMMDD>-etccc-<NN>.mp4`),
+- the **download URL** (`http://localhost:<port>/videogen-cache/<id>/render.mp4`)
+  and the review page URL,
 - the **video title** (`<title> - Ethereum Classic Community Call #<N>`),
 - the **summary** blurb (the YouTube description body),
 - the **chapters** in YouTube format — **first line forced to `0:00`** (YouTube

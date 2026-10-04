@@ -18,8 +18,9 @@ const calls = defineCollection({
     // renders no markdown. Used by scripts/videogen/episode-text.mjs.
     youtubeLinks: z.array(z.string()).optional(),
     // Participants for the call-page roster + video. Names resolve against the
-    // speaker registry (speakers/speakers.yaml) for avatars; auto-populated by
-    // the /videogen skill from the transcript, then curated.
+    // speaker registry (speakers/speakers.yaml) for avatars (full size for the
+    // video, the 96px public/speakers/sm/ copies on the site); auto-populated
+    // by the /videogen skill from the transcript, then curated.
     roster: z.array(z.string()).optional(),
     date: z.coerce.date(),
     time: z.string(),

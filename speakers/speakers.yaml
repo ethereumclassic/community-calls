@@ -4,12 +4,12 @@
 istora:
   displayName: Istora
   aliases: [Istora Mandiri]
-  avatar: istora.png
+  avatar: istora.webp
   github: istoramandiri
 diego:
   displayName: Diego
   aliases: [Diego L.L., Diego L. L., Diego López León]
-  avatar: diego.png
+  avatar: diego.webp
 lunar:
   displayName: Lunar
   aliases: [Lunar Warden, LW, Luna]
@@ -21,6 +21,7 @@ iav:
 cody:
   displayName: Cody Burns
   aliases: [Cody, "Cody Burns | >"]
+  avatar: cody.webp
   github: realcodywburns
 w1g0:
   displayName: w1g0

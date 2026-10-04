@@ -165,8 +165,10 @@ The cleaned version goes into the markdown.
      guessed proper spelling or expand it to a real name unless the user tells you
      to; only fold it into an existing speaker as an `alias` when it is clearly an
      ASR garble of a known person. Then **prompt for an avatar image URL** (skip →
-     initials), download it next to the yaml (`curl -L -o speakers/<key>.<ext>
-     "<url>"`), and add a `speakers/speakers.yaml` entry (`displayName` = the
+     initials), download it to `public/speakers/<key>.<ext>` at the largest size you
+     can find (it is used up to ~500px in the video), then run
+     `node scripts/speaker-avatars.mjs` to make the 96px copy the website
+     uses, and add a `speakers/speakers.yaml` entry (`displayName` = the
      label, plus `aliases`/`avatar` only if applicable).
 4. Show a **representative sample** of the confident cleanup (not all blocks) and
    the resolved speaker list, **and present the flagged fixes** — block/time, raw

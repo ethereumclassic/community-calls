@@ -17,7 +17,7 @@ const people = roster.map((name) => {
   const displayName = r?.displayName ?? name;
   return {
     displayName,
-    avatar: r?.avatar ?? null,
+    avatar: r?.avatarSmall ?? null,
     initials: initialsFor(displayName),
   };
 });

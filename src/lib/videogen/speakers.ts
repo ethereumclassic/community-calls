@@ -4,7 +4,9 @@
 // reads the same YAML directly (it can't go through Vite).
 //
 // Avatar images live in public/speakers/ and are referenced by a plain
-// /speakers/<file> URL. They must be a real public asset (not an
+// /speakers/<file> URL. Full size feeds the video; the website uses the 96px
+// copies in public/speakers/sm/ (made by scripts/speaker-avatars.mjs), since it
+// only shows avatars at 40px and 20px. They must be a real public asset (not an
 // import.meta.glob ?url): the transcript is built by the remark-webvtt plugin,
 // which runs in Vite's config graph where ?url does NOT emit/hash an asset — it
 // returns an unservable path that 404s in prod. A public/ file always ships.
@@ -23,6 +25,8 @@ type ResolvedSpeaker = {
   displayName: string;
   aliases: string[];
   avatar: string | null;
+  // The website's small copy (call roster, transcript).
+  avatarSmall: string | null;
   github?: string;
 };
 
@@ -44,6 +48,13 @@ function avatarUrl(rec: SpeakerRecord): string | null {
   return null;
 }
 
+function avatarSmallUrl(rec: SpeakerRecord): string | null {
+  if (rec.avatar)
+    return `/speakers/sm/${rec.avatar.replace(/\.[^.]+$/, "")}.webp`;
+  if (rec.github) return `https://github.com/${rec.github}.png?size=96`;
+  return null;
+}
+
 // Match a name against a registry entry's key, displayName, or any alias
 // (case-insensitive). Returns null for an unknown speaker (→ initials fallback).
 export function resolveSpeaker(name: string): ResolvedSpeaker | null {
@@ -58,6 +69,7 @@ export function resolveSpeaker(name: string): ResolvedSpeaker | null {
         displayName: rec.displayName,
         aliases: rec.aliases ?? [],
         avatar: avatarUrl(rec),
+        avatarSmall: avatarSmallUrl(rec),
         github: rec.github,
       };
     }

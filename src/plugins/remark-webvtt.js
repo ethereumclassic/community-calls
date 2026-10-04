@@ -153,8 +153,8 @@ function renderCueRows(cues, youtube, youtubeOffset = 0) {
         // Prefer the registry's canonical display name over the raw Zoom label
         // (e.g. "Cody Burns | >" → "Cody Burns"); fall back to the raw name.
         const name = escapeHtml(resolved?.displayName ?? cue.speaker);
-        const avatar = resolved?.avatar
-          ? `<img class="transcript-avatar" src="${resolved.avatar}" alt="" width="20" height="20" loading="lazy" />`
+        const avatar = resolved?.avatarSmall
+          ? `<img class="transcript-avatar" src="${resolved.avatarSmall}" alt="" width="20" height="20" loading="lazy" />`
           : "";
         speaker = `<span class="transcript-speaker">${avatar}${name}</span>`;
       }

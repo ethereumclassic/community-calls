@@ -19,9 +19,9 @@
 //
 // Audit note: Google documents that videos uploaded through the API (--upload)
 // by a project that has not passed YouTube's API audit are restricted to
-// private. In practice (Call 61, Oct 2026) the channel could still make the
-// upload public in Studio, so no audit was needed; if that ever changes,
-// upload in Studio and run this without --upload (editing is never locked).
+// private. That did not apply here: Call 61 was uploaded with --upload and
+// later set public (Oct 2026). If it ever does, upload in Studio and run this
+// without --upload (editing is never locked).
 
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";

@@ -14,7 +14,11 @@ import { VIDEOGEN_CONFIG } from "./config";
 import { resolveSpeaker } from "./speakers";
 import type { Job, Participant } from "./job";
 import type { SidecarMeta, Chapter } from "./sidecar";
-import { buildDisplays } from "./video-file";
+import {
+  buildColdOpen,
+  buildDisplays,
+  listColdOpenCandidates,
+} from "./video-file";
 
 type Entry = CollectionEntry<"calls">;
 
@@ -51,6 +55,7 @@ function deriveParticipants(vtt: string): Participant[] {
     if (!seen.has(id)) {
       seen.set(id, {
         name: r?.displayName ?? c.speaker,
+        aliases: r?.aliases,
         avatar: r?.avatar ?? null,
       });
     }
@@ -60,7 +65,11 @@ function deriveParticipants(vtt: string): Participant[] {
 
 function rosterParticipant(name: string): Participant {
   const r = resolveSpeaker(name);
-  return { name: r?.displayName ?? name, avatar: r?.avatar ?? null };
+  return {
+    name: r?.displayName ?? name,
+    aliases: r?.aliases,
+    avatar: r?.avatar ?? null,
+  };
 }
 
 export function buildJob(entry: Entry, vtt: string): Job {
@@ -107,5 +116,7 @@ export function buildMeta(entry: Entry, vtt: string): SidecarMeta {
     chapters,
     // Display windows come from calls/video/<id>.yaml, not the markdown.
     displays: buildDisplays(entry.id),
+    coldOpen: buildColdOpen(entry.id),
+    coldOpenCandidates: listColdOpenCandidates(entry.id),
   };
 }

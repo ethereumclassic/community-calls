@@ -36,6 +36,37 @@ FF=$(node -e "console.log(require('ffmpeg-static'))")
 gitignored (70 MB+) and never committed. Verify the page boots against
 `/videogen/<NN>/job.json` and the roster resolves before rendering.
 
+### Step 1a — Edit the audio: cuts and long silences (most calls)
+
+Instead of the plain transcode above, a call can carry an `edit:` section in
+`calls/video/<id>.yaml`: hand-picked `cuts` (trolls, a false start before the
+welcome) and `silence` (only gaps of at least `minGapSec`, default 2s, are
+shortened to `keepSec`, default 0.75s; normal pauses are untouched). Dry-run to
+see what it would remove, then write:
+
+```bash
+node scripts/videogen/edit-audio.mjs <NN> --recording <recording.mp4> --dry-run
+node scripts/videogen/edit-audio.mjs <NN> --recording <recording.mp4>
+```
+
+It writes `public/videogen/<NN>/<NN>-audio.mp3`, `transcripts/<id>.edited.vtt`
+(the diarized or raw transcript re-timed onto the edited clock) and
+`calls/video/<id>.map.json`. With an `edit:` section, every other time in the
+video file (`coldOpen`, `displays`) is on the **original recording clock** (read
+it straight off Zoom's transcript); the map carries it onto the edited audio, so
+re-tuning the silence never means retiming windows. Run `call-markdown` on the
+`.edited.vtt`, and validate with `--raw transcripts/<id>.edited.vtt`.
+
+### Step 1c — Cold open (optional)
+
+A highlight before the preroll: `coldOpen: { from, to, src, quote }` in the video
+file. It plays that span of the call over the still `src` (resolved like a display
+src) with the stage header, the speaker's name and avatar, and `quote` as the
+caption (default: the words spoken in the clip). The intro jingle starts after it,
+on the hero slide. Up to 20s. Candidate stills named `coldopen-*` in
+`.cache/videogen/<id>/media/` (keep them ~1920px WebP, with a `thumb-coldopen-*.webp`
+next to each) show on the review page; click one to preview it in the cold open.
+
 ## Step 1b — Display windows (assets shown while they are discussed)
 
 The stage has a **display mode**: for a window of the call the waveform is
@@ -78,7 +109,6 @@ zips them with the audio onto the call's GitHub release (`call-<NN>`), and
   already per call).
 - Check the windows before rendering: `scripts/videogen/shot-display.mjs` seeks the
   page to chosen main-local times and screenshots them.
-- The title card carries the brand art from `VIDEOGEN_CONFIG.titleArt`.
 
 **Before any render, probe the live visualiser.** Load
 `/videogen?job=…&preview=1`, `__seekMain(t)` into the call, click play, and
@@ -87,6 +117,11 @@ confirm `#ama canvas` exists and `#viz` is hidden
 import leaves the deterministic canvas in place and the waveform wrong.
 
 ## Step 2 — Render (the full final by default)
+
+> The render server shares `.astro/` (the content store) with your working dev
+> server. Starting it can leave the working server's store empty ("The
+> collection \"calls\" does not exist"; every /videogen endpoint 404s). The
+> render itself is unaffected; restart the working dev server if it happens.
 
 > **`--realtime` is mandatory. Copy the command below verbatim.**
 > Do **not** reconstruct it from `videogen.mjs`'s `parseArgs` flags. Without
@@ -288,6 +323,7 @@ Hand the user a reviewable, downloadable video and everything to publish it.
 1. **Rename the render output to the canonical name**:
    ```bash
    mv .cache/videogen/<id>/render-*.mp4 .cache/videogen/<id>/render.mp4
+   mv .cache/videogen/<id>/render-*.timings.json .cache/videogen/<id>/render.timings.json
    ```
 2. **Review it on the working dev server** (port 4321, HMR on — not the render
    server). `/videogen/<NN>/review` is the dev-only review page: a wide

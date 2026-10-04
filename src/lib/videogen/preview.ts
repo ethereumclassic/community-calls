@@ -14,7 +14,13 @@ import {
 import { fmt } from "./format";
 import { ensureAma } from "./ama";
 import { setDisplayPlaying } from "./display";
-import { renderedUrl, type Job, type Participant } from "./job";
+import {
+  galleryMode,
+  renderedUrl,
+  slideView,
+  type Job,
+  type Participant,
+} from "./job";
 import type { SidecarMeta } from "./sidecar";
 import type { Cue } from "./vtt";
 import {
@@ -28,6 +34,9 @@ import {
   setActiveSlide,
   hideSlideOverlay,
   setOverlayOpacity,
+  setColdOpenProgress,
+  renderSlideGallery,
+  thumbnailSlide,
   SLIDE_KEYS,
   type SlideContext,
   type SlideKey,
@@ -161,6 +170,12 @@ export function setupPreviewControls(ctx: Ctx): void {
       }
     } else {
       setActiveSlide(seg.key, buildSlideContext);
+      if (seg.key === "coldopen") {
+        setColdOpenProgress(
+          ctx.getSidecar(),
+          (t - seg.start) / (seg.end - seg.start),
+        );
+      }
       // Fade the first post-roll slide in over the close of the call (a longer
       // fade than the inter-slide one so it clearly reads as a fade-up).
       const postFade = POSTROLL_FADE_SEC;
@@ -251,10 +266,14 @@ export function setupPreviewControls(ctx: Ctx): void {
   }
 
   // Start/stop the main call audio when crossing into a segment. The jingle is
-  // handled separately (applyJingle) since it spans boundaries.
+  // handled separately (applyJingle) since it spans boundaries. The cold open
+  // is a slide that plays its own stretch of the call audio.
   function onEnterSegment(seg: Segment, t: number): void {
     if (!timeline) return;
-    if (seg.kind === "main") {
+    if (seg.kind === "slide" && seg.audioFrom != null) {
+      previewAudio.currentTime = seg.audioFrom + Math.max(0, t - seg.start);
+      if (playing) void previewAudio.play().catch(() => {});
+    } else if (seg.kind === "main") {
       // Audio plays from the trimmed-head offset, not from 0.
       const audioT =
         timeline.mainAudioOffsetSec + Math.max(0, t - timeline.mainStart);
@@ -267,10 +286,29 @@ export function setupPreviewControls(ctx: Ctx): void {
     }
   }
 
+  // Call-audio volume: the cold open fades in and out (the fade out overlaps
+  // the jingle coming in); everywhere else the call plays at full level.
+  let callVol = -1;
+  function applyCallVolume(seg: Segment, t: number): void {
+    if (!timeline) return;
+    let v = 1;
+    if (seg.kind === "slide" && seg.audioFrom != null) {
+      const { coldOpenFadeInSec: fi, coldOpenFadeOutSec: fo } = timeline;
+      const vin = fi > 0 ? (t - seg.start) / fi : 1;
+      const vout = fo > 0 ? (seg.end - t) / fo : 1;
+      v = clamp(Math.min(vin, vout, 1), 0, 1);
+    }
+    if (v !== callVol) {
+      previewAudio.volume = v;
+      callVol = v;
+    }
+  }
+
   function syncMedia(t: number): void {
     if (!timeline) return;
     const idx = segmentIndexAt(timeline, t);
     const seg = timeline.segments[idx];
+    applyCallVolume(seg, t);
     if (idx !== activeIdx) {
       onEnterSegment(seg, t);
       activeIdx = idx;
@@ -384,6 +422,56 @@ export function setupPreviewControls(ctx: Ctx): void {
     renderGlobal(globalT);
   }
 
+  // ?slide=<key>: one slide, fitted to the window, for the review page's
+  // slide tabs. The parent switches slides (and the cold-open still) by
+  // postMessage({ slide, still }) without reloading.
+  function showSlideView(initial: string): void {
+    document.documentElement.classList.add("slide-view");
+    const fit = () => {
+      document.documentElement.style.zoom = String(window.innerWidth / 1920);
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    let still: string | undefined;
+    const show = (key: string) => {
+      if (key === "thumbnail") {
+        // Not a timeline slide: mount it straight into the overlay.
+        pause();
+        hideSlideOverlay();
+        setActiveSlide("hero", buildSlideContext);
+        const inner = document.getElementById("slides-inner");
+        if (inner) {
+          const el = thumbnailSlide(buildSlideContext());
+          el.classList.add("slide", "visible");
+          inner.replaceChildren(el);
+        }
+        setOverlayOpacity(1);
+        return;
+      }
+      if (!SLIDE_KEYS.includes(key as SlideKey)) return;
+      pause();
+      hideSlideOverlay();
+      const meta = ctx.getSidecar();
+      const withStill =
+        still && meta?.coldOpen
+          ? { ...meta, coldOpen: { ...meta.coldOpen, src: still } }
+          : meta;
+      setActiveSlide(key as SlideKey, () => ({
+        ...buildSlideContext(),
+        meta: withStill ?? null,
+      }));
+      setOverlayOpacity(1);
+      if (key === "coldopen") setColdOpenProgress(withStill ?? null, 0);
+    };
+    window.addEventListener("message", (e) => {
+      const d = e.data as { slide?: string; still?: string } | null;
+      if (!d || typeof d !== "object") return;
+      if (d.still !== undefined) still = d.still || undefined;
+      if (d.slide) show(d.slide);
+    });
+    show(initial);
+  }
+
   ctx.ready.then(() => {
     timeline = ctx.getTimeline();
     const mi = timeline.segments.findIndex((s) => s.kind === "main");
@@ -391,7 +479,26 @@ export function setupPreviewControls(ctx: Ctx): void {
     const after = timeline.segments[mi + 1];
     lastPrerollKey = before?.kind === "slide" ? before.key : null;
     firstPostrollKey = after?.kind === "slide" ? after.key : null;
+    // Only the render driver (a webdriver) preloads the call audio: it needs
+    // it ready for the cold open at t=0. In a normal browser it loads on play.
+    if (navigator.webdriver) {
+      previewAudio.preload = "auto";
+      jingleAudio.preload = "auto";
+    }
     previewAudio.src = ctx.audioSrc;
+    // All the timeline's slides at once, in a panel over the stage: the
+    // "slides" button toggles it, ?gallery=1 opens it on load.
+    const gallery = document.getElementById("slide-gallery");
+    if (gallery) {
+      const keys = timeline.segments.flatMap((s) =>
+        s.kind === "slide" ? [s.key] : [],
+      );
+      renderSlideGallery(gallery, keys, buildSlideContext());
+      gallery.classList.toggle("hidden", !galleryMode);
+      document
+        .getElementById("gallery-toggle")
+        ?.addEventListener("click", () => gallery.classList.toggle("hidden"));
+    }
     previewScrub.min = "0";
     previewScrub.max = String(timeline.totalDuration || 1);
     previewScrub.step = "0.05";
@@ -400,6 +507,8 @@ export function setupPreviewControls(ctx: Ctx): void {
     // (the title slide), not the bare stage — this is also what the realtime
     // driver captures as frame 0.
     seekTo(0);
+    // After the t=0 paint, which would otherwise replace the chosen slide.
+    if (slideView != null) showSlideView(slideView);
     if (renderedUrl) {
       previewDownload.href = renderedUrl;
       previewDownload.classList.remove("hidden");

@@ -84,7 +84,8 @@ function parseCues(vtt) {
     const buf = [];
     while (i < lines.length && lines[i].trim() !== "") buf.push(lines[i++]);
     const raw = buf.join("\n").trim();
-    const colon = /^([A-Za-z][\w .'-]{0,40}):\s+([\s\S]+)$/.exec(raw);
+    // Mirrors vtt.ts: any script's letters, optional "@handle".
+    const colon = /^(@?\p{L}[\p{L}\p{N}_ .'-]{0,40}):\s+([\s\S]+)$/u.exec(raw);
     const speaker = colon ? colon[1].trim() : undefined;
     const text = colon ? colon[2].trim() : raw;
     cues.push({ id, start, end, speaker, text });

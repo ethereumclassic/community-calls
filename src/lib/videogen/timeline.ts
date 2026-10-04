@@ -8,24 +8,31 @@
 import type { SidecarMeta } from "./sidecar";
 import type { SlideKey } from "./slides";
 
-// How long the jingle bleeds across a slide/chat boundary and fades under the
-// speaker. The intro plays full over the pre-roll slides, then keeps playing
-// into the start of the call and fades out over this window while the first
-// speaker talks; the outro mirrors it, fading in under the closing speaker over
-// the last of the call before playing full over the post-roll slides. This one
-// constant is the single source of truth for the crossfade — the browser
-// preview (preview.ts) and the ffmpeg render (scripts/videogen.mjs, via
-// __timings) both read it so they can never drift apart.
-const JINGLE_OVERLAP_SEC = 10;
-
-// The jingle is ducked before the speaker starts: over the last
-// JINGLE_DUCK_LEAD_SEC of the preroll it drops from full to JINGLE_DUCK_LEVEL,
-// so by the first word it is already quiet, and then tails from that level to
-// silence over JINGLE_OVERLAP_SEC. The outro mirrors it: rises to the duck
-// level under the closing words, then to full over the first
-// JINGLE_DUCK_LEAD_SEC of the postroll.
+// Jingle levels and fades. These numbers are the single source of truth for
+// the intro/outro mix: the browser preview (preview.ts) plays the envelopes
+// built here, and the ffmpeg render (scripts/videogen.mjs) receives the same
+// envelopes through __timings, so the two can never drift apart.
+//
+// The jingle (about -11.5 LUFS) is much louder than speech (about -18 LUFS):
+// - JINGLE_FULL: its level over the slides, so it does not jump 6 dB above
+//   the voices either side of it.
+// - JINGLE_UNDER_SPEECH: the most it may be while anyone is talking (cold
+//   open, the opening words, the closing words), about 18 dB under the voice.
+const JINGLE_FULL = 0.6;
+const JINGLE_UNDER_SPEECH = 0.06;
+// The jingle starts silent and fades in slowly to full.
+const JINGLE_FADE_IN_SEC = 3;
+// It reaches the speech level this long before the call starts...
 const JINGLE_DUCK_LEAD_SEC = 4;
-const JINGLE_DUCK_LEVEL = 0.25;
+const JINGLE_DUCK_EARLY_SEC = 0.5;
+// ...and tails from there to silence over this long under the first speaker
+// (the outro mirrors it, rising under the closing speaker).
+const JINGLE_OVERLAP_SEC = 6;
+// Cold open: the jingle starts this long before the clip ends, held at the
+// speech level, and the clip itself fades in and out.
+const COLD_OPEN_OVERLAP_SEC = 2;
+const COLD_OPEN_FADE_IN_SEC = 0.3;
+const COLD_OPEN_FADE_OUT_SEC = 1;
 
 // The ending: over the final slide (the logo) the audio fades to silence and
 // the picture fades to black, so the video winds down instead of cutting. This
@@ -37,7 +44,8 @@ const END_FADE_SEC = 2.5;
 // Per-slide on-screen duration. Changing these here automatically reflows the
 // preview scrubber AND the driver's audio padding (both read this timeline),
 // so the two can no longer drift apart.
-const SLIDE_MS: Record<SlideKey, number> = {
+// The cold open is sized by its clip, not here (see coldOpenSec below).
+const SLIDE_MS: Record<Exclude<SlideKey, "coldopen">, number> = {
   hero: 4500,
   title: 9000,
   toc: 4000,
@@ -51,6 +59,8 @@ type SlideSegment = {
   key: SlideKey;
   start: number;
   end: number;
+  // Cold open only: the call audio plays from this audio time over the slide.
+  audioFrom?: number;
 };
 
 type MainSegment = { kind: "main"; start: number; end: number };
@@ -82,6 +92,12 @@ export type Timeline = {
   duckLevel: number;
   intro: JingleWindow | null;
   outro: JingleWindow | null;
+  // Cold open at the head of the preroll (0 when there is none): seconds of
+  // call audio from coldOpenAudioFrom, faded in/out over coldOpenFade*Sec.
+  coldOpenSec: number;
+  coldOpenAudioFrom: number;
+  coldOpenFadeInSec: number;
+  coldOpenFadeOutSec: number;
   // Final audio-fade / fade-to-black window: [totalDuration - endFadeSec,
   // totalDuration]. 0 when there's no postroll to fade over.
   endFadeSec: number;
@@ -123,18 +139,24 @@ type TimelineSpec = {
   includeSlides: boolean;
 };
 
-// Which slides to show is content-driven: title always, TOC only when there
-// are chapters, summary only when there's a summary. Postroll is the full
+// Which slides to show: an optional cold open, then hero and title (the
+// summary sits on the title card). Postroll is the full
 // stats -> thanks -> logo run. Keeping this derivation in one place means the
 // exposed prerollMs/postrollMs always match what actually renders.
 function prerollKeys(meta: SidecarMeta): SlideKey[] {
-  // Brand hero, then the episode card (title + summary merged), then chapters.
-  const keys: SlideKey[] = ["hero", "title"];
-  if (meta.chapters && meta.chapters.length > 0) keys.push("toc");
+  // Optional cold open, then the brand hero and the episode card (title +
+  // summary merged). The chapter list (toc) is no longer part of the intro;
+  // YouTube's description chapters cover it.
+  const keys: SlideKey[] = meta.coldOpen ? ["coldopen"] : [];
+  keys.push("hero", "title");
   return keys;
 }
 
-const POSTROLL_KEYS: SlideKey[] = ["stats", "thanks", "logo"];
+const POSTROLL_KEYS: Exclude<SlideKey, "coldopen">[] = [
+  "stats",
+  "thanks",
+  "logo",
+];
 
 export function buildTimeline(spec: TimelineSpec): Timeline {
   const segments: Segment[] = [];
@@ -142,8 +164,23 @@ export function buildTimeline(spec: TimelineSpec): Timeline {
   const meta = spec.meta;
 
   let t = 0;
+  let coldOpenSec = 0;
   if (useSlides && meta) {
     for (const key of prerollKeys(meta)) {
+      if (key === "coldopen" && meta.coldOpen) {
+        coldOpenSec = meta.coldOpen.end - meta.coldOpen.start;
+        const end = t + coldOpenSec;
+        segments.push({
+          kind: "slide",
+          key,
+          start: t,
+          end,
+          audioFrom: meta.coldOpen.start,
+        });
+        t = end;
+        continue;
+      }
+      if (key === "coldopen") continue;
       const end = t + SLIDE_MS[key] / 1000;
       segments.push({ kind: "slide", key, start: t, end });
       t = end;
@@ -175,23 +212,45 @@ export function buildTimeline(spec: TimelineSpec): Timeline {
     Math.min(JINGLE_OVERLAP_SEC, (mainEnd - mainStart) / 2),
   );
 
-  // Duck lead can't be longer than the preroll it sits in (short renders).
-  const duckLeadSec = Math.max(0, Math.min(JINGLE_DUCK_LEAD_SEC, mainStart));
-  const duckLevel = JINGLE_DUCK_LEVEL;
+  // Duck lead can't be longer than the slides it sits in (short renders).
+  const duckLeadSec = Math.max(
+    0,
+    Math.min(JINGLE_DUCK_LEAD_SEC, mainStart - coldOpenSec),
+  );
+  const duckLevel = JINGLE_UNDER_SPEECH;
+  const full = JINGLE_FULL;
 
-  // Intro: opens full over the pre-roll slides, ducks to duckLevel over the
-  // last duckLeadSec before the call, then tails to silence over `overlapSec`
+  // Intro: starts silent (under the end of the cold open, held at the speech
+  // level until the clip ends), fades in slowly to full over the slides,
+  // ducks to the speech level just before the call, then tails to silence
   // under the first speaker.
+  const coldOverlap =
+    coldOpenSec > 0 ? Math.min(COLD_OPEN_OVERLAP_SEC, coldOpenSec) : 0;
+  const introStart = coldOpenSec - coldOverlap;
+  const slidesSec = mainStart - coldOpenSec;
+  const fadeIn = Math.min(
+    JINGLE_FADE_IN_SEC,
+    Math.max(0, slidesSec - duckLeadSec),
+  );
+  const duckAt = Math.max(
+    coldOpenSec + fadeIn,
+    mainStart - JINGLE_DUCK_EARLY_SEC,
+  );
   const intro: JingleWindow | null =
-    useSlides && meta?.intro && prerollMs > 0
+    useSlides && meta?.intro && slidesSec > 0
       ? {
           url: meta.intro,
-          startGlobal: 0,
+          startGlobal: introStart,
           endGlobal: mainStart + overlapSec,
           envelope: [
-            { t: 0, v: 1 },
-            { t: mainStart - duckLeadSec, v: 1 },
-            { t: mainStart, v: duckLevel },
+            { t: introStart, v: 0 },
+            ...(coldOverlap > 0 ? [{ t: coldOpenSec, v: duckLevel }] : []),
+            { t: coldOpenSec + fadeIn, v: full },
+            {
+              t: Math.max(coldOpenSec + fadeIn, mainStart - duckLeadSec),
+              v: full,
+            },
+            { t: duckAt, v: duckLevel },
             { t: mainStart + overlapSec, v: 0 },
           ],
         }
@@ -222,8 +281,8 @@ export function buildTimeline(spec: TimelineSpec): Timeline {
           envelope: [
             { t: outroStart, v: 0 },
             { t: mainEnd, v: duckLevel },
-            { t: mainEnd + outLead, v: 1 },
-            { t: outFadeStart, v: 1 },
+            { t: mainEnd + outLead, v: full },
+            { t: outFadeStart, v: full },
             { t: totalDuration, v: 0 },
           ],
         }
@@ -241,6 +300,10 @@ export function buildTimeline(spec: TimelineSpec): Timeline {
     duckLevel,
     intro,
     outro,
+    coldOpenSec,
+    coldOpenAudioFrom: meta?.coldOpen?.start ?? 0,
+    coldOpenFadeInSec: coldOpenSec > 0 ? COLD_OPEN_FADE_IN_SEC : 0,
+    coldOpenFadeOutSec: coldOpenSec > 0 ? COLD_OPEN_FADE_OUT_SEC : 0,
     endFadeSec,
     mainDurationSec: mainEnd - mainStart,
     mainAudioOffsetSec: spec.mainAudioOffsetSec ?? 0,

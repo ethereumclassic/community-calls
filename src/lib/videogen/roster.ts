@@ -164,7 +164,11 @@ export function matchParticipant(
 function resolveParticipant(speaker: string): Participant | undefined {
   const lower = speaker.trim().toLowerCase();
   const first = lower.split(/\s+/)[0];
-  const exact = participants.find((p) => p.name.trim().toLowerCase() === lower);
+  const exact = participants.find(
+    (p) =>
+      p.name.trim().toLowerCase() === lower ||
+      p.aliases?.some((a) => a.trim().toLowerCase() === lower),
+  );
   if (exact) return exact;
   return participants.find((p) => {
     const pl = p.name.trim().toLowerCase();

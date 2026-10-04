@@ -148,7 +148,11 @@ function parseFocus(f: string | undefined): [number, number] {
 // to zoomTo about the focus point, translating so the focus point sits at the
 // frame centre when fully zoomed in and at its natural spot when the image is
 // shown whole (scale 1). Eased so both ends settle.
-function imageTransform(d: Display, p: number): string {
+// Also drives the cold-open still (slides.ts), hence the narrow parameter.
+export function imageTransform(
+  d: Pick<Display, "zoomFrom" | "zoomTo" | "focus">,
+  p: number,
+): string {
   const from = d.zoomFrom ?? 1;
   const to = d.zoomTo ?? (d.zoomFrom != null ? 1 : 1 + IMAGE_DRIFT_SCALE);
   const e = easeInOut(p);

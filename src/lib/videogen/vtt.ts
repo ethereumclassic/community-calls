@@ -60,8 +60,11 @@ function extractVoice(raw: string): { speaker?: string; text: string } {
   // <v Speaker Name>text</v> or <v Speaker>text
   const m = /^<v\s+([^>]+)>([\s\S]*?)(?:<\/v>)?$/.exec(raw.trim());
   if (m) return { speaker: m[1].trim(), text: stripTags(m[2]).trim() };
-  // "Speaker: text" fallback
-  const colon = /^([A-Za-z][\w .'-]{0,40}):\s+([\s\S]+)$/.exec(raw.trim());
+  // "Speaker: text" fallback. Any script's letters (an accented name like
+  // "Edilson Osório" must parse); an "@handle" label is a Zoom display name.
+  const colon = /^(@?\p{L}[\p{L}\p{N}_ .'-]{0,40}):\s+([\s\S]+)$/u.exec(
+    raw.trim(),
+  );
   if (colon) return { speaker: colon[1].trim(), text: colon[2].trim() };
   return { text: stripTags(raw).trim() };
 }

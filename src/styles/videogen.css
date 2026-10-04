@@ -638,8 +638,17 @@ body::before {
   gap: 30px;
   padding: 0 160px;
 }
+/* Number/date, title and summary stacked and centred, with room between. */
+.title-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 56px;
+  text-align: center;
+}
 .title-meta {
   display: flex;
+  justify-content: center;
   gap: 28px;
   align-items: baseline;
   font-family: var(--font-mono);
@@ -657,70 +666,21 @@ body::before {
   color: var(--color-etc-green);
   text-shadow: 0 0 36px rgba(122, 238, 168, 0.22);
 }
+/* A short description under the title, held to two lines. */
 .title-summary {
   font-family: var(--font-display);
   font-size: 50px;
   line-height: 1.4;
-  margin: 8px 0 0;
+  margin: 0;
   max-width: 1400px;
   text-align: center;
   color: var(--color-text-primary);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
 }
-/* With artwork: text becomes a left-aligned column and the art stands on the
-   right, full height of the card. The art breathes very slowly (it is on
-   screen for ~6s) so the card is not a still. */
-.title-content.has-art {
-  flex-direction: row-reverse; /* art on the left, text on the right */
-  align-items: center;
-  justify-content: space-between;
-  gap: 110px;
-  padding: 0 120px 0 40px;
-}
-.title-content.has-art .title-text {
-  flex: 1 1 auto;
-  min-width: 0;
-  max-width: 1060px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 30px;
-}
-.title-content.has-art .title-name {
-  text-align: left;
-  font-size: 150px;
-}
-.title-content.has-art .title-summary {
-  text-align: left;
-  font-size: 44px;
-  max-width: 1000px;
-}
-.title-art {
-  flex: 0 0 auto;
-  width: 600px;
-  height: 920px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.title-art img {
-  height: 100%;
-  width: auto;
-  object-fit: contain;
-  /* The artwork is a wireframe on pure black; screen-blend it so its black
-     dissolves into the slide background instead of printing a rectangle. */
-  mix-blend-mode: screen;
-  animation: title-art-drift 7s ease-in-out both;
-  will-change: transform;
-}
-@keyframes title-art-drift {
-  from {
-    transform: scale(1);
-  }
-  to {
-    transform: scale(1.05);
-  }
-}
-
 /* Centred-content variant used by TOC / Summary / Stats / Thanks */
 .og-content {
   position: absolute;
@@ -790,6 +750,85 @@ body::before {
 }
 
 /* ── Hero / main-title slide — reproduces the landing-page hero ─────────── */
+/* Cold open: the highlight still full-bleed (its zoom is set per frame from
+   the transport), a gradient so the lower third reads, then the speaker and
+   the quoted words. */
+.slide-coldopen {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #000;
+}
+.coldopen-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform;
+}
+.coldopen-shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.7) 0%, rgba(0, 0, 0, 0) 24%),
+    linear-gradient(
+      to top,
+      rgba(0, 0, 0, 0.88) 0%,
+      rgba(0, 0, 0, 0.55) 28%,
+      rgba(0, 0, 0, 0) 55%
+    );
+}
+.slide-coldopen .header {
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.85);
+}
+.coldopen-lower {
+  position: absolute;
+  left: 120px;
+  right: 120px;
+  bottom: 96px;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+.coldopen-avatar {
+  flex: 0 0 auto;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  border: 4px solid #6fcf97;
+  box-shadow: 0 0 40px rgba(111, 207, 151, 0.45);
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+}
+.coldopen-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.coldopen-text {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+.coldopen-name {
+  font-family: var(--font-mono);
+  font-size: 34px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #6fcf97;
+}
+.coldopen-quote {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 54px;
+  line-height: 1.25;
+  color: var(--color-text-primary);
+  text-shadow: 0 2px 24px rgba(0, 0, 0, 0.8);
+}
+
 .slide-hero {
   position: absolute;
   inset: 0;
@@ -1228,4 +1267,144 @@ body::before {
   display: block;
   border-radius: 6px;
   background: #000;
+}
+
+/* Preview page: every slide at once, scaled to a quarter (480x270), in a
+   full-window panel that scrolls on its own (the page itself never scrolls,
+   since the render captures it). Toggled by the "slides" button. */
+.slide-gallery {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  overflow-y: auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 480px);
+  align-content: start;
+  justify-content: center;
+  gap: 24px;
+  padding: 24px 24px 140px;
+  background: rgba(0, 0, 0, 0.94);
+}
+.slide-gallery.hidden {
+  display: none;
+}
+.gallery-card {
+  margin: 0;
+}
+.gallery-frame {
+  position: relative;
+  width: 480px;
+  height: 270px;
+  overflow: hidden;
+  border: 1px solid rgba(111, 207, 151, 0.25);
+  border-radius: 6px;
+  background: #0a0a0c;
+}
+.gallery-card.chosen .gallery-frame {
+  border: 3px solid #6fcf97;
+}
+.gallery-scale {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1920px;
+  height: 1080px;
+  transform-origin: 0 0;
+}
+.gallery-card figcaption {
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--color-text-secondary, #9aa);
+}
+
+/* ?slide=<key>: just the slide, fitted to the window (zoom set from JS). */
+.slide-view .preview-controls,
+.slide-view .rendered-player,
+.slide-view .loading {
+  display: none !important;
+}
+.slide-view .slide {
+  transition: none;
+}
+
+/* ── YouTube thumbnail (never on the video timeline) ─────────────────────
+   Authored at 1920x1080 like every slide; captured at 1280x720. Thumbnails
+   are seen small, so type and the face are much larger than in the video:
+   the logo overlay top left, the number in white above the title on a dark
+   fade, the guest's face on the right. */
+.slide-thumb {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: #000;
+  font-family: var(--font-display);
+  color: var(--color-text-primary);
+}
+.thumb-bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.thumb-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.92) 0%,
+    rgba(0, 0, 0, 0.6) 45%,
+    rgba(0, 0, 0, 0) 75%
+  );
+}
+.thumb-header {
+  transform: scale(1.6);
+  transform-origin: 0 0;
+  text-shadow: 0 3px 18px rgba(0, 0, 0, 0.9);
+}
+.thumb-num {
+  position: absolute;
+  left: 104px;
+  bottom: 400px;
+  font-family: var(--font-mono);
+  font-size: 120px;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.9);
+}
+.thumb-title {
+  position: absolute;
+  left: 96px;
+  bottom: 150px;
+  max-width: 1050px;
+  margin: 0;
+  font-size: 230px;
+  font-weight: 400;
+  line-height: 0.95;
+  color: var(--color-etc-green);
+  text-shadow:
+    0 0 48px rgba(122, 238, 168, 0.35),
+    0 6px 30px rgba(0, 0, 0, 0.9);
+}
+.thumb-face {
+  position: absolute;
+  right: 120px;
+  top: 50%;
+  width: 520px;
+  height: 520px;
+  transform: translateY(-50%);
+  border-radius: 50%;
+  overflow: hidden;
+  border: 10px solid #6fcf97;
+  box-shadow:
+    0 0 80px rgba(111, 207, 151, 0.55),
+    0 20px 60px rgba(0, 0, 0, 0.8);
+  background: #111;
+}
+.thumb-face img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }

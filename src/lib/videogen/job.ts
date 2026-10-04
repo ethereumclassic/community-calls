@@ -1,5 +1,8 @@
 export type Participant = {
   name: string;
+  // Registry aliases, so raw transcript labels (a Zoom handle, a full name)
+  // still match this participant on the page.
+  aliases?: string[];
   role?: string;
   avatar?: string | null;
   github?: string;
@@ -30,6 +33,13 @@ const query = new URLSearchParams(location.search);
 export const isPreview = query.get("preview") === "1";
 export const renderedUrl = query.get("out");
 export const noSlides = query.get("noSlides") === "1";
+// ?gallery=1 opens on the slide gallery; ?slide=<key> shows one slide fitted
+// to the window (the review page embeds it and switches slides by message).
+// Both only look at slides, so boot skips the full-audio decode (the
+// visualiser spectrum) and reads just the duration.
+export const galleryMode = query.get("gallery") === "1";
+export const slideView = query.get("slide");
+export const slidesOnly = galleryMode || slideView != null;
 // Dev alignment aid: ?guides=1 draws a center crosshair over the stage.
 export const showGuides = query.get("guides") === "1";
 

@@ -26,8 +26,25 @@ export type Display = {
   loop?: boolean;
 };
 
+// A cold open: the call audio between start and end (transcript clock,
+// seconds) played over the still `src` before the preroll slides.
+export type ColdOpen = {
+  start: number;
+  end: number;
+  src: string;
+  quote?: string; // on-screen caption; default is the clip's spoken words
+  zoomFrom?: number;
+  zoomTo?: number;
+  focus?: string; // "x% y%" of the frame
+};
+
 export type SidecarMeta = {
   summary?: string;
+  coldOpen?: ColdOpen;
+  // Dev preview only: every coldopen-* still in the call's media cache (with
+  // its thumb-coldopen-* thumbnail when there is one), so the slide gallery
+  // and review page can show the cold open over each candidate.
+  coldOpenCandidates?: { src: string; thumb?: string }[];
   displays?: Display[];
   hosts?: string[];
   episodeUrl?: string;

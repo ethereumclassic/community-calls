@@ -80,13 +80,13 @@ if (guard) return guard;
          so both the live preview and the captured frames fade out together. -->
     <div class="fade-black" id="fade-black"></div>
 
-    <audio id="jingle-audio" preload="auto" class="hidden"></audio>
+    <audio id="jingle-audio" preload="none" class="hidden"></audio>
 
     <div class="loading" id="loading">
       <div class="spinner"></div>
     </div>
 
-    <audio id="preview-audio" preload="auto" class="hidden"></audio>
+    <audio id="preview-audio" preload="none" class="hidden"></audio>
     <div id="preview-controls" class="preview-controls hidden">
       <button id="preview-play" aria-label="Play/Pause">▶</button>
       <input
@@ -105,6 +105,7 @@ if (guard) return guard;
         >MP4 ↗</a
       >
       <span class="slide-jumps" id="slide-jumps">
+        <button data-slide="coldopen" class="secondary">cold open</button>
         <button data-slide="hero" class="secondary">hero</button>
         <button data-slide="title" class="secondary">title</button>
         <button data-slide="toc" class="secondary">toc</button>
@@ -113,11 +114,14 @@ if (guard) return guard;
         <button data-slide="logo" class="secondary">logo</button>
         <button data-slide="off" class="secondary" id="slide-off">×</button>
       </span>
+      <button id="gallery-toggle" class="secondary">slides</button>
     </div>
+
+    <div id="slide-gallery" class="slide-gallery hidden"></div>
 
     <div id="rendered-player" class="rendered-player hidden">
       <h4>Rendered Output</h4>
-      <video id="rendered-video" controls preload="metadata"></video>
+      <video id="rendered-video" controls preload="none"></video>
     </div>
 
     <div id="landing" class="landing hidden">

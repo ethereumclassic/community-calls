@@ -359,6 +359,13 @@ try {
     await rm(workDir, { recursive: true, force: true }).catch(() => {});
 }
 console.log(`✓ wrote ${out}`);
+// The video-clock facts later steps need (captions and chapters on YouTube are
+// on the video clock): written next to the render as <name>.timings.json.
+if (renderTimings)
+  await writeFile(
+    out.replace(/\.mp4$/, "") + ".timings.json",
+    JSON.stringify(renderTimings, null, 2) + "\n",
+  );
 
 // ── per-frame deterministic renderer (original path) ────────────────────────
 async function renderPerFrame(durSec) {
@@ -436,6 +443,8 @@ async function renderPerFrame(durSec) {
 }
 
 // ── real-time CDP screencast renderer ──────────────────────────────────────
+let renderTimings = null;
+
 async function renderRealtime(durSec) {
   // Pull the page's pre/post-roll wallclock budget + jingle URLs so we can
   // size the concatenated audio track to match the captured visual range.
@@ -456,14 +465,15 @@ async function renderRealtime(durSec) {
   const mainSec = limitDurationSec
     ? Math.min(limitDurationSec, mainAvail)
     : mainAvail;
-  // Crossfade window: cap at half the (possibly --duration-capped) main length
-  // so intro and outro never overlap — same rule as timeline.ts so the MP4 and
-  // the on-page preview agree on the outro start.
-  const overlapSec = Math.max(
-    0,
-    Math.min(timings.overlapSec ?? 0, mainSec / 2),
-  );
   const totalSec = prerollSec + mainSec + postrollSec;
+  renderTimings = {
+    prerollSec,
+    mainSec,
+    postrollSec,
+    totalSec,
+    // Call audio time at the start of the main segment (head trim + --start).
+    mainAudioOffsetSec: Math.max(0, timings.mainAudioOffsetSec ?? 0) + startAt,
+  };
   console.log(
     `▸ realtime capture: ${totalSec.toFixed(2)}s (${prerollSec}s preroll + ${mainSec.toFixed(2)}s main + ${postrollSec}s postroll)` +
       (startSec != null ? ` starting ${startAt}s into the call` : ""),
@@ -483,13 +493,24 @@ async function renderRealtime(durSec) {
     // moves the audio in-point along with the picture.
     mainOffsetSec: Math.max(0, timings.mainAudioOffsetSec ?? 0) + startAt,
     prerollSec,
+    // Cold open at the head of the preroll (none with --start, which has no
+    // preroll): that stretch of the call plays before the intro jingle.
+    coldOpenSec: startSec != null ? 0 : (timings.coldOpenSec ?? 0),
+    coldOpenFrom: timings.coldOpenAudioFrom ?? 0,
     mainSec,
     postrollSec,
-    overlapSec,
-    // Duck: intro drops to duckLevel over the last duckLeadSec of the preroll
-    // (same numbers the page's timeline uses, see timeline.ts).
-    duckLeadSec: Math.max(0, Math.min(timings.duckLeadSec ?? 0, prerollSec)),
-    duckLevel: timings.duckLevel ?? 1,
+    coldOpenFadeInSec: timings.coldOpenFadeInSec ?? 0,
+    coldOpenFadeOutSec: timings.coldOpenFadeOutSec ?? 0,
+    // The jingle windows (global times + volume envelopes) exactly as the
+    // page's timeline plays them. The outro is shifted onto this render's
+    // clock, which differs from the page's when --start/--duration trim the
+    // call.
+    introWindow: startSec != null ? null : timings.introWindow,
+    outroWindow: timings.outroWindow,
+    outroShiftSec:
+      prerollSec +
+      mainSec -
+      (timings.prerollMs / 1000 + timings.mainDurationSec),
     endFadeSec: Math.max(0, Math.min(timings.endFadeSec ?? 0, postrollSec)),
   });
 
@@ -825,17 +846,15 @@ async function renderRealtime(durSec) {
 // Build the full audio track, laid out on one totalSec-long timeline and mixed
 // so the jingle crosses the slide/call boundaries instead of hard-cutting:
 //
-//   0        preroll        preroll+main                 totalSec
-//   |==intro==|=fade out=>·····call·····<=fade in=|==outro==|
-//             (overlap)                  (overlap)
+//   0  cold open  preroll        preroll+main                 totalSec
+//   |=clip=>|==intro==|=duck/tail=>···call···<=rise=|==outro==|
 //
-// The intro opens at full over the pre-roll slides, then fades out over
-// `overlapSec` while the first speaker talks; the outro fades in under the
-// closing speaker over the last `overlapSec` of the call, then plays full over
-// the post-roll slides. A silent base of exactly totalSec fixes the length and
-// fills any gaps (e.g. when a jingle URL is missing). This mirrors the browser
-// preview (see preview.ts / timeline.ts jingleVolumeAt) so the rendered MP4 and
-// the on-page preview sound identical.
+// The cold open plays a stretch of the call; the intro jingle fades in under
+// its end, plays over the slides, ducks before the call and tails under the
+// first speaker; the outro mirrors it. The jingle envelopes come from the
+// page's timeline (window.__timings introWindow/outroWindow, built in
+// timeline.ts), so the rendered MP4 and the on-page preview mix identically.
+// A silent base of exactly totalSec fixes the length and fills any gaps.
 async function buildConcatAudio(outPath, opts) {
   // ffmpeg-static segfaults on HTTP inputs in some filter graphs — always
   // localise jingles to a temp file first. Memoised by URL so a shared
@@ -856,18 +875,14 @@ async function buildConcatAudio(outPath, opts) {
   const introIn = await localise(opts.introUrl, "intro.mp3");
   const outroIn = await localise(opts.outroUrl, "outro.mp3");
 
-  // overlapSec and endFadeSec are already clamped by the caller (to half the
-  // main length, and to postrollSec, respectively); just guard a degenerate 0.
-  const { prerollSec, mainSec, postrollSec, overlapSec, endFadeSec } = opts;
+  // endFadeSec is already clamped by the caller (to postrollSec).
+  const { prerollSec, mainSec, postrollSec, endFadeSec } = opts;
   const mainOffsetSec = Math.max(0, opts.mainOffsetSec ?? 0);
   const totalSec = prerollSec + mainSec + postrollSec;
-  const ov = Math.max(0, overlapSec);
   const endFade = Math.max(0, endFadeSec ?? 0);
   const ms = (s) => Math.round(s * 1000); // adelay wants integer milliseconds
-  // Duck envelope (mirrors timeline.ts): level reached at the speaker, and the
-  // lead time over which the jingle gets there.
-  const duckLevel = Math.min(1, Math.max(0, opts.duckLevel ?? 1));
-  const lead = Math.max(0, Math.min(opts.duckLeadSec ?? 0, prerollSec));
+  // The cold open (if any) fills the head of the preroll with call audio.
+  const coldSec = Math.max(0, Math.min(opts.coldOpenSec ?? 0, prerollSec));
   // Piecewise-linear ffmpeg `volume` expression over local time t from a list
   // of [t, v] points; the caller wraps it in quotes inside the filter graph.
   const envelopeExpr = (pts) => {
@@ -896,48 +911,50 @@ async function buildConcatAudio(outPath, opts) {
   ];
   const mixLabels = ["[base]"];
 
-  // Intro: plays from 0, full over the preroll, fading out across [preroll,
-  // preroll+ov]. Trimmed so it doesn't bleed further into the call. The fade is
-  // only emitted when ov > 0 (afade with d=0 is a degenerate no-op/error).
-  if (introIdx >= 0 && prerollSec > 0) {
-    // Full over the slides, duck to duckLevel by the first word, then tail
-    // to silence over the overlap.
-    const env = envelopeExpr([
-      [0, 1],
-      [prerollSec - lead, 1],
-      [prerollSec, duckLevel],
-      [prerollSec + ov, 0],
-    ]);
+  // A jingle window from the page's timeline -> one delayed, trimmed,
+  // envelope-shaped input. `shift` moves it onto this render's clock.
+  const jingleFilter = (idx, w, shift, label) => {
+    const start = w.startGlobal + shift;
+    const dur = w.endGlobal - w.startGlobal;
+    if (dur <= 0 || start + dur <= 0) return;
+    const env = envelopeExpr(w.envelope.map((p) => [p.t - w.startGlobal, p.v]));
     filters.push(
-      `[${introIdx}:a]atrim=duration=${prerollSec + ov},asetpts=PTS-STARTPTS,volume='${env}':eval=frame[pre]`,
+      `[${idx}:a]atrim=duration=${dur},asetpts=PTS-STARTPTS,volume='${env}':eval=frame,adelay=${ms(Math.max(0, start))}|${ms(Math.max(0, start))}[${label}]`,
     );
-    mixLabels.push("[pre]");
+    mixLabels.push(`[${label}]`);
+  };
+
+  // Intro: fades in under the end of the cold open (held at the speech level),
+  // up to full over the slides, ducks before the call and tails under the
+  // first speaker (see timeline.ts for the numbers).
+  if (introIdx >= 0 && opts.introWindow)
+    jingleFilter(introIdx, opts.introWindow, 0, "pre");
+
+  // The call audio feeds the main segment and, with a cold open, the clip.
+  const mainSrc = coldSec > 0 ? "[mainsrc]" : `[${mainIdx}:a]`;
+  if (coldSec > 0) {
+    filters.push(`[${mainIdx}:a]asplit=2[mainsrc][coldsrc]`);
+    // Cold open: the clip from t=0, faded in and out (the fade out overlaps
+    // the jingle coming in).
+    const fadeIn = Math.max(0.01, opts.coldOpenFadeInSec ?? 0.05);
+    const fadeOut = Math.min(opts.coldOpenFadeOutSec ?? 0.3, coldSec / 2);
+    filters.push(
+      `[coldsrc]atrim=start=${opts.coldOpenFrom}:end=${opts.coldOpenFrom + coldSec},asetpts=PTS-STARTPTS,afade=t=in:d=${fadeIn},afade=t=out:st=${coldSec - fadeOut}:d=${fadeOut}[cold]`,
+    );
+    mixLabels.push("[cold]");
   }
 
   // Main call audio: cut leading silence (start at mainOffsetSec) and take
   // mainSec of it, then delay to start after the preroll.
   filters.push(
-    `[${mainIdx}:a]atrim=start=${mainOffsetSec}:end=${mainOffsetSec + mainSec},asetpts=PTS-STARTPTS,adelay=${ms(prerollSec)}|${ms(prerollSec)}[main]`,
+    `${mainSrc}atrim=start=${mainOffsetSec}:end=${mainOffsetSec + mainSec},asetpts=PTS-STARTPTS,adelay=${ms(prerollSec)}|${ms(prerollSec)}[main]`,
   );
   mixLabels.push("[main]");
 
-  // Outro: fades in over its first `ov` seconds, then plays full; delayed so
-  // that fade-in lands under the last `ov` seconds of the call.
-  if (outroIdx >= 0 && postrollSec > 0) {
-    const outroDelay = prerollSec + mainSec - ov;
-    // Mirror of the intro: up to duckLevel under the closing words, then to
-    // full over the first `lead` seconds of the postroll.
-    const outLead = Math.min(lead, postrollSec);
-    const env = envelopeExpr([
-      [0, 0],
-      [ov, duckLevel],
-      [ov + outLead, 1],
-    ]);
-    filters.push(
-      `[${outroIdx}:a]atrim=duration=${ov + postrollSec},asetpts=PTS-STARTPTS,volume='${env}':eval=frame,adelay=${ms(outroDelay)}|${ms(outroDelay)}[post]`,
-    );
-    mixLabels.push("[post]");
-  }
+  // Outro: rises under the closing words, full over the postroll, out to
+  // silence over the last slide.
+  if (outroIdx >= 0 && postrollSec > 0 && opts.outroWindow)
+    jingleFilter(outroIdx, opts.outroWindow, opts.outroShiftSec ?? 0, "post");
 
   // normalize=0 keeps each source at its own level (we want the brief overlap
   // to sum, not duck everything); dropout_transition=0 avoids a gain bump when

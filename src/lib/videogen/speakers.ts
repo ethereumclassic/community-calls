@@ -21,6 +21,7 @@ type SpeakerRecord = {
 type ResolvedSpeaker = {
   key: string;
   displayName: string;
+  aliases: string[];
   avatar: string | null;
   github?: string;
 };
@@ -55,6 +56,7 @@ export function resolveSpeaker(name: string): ResolvedSpeaker | null {
       return {
         key,
         displayName: rec.displayName,
+        aliases: rec.aliases ?? [],
         avatar: avatarUrl(rec),
         github: rec.github,
       };

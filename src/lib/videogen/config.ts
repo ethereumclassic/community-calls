@@ -13,12 +13,6 @@ export const VIDEOGEN_CONFIG = {
    */
   intro: "/audiogen/recording.mp3",
   outro: "/audiogen/recording.mp3",
-  /**
-   * Artwork on the episode title card, every call: the Lady Justice wireframe
-   * from the ETC rebrand. Lives under public/videogen/ so it is served in dev
-   * and stripped from prod with the rest of the /videogen route.
-   */
-  titleArt: "/videogen/brand/lady-justice.webp",
   /** Default render settings. */
   fps: 60,
   bands: 48,

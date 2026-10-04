@@ -13,6 +13,10 @@ const calls = defineCollection({
     // with the agenda (the /draft-agenda skill). Keep it to roughly 80
     // characters: ShareModal fails the build if the X post exceeds 280.
     agendaSummary: z.string().max(120).optional(),
+    // Extra lines for the end of the YouTube description (e.g. the guest's
+    // socials, one per line), after the call-page link. Plain text: YouTube
+    // renders no markdown. Used by scripts/videogen/episode-text.mjs.
+    youtubeLinks: z.array(z.string()).optional(),
     // Participants for the call-page roster + video. Names resolve against the
     // speaker registry (speakers/speakers.yaml) for avatars; auto-populated by
     // the /videogen skill from the transcript, then curated.

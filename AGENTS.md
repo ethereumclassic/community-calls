@@ -27,7 +27,8 @@ cannot launch in this devcontainer — point
 ## Call media
 
 The episode markdown is the public record and carries no render settings.
-Video settings (display windows) are in `calls/video/<id>.yaml`. Per-call media
+Video settings (audio edits, cold open, display windows) are in
+`calls/video/<id>.yaml`. Per-call media
 is not in git: the distributable audio and display clips live on the call's
 GitHub release (`call-<NN>`) and locally under `public/videogen/<NN>/` and
 `.cache/videogen/<id>/`; `node scripts/videogen/media.mjs pull <NN>` fetches

@@ -12,10 +12,10 @@
 //     pull <NN>` fills from the call's GitHub release. In dev both are served
 //     with Range support (callsMediaDev / videogenCacheDev in astro.config.mjs).
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { parse as parseYaml } from "yaml";
 import { z } from "astro:content";
-import type { Display } from "./sidecar";
+import type { ColdOpen, Display } from "./sidecar";
 
 const displaySchema = z.object({
   from: z.string(),
@@ -32,10 +32,41 @@ const displaySchema = z.object({
   loop: z.boolean().optional(),
 });
 
+// Cold open: a short highlight from the call played before the preroll, over
+// a still. `from`/`to` pick the audio; `src` resolves like a display src;
+// `quote` is the on-screen caption (default: the words spoken in the clip);
+// zoom/focus behave as for an image display.
+const coldOpenSchema = z.object({
+  from: z.string(),
+  to: z.string(),
+  src: z.string(),
+  quote: z.string().optional(),
+  zoomFrom: z.number().positive().optional(),
+  zoomTo: z.number().positive().optional(),
+  focus: z.string().optional(),
+});
+
+// Audio edit applied by scripts/videogen/edit-audio.mjs before rendering.
+// When present, every other time in this file is on the recording clock and
+// is carried onto the edited audio through calls/video/<id>.map.json.
+const editSchema = z.object({
+  cuts: z.array(z.object({ from: z.string(), to: z.string() })).optional(),
+  silence: z
+    .object({
+      minGapSec: z.number().positive().optional(),
+      keepSec: z.number().nonnegative().optional(),
+      thresholdDb: z.number().optional(),
+    })
+    .optional(),
+});
+
 const videoFileSchema = z.object({
+  edit: editSchema.optional(),
+  coldOpen: coldOpenSchema.optional(),
   // Display-mode windows: while the call discusses an asset, the stage swaps
-  // the waveform for it. Times are on the transcript clock ([h:]mm:ss[.ms],
-  // the same clock as NOTE chapters).
+  // the waveform for it. Times are [h:]mm:ss[.ms] on the transcript clock
+  // (the same clock as NOTE chapters), or on the recording clock when the
+  // file has an edit.
   displays: z.array(displaySchema).optional(),
 });
 
@@ -56,12 +87,35 @@ function loadVideoFile(id: string): VideoFile | null {
   return parsed.data;
 }
 
-// "[h:]mm:ss[.ms]" on the transcript clock -> seconds.
+// Recording time -> edited time, from the kept spans edit-audio.mjs wrote. A
+// time inside a removed span maps to where that span was cut out. Identity
+// when the call has no edit.
+function loadClockMap(id: string, vf: VideoFile | null): (t: number) => number {
+  if (!vf?.edit) return (t) => t;
+  const file = new URL(`./calls/video/${id}.map.json`, ROOT);
+  if (!existsSync(file))
+    throw new Error(
+      `calls/video/${id}.yaml has an edit but no ${id}.map.json; run scripts/videogen/edit-audio.mjs`,
+    );
+  const { kept } = JSON.parse(readFileSync(file, "utf8")) as {
+    kept: [number, number, number][];
+  };
+  return (t) => {
+    for (const [from, to, at] of kept) {
+      if (t < from) return at;
+      if (t <= to) return at + (t - from);
+    }
+    const last = kept[kept.length - 1];
+    return last ? last[2] + (last[1] - last[0]) : t;
+  };
+}
+
+// "[h:]mm:ss[.ms]" -> seconds.
 function parseClock(s: string): number {
   const m = String(s)
     .trim()
     .match(/^(?:(\d+):)?(\d{1,2}):(\d{2})(?:\.(\d{1,3}))?$/);
-  if (!m) throw new Error(`displays: bad time "${s}" (want [h:]mm:ss[.ms])`);
+  if (!m) throw new Error(`video file: bad time "${s}" (want [h:]mm:ss[.ms])`);
   const h = m[1] ? parseInt(m[1], 10) : 0;
   const ms = m[4] ? parseInt(m[4].padEnd(3, "0"), 10) : 0;
   return h * 3600 + parseInt(m[2], 10) * 60 + parseInt(m[3], 10) + ms / 1000;
@@ -71,7 +125,7 @@ function resolveSrc(id: string, src: string): string {
   if (/^(https?:)?\/\//i.test(src) || src.startsWith("/")) return src;
   const file = src.replace(/^\.?\/?media\//, "");
   if (file.includes("/") || file.includes(".."))
-    throw new Error(`displays: src must be a file name, got "${src}"`);
+    throw new Error(`video file: src must be a file name, got "${src}"`);
   if (existsSync(new URL(`./calls/media/${file}`, ROOT)))
     return `/calls-media/${file}`;
   return `/videogen-cache/${id}/media/${file}`;
@@ -82,12 +136,14 @@ function displayKind(src: string): Display["kind"] {
 }
 
 export function buildDisplays(id: string): Display[] | undefined {
-  const list = loadVideoFile(id)?.displays;
+  const vf = loadVideoFile(id);
+  const list = vf?.displays;
   if (!list || list.length === 0) return undefined;
+  const toEdited = loadClockMap(id, vf);
   return list
     .map((d) => {
-      const start = parseClock(d.from);
-      const end = parseClock(d.to);
+      const start = toEdited(parseClock(d.from));
+      const end = toEdited(parseClock(d.to));
       if (end <= start)
         throw new Error(
           `displays: "${d.from}" -> "${d.to}" ends before it starts`,
@@ -102,4 +158,49 @@ export function buildDisplays(id: string): Display[] | undefined {
       return out;
     })
     .sort((a, b) => a.start - b.start);
+}
+
+// Longest cold open we accept: it is a teaser, not a segment.
+const COLD_OPEN_MAX_SEC = 20;
+
+export function buildColdOpen(id: string): ColdOpen | undefined {
+  const vf = loadVideoFile(id);
+  const c = vf?.coldOpen;
+  if (!c) return undefined;
+  const toEdited = loadClockMap(id, vf);
+  const start = toEdited(parseClock(c.from));
+  const end = toEdited(parseClock(c.to));
+  if (end <= start || end - start > COLD_OPEN_MAX_SEC)
+    throw new Error(
+      `coldOpen: "${c.from}" -> "${c.to}" must run forwards and last at most ${COLD_OPEN_MAX_SEC}s`,
+    );
+  const out: ColdOpen = { start, end, src: resolveSrc(id, c.src) };
+  if (c.quote) out.quote = c.quote;
+  if (c.zoomFrom != null) out.zoomFrom = c.zoomFrom;
+  if (c.zoomTo != null) out.zoomTo = c.zoomTo;
+  if (c.focus) out.focus = c.focus;
+  return out;
+}
+
+// Candidate cold-open stills: coldopen-*.{png,jpg,webp} in the call's media
+// cache, as servable URLs, each with its thumb-coldopen-*.webp thumbnail when
+// one exists (the stills are ~2560px; the gallery and review grid only need
+// the thumbnail).
+export function listColdOpenCandidates(
+  id: string,
+): { src: string; thumb?: string }[] | undefined {
+  const dir = new URL(`./.cache/videogen/${id}/media/`, ROOT);
+  if (!existsSync(dir)) return undefined;
+  const files = readdirSync(dir);
+  const url = (f: string) => `/videogen-cache/${id}/media/${f}`;
+  const list = files
+    .filter((f) => /^coldopen-.+\.(png|jpe?g|webp)$/i.test(f))
+    .sort()
+    .map((f) => {
+      const thumb = `thumb-${f.replace(/\.[^.]+$/, "")}.webp`;
+      return files.includes(thumb)
+        ? { src: url(f), thumb: url(thumb) }
+        : { src: url(f) };
+    });
+  return list.length ? list : undefined;
 }

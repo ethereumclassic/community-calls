@@ -54,12 +54,35 @@ const review = {
     title: c.title,
     t: vt(c.start),
   })),
-  displays: (meta.displays ?? []).map((d) => ({
-    label: d.src.split("/").pop(),
-    a: vt(d.start),
-    b: vt(d.end),
-  })),
+  displays: [
+    // The cold open opens the video, ahead of the preroll slides.
+    ...(timeline.coldOpenSec > 0
+      ? [{ label: "cold open", a: 0, b: timeline.coldOpenSec }]
+      : []),
+    ...(meta.displays ?? []).map((d) => ({
+      label: d.src.split("/").pop(),
+      a: vt(d.start),
+      b: vt(d.end),
+    })),
+  ],
 };
+
+// Cold-open stills to choose from (coldopen-* in the media cache), and the
+// one calls/video/<id>.yaml currently uses.
+const coldOpen = meta.coldOpen;
+const stills = (meta.coldOpenCandidates ?? []).map((c) => ({
+  src: c.src,
+  thumb: c.thumb ?? c.src,
+  name: c.src.split("/").pop() ?? c.src,
+  chosen: c.src === coldOpen?.src,
+}));
+const pageUrl = `/videogen?job=/videogen/${entry.data.number}/job.json&preview=1`;
+const galleryUrl = `${pageUrl}&gallery=1`;
+// The video's slides in order, for the slide tabs.
+const slideKeys = timeline.segments.flatMap((s) =>
+  s.kind === "slide" ? [s.key] : [],
+);
+const slideViewUrl = `${pageUrl}&slide=${slideKeys[0] ?? "hero"}`;
 ---
 
 <!doctype html>
@@ -216,6 +239,50 @@ const review = {
         border-radius: 8px;
         color: #8b8f98;
       }
+      .stills {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 14px;
+        margin: 10px 0 18px;
+      }
+      .stills figure {
+        margin: 0;
+      }
+      .stills img {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        object-fit: cover;
+        display: block;
+        border-radius: 6px;
+        border: 1px solid #26262c;
+      }
+      .stills figure.chosen img {
+        border: 3px solid #7aeea8;
+      }
+      .stills figcaption {
+        margin-top: 4px;
+        color: #8b8f98;
+      }
+      .slide-frame {
+        display: block;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        border: 1px solid #26262c;
+        border-radius: 8px;
+        margin: 10px 0 18px;
+        background: #000;
+      }
+      #slide-tabs button.on {
+        background: #7aeea8;
+        color: #0a0a0c;
+      }
+      .stills figure {
+        cursor: pointer;
+      }
+      .stills figure.previewing img {
+        outline: 3px dashed #7aeea8;
+        outline-offset: 2px;
+      }
       .clips {
         margin-top: 18px;
         border-top: 1px solid #2a2a33;
@@ -261,7 +328,7 @@ const review = {
         {review.title}
         <span>· review</span>
       </h1>
-      <video id="v" src={review.renderUrl} preload="metadata" controls></video>
+      <video id="v" src={review.renderUrl} preload="none" controls></video>
       <div class="missing hidden" id="missing">
         No render in the cache for this call. Expected
         <code>.cache/videogen/{review.id}/render.mp4</code>
@@ -299,6 +366,53 @@ const review = {
         &nbsp; · keys: ←/→ 5s · shift+←/→ 30s · ,/. one frame · J/L 10s · K play
         · 0–9 jump to tenths · I / O set clip in / out at the playhead
       </p>
+
+      <section>
+        <div class="row" id="slide-tabs">
+          <strong>Slides</strong>
+          {
+            slideKeys.map((k, i) => (
+              <button data-slide={k} class={i === 0 ? "on" : ""}>
+                {k === "coldopen" ? "cold open" : k}
+              </button>
+            ))
+          }
+          <a href={galleryUrl} target="_blank" rel="noopener">all at once ↗</a>
+        </div>
+        <iframe
+          class="slide-frame"
+          id="slide-frame"
+          src={slideViewUrl}
+          title="slide view"></iframe>
+        {
+          stills.length > 0 && (
+            <>
+              <div class="row">
+                <strong>Cold-open stills</strong>
+                <span class="hint">
+                  click to preview it in the cold open above; set{" "}
+                  <code>coldOpen.src</code> in{" "}
+                  <code>calls/video/{review.id}.yaml</code> to choose
+                </span>
+              </div>
+              <div class="stills">
+                {stills.map((s) => (
+                  <figure class={s.chosen ? "chosen" : ""} data-still={s.src}>
+                    <img src={s.thumb} alt={s.name} loading="lazy" />
+                    <figcaption>
+                      {s.name}
+                      {s.chosen ? " (chosen)" : ""} ·{" "}
+                      <a href={s.src} target="_blank" rel="noopener">
+                        full ↗
+                      </a>
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            </>
+          )
+        }
+      </section>
 
       <div class="clips">
         <div class="row">
@@ -376,9 +490,33 @@ const review = {
         R.displays.forEach((d) => {
           const hover = () => (hoveredWindow = d);
           mark("window", d.a, d.label, d.b, hover);
-          btn("windows", "win", d.label, d.a - 3, hover);
+          btn("windows", "win", d.label, Math.max(0, d.a - 3), hover);
         });
       }
+      // Slide tabs drive the embedded slide view by message (no reload); a
+      // cold-open still previews that image in the cold open.
+      const frame = document.getElementById("slide-frame");
+      const tabs = document.getElementById("slide-tabs");
+      const showSlide = (msg) => {
+        frame.contentWindow.postMessage(msg, "*");
+        if (msg.slide)
+          tabs.querySelectorAll("button[data-slide]").forEach((b) => {
+            b.classList.toggle("on", b.dataset.slide === msg.slide);
+          });
+      };
+      tabs.addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-slide]");
+        if (b) showSlide({ slide: b.dataset.slide });
+      });
+      document.querySelectorAll(".stills figure").forEach((f) => {
+        f.addEventListener("click", (e) => {
+          if (e.target.closest("a")) return;
+          document
+            .querySelectorAll(".stills figure")
+            .forEach((g) => g.classList.toggle("previewing", g === f));
+          showSlide({ slide: "coldopen", still: f.dataset.still });
+        });
+      });
       v.addEventListener("loadedmetadata", build);
       v.addEventListener("error", () => {
         document.getElementById("missing").classList.remove("hidden");
@@ -526,7 +664,7 @@ const review = {
           if (j.state === "done" && j.file) {
             const cv = document.createElement("video");
             cv.controls = true;
-            cv.preload = "metadata";
+            cv.preload = "none";
             cv.src = R.cacheBase + j.file;
             left.appendChild(cv);
           } else {

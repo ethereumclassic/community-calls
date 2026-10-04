@@ -4,3 +4,5 @@ node_modules/
 .claude/
 tmp/
 *.md
+# Written by scripts/videogen/edit-audio.mjs
+calls/video/*.map.json

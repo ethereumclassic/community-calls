@@ -13,6 +13,7 @@ import {
   hasJob,
   isPreview,
   noSlides,
+  slidesOnly,
   showGuides,
   loadJob,
   type Job,
@@ -106,14 +107,21 @@ async function init(): Promise<void> {
     // call is ~400 MB and the spectrum still covers speech.
     const SPECTRUM_RATE = 16000;
     try {
+      if (slidesOnly) throw new Error("slides only: duration only");
       const tmp = new OfflineAudioContext(1, SPECTRUM_RATE, SPECTRUM_RATE);
       const buf = await decodeAudio(job.audio, tmp);
       duration = buf.duration;
       setSpectrum(computeSpectrum(buf, { fps, bands }));
     } catch (e) {
       // Fall back to the media element for the duration and run without the
-      // precomputed spectrum (the live analyser still works).
-      console.warn("videogen: audio decode failed, using element duration", e);
+      // precomputed spectrum (the live analyser still works). The slide
+      // gallery and slide view come straight here so they never download the
+      // whole call.
+      if (!slidesOnly)
+        console.warn(
+          "videogen: audio decode failed, using element duration",
+          e,
+        );
       duration = await new Promise<number>((resolve, reject) => {
         const a = new Audio();
         a.preload = "metadata";
@@ -169,6 +177,12 @@ async function init(): Promise<void> {
         mainAudioUrl: string;
         mainDurationSec: number;
         mainAudioOffsetSec: number;
+        coldOpenSec: number;
+        coldOpenAudioFrom: number;
+        coldOpenFadeInSec: number;
+        coldOpenFadeOutSec: number;
+        introWindow: Timeline["intro"];
+        outroWindow: Timeline["outro"];
       };
     }
   ).__timings = {
@@ -184,6 +198,16 @@ async function init(): Promise<void> {
     // Trimmed main length + head-trim offset (cut dead air at head/tail).
     mainDurationSec: timeline.mainDurationSec,
     mainAudioOffsetSec: timeline.mainAudioOffsetSec,
+    // Cold open: the first coldOpenSec of the preroll plays the call audio
+    // from coldOpenAudioFrom; the intro jingle starts after it.
+    coldOpenSec: timeline.coldOpenSec,
+    coldOpenAudioFrom: timeline.coldOpenAudioFrom,
+    coldOpenFadeInSec: timeline.coldOpenFadeInSec,
+    coldOpenFadeOutSec: timeline.coldOpenFadeOutSec,
+    // The jingle windows exactly as the preview plays them (global times and
+    // volume envelopes), so the render mixes the same thing.
+    introWindow: timeline.intro,
+    outroWindow: timeline.outro,
   };
   seek(0);
 }

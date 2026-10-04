@@ -1,0 +1,28 @@
+# Call 61 video settings. All times are on the original recording clock;
+# scripts/videogen/edit-audio.mjs applies `edit` and writes the map that
+# carries them onto the edited audio.
+
+edit:
+  cuts:
+    # A stray "say like" before the welcome.
+    - { from: "0:00", to: "0:04.9" }
+    # Trolls in the chat, through the apologies after.
+    - { from: "10:15.3", to: "10:58.85" }
+  silence:
+    minGapSec: 2
+    keepSec: 0.75
+    thresholdDb: -40
+
+# Highlight before the preroll: Edilson on ETC being like a wolverine,
+# through "...with all their weapons all the time".
+coldOpen:
+  from: "53:20.5"
+  to: "53:35.5"
+  quote: Ethereum Classic is like Wolverine.
+  src: coldopen-10-slashes.webp
+
+# When the quote comes round in the call, show the cold-open still.
+displays:
+  - from: "53:20.5"
+    to: "53:35.5"
+    src: coldopen-10-slashes.webp

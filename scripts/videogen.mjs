@@ -345,6 +345,9 @@ const renderDur = limitDurationSec
   ? Math.min(limitDurationSec, duration)
   : duration;
 
+// Set by renderRealtime(); declared before the render runs (top-level let).
+let renderTimings = null;
+
 try {
   if (realtime) {
     await renderRealtime(renderDur);
@@ -443,7 +446,6 @@ async function renderPerFrame(durSec) {
 }
 
 // ── real-time CDP screencast renderer ──────────────────────────────────────
-let renderTimings = null;
 
 async function renderRealtime(durSec) {
   // Pull the page's pre/post-roll wallclock budget + jingle URLs so we can

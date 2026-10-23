@@ -263,15 +263,27 @@ export function thumbnailSlide(ctx: SlideContext): HTMLElement {
     ? ctx.cues.find((c) => c.end > co.start && c.start < co.end && c.speaker)
         ?.speaker
     : undefined;
-  const who = matchParticipant(speaker);
+  // A call without a guest shows everyone who spoke instead of one face.
+  const all = ctx.meta?.thumbnail?.faces === "all";
+  const who = all ? undefined : matchParticipant(speaker);
   root.innerHTML = `
     ${co ? `<img class="thumb-bg" src="${co.src}" alt="" />` : ""}
     <div class="thumb-shade"></div>
     <div class="thumb-num">${ctx.call?.number != null ? `#${ctx.call.number}` : ""}</div>
     <h1 class="thumb-title">${ctx.call?.title ?? ""}</h1>
-    ${who ? `<div class="thumb-face"></div>` : ""}`;
+    ${who ? `<div class="thumb-face"></div>` : ""}
+    ${all ? `<div class="thumb-faces"></div>` : ""}`;
   const face = root.querySelector<HTMLElement>(".thumb-face");
   if (face && who) setAvatar(face, who);
+  const faces = root.querySelector<HTMLElement>(".thumb-faces");
+  if (faces) {
+    for (const p of ctx.participants) {
+      const el = document.createElement("div");
+      el.className = "thumb-faces-one";
+      setAvatar(el, p);
+      faces.appendChild(el);
+    }
+  }
   // The stage's own logo overlay (logo + "Ethereum Classic / Community
   // Calls"), copied from the live stage like the cold open's header. Only the
   // left half: the right half would repeat the number and title.

@@ -45,6 +45,8 @@ export type SidecarMeta = {
   // its thumb-coldopen-* thumbnail when there is one), so the slide gallery
   // and review page can show the cold open over each candidate.
   coldOpenCandidates?: { src: string; thumb?: string }[];
+  // YouTube thumbnail faces: the cold open's speaker (default) or everyone.
+  thumbnail?: { faces?: "speaker" | "all" };
   displays?: Display[];
   hosts?: string[];
   episodeUrl?: string;

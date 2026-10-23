@@ -68,6 +68,11 @@ const videoFileSchema = z.object({
   // (the same clock as NOTE chapters), or on the recording clock when the
   // file has an edit.
   displays: z.array(displaySchema).optional(),
+  // YouTube thumbnail: `faces: speaker` (default) shows the cold open's
+  // speaker, for a guest interview; `faces: all` shows every participant.
+  thumbnail: z
+    .object({ faces: z.enum(["speaker", "all"]).optional() })
+    .optional(),
 });
 
 type VideoFile = z.infer<typeof videoFileSchema>;
@@ -162,6 +167,12 @@ export function buildDisplays(id: string): Display[] | undefined {
 
 // Longest cold open we accept: it is a teaser, not a segment.
 const COLD_OPEN_MAX_SEC = 20;
+
+export function buildThumbnail(
+  id: string,
+): { faces?: "speaker" | "all" } | undefined {
+  return loadVideoFile(id)?.thumbnail;
+}
 
 export function buildColdOpen(id: string): ColdOpen | undefined {
   const vf = loadVideoFile(id);

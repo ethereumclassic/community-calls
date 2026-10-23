@@ -17,6 +17,7 @@ import type { SidecarMeta, Chapter } from "./sidecar";
 import {
   buildColdOpen,
   buildDisplays,
+  buildThumbnail,
   listColdOpenCandidates,
 } from "./video-file";
 
@@ -118,5 +119,6 @@ export function buildMeta(entry: Entry, vtt: string): SidecarMeta {
     displays: buildDisplays(entry.id),
     coldOpen: buildColdOpen(entry.id),
     coldOpenCandidates: listColdOpenCandidates(entry.id),
+    thumbnail: buildThumbnail(entry.id),
   };
 }

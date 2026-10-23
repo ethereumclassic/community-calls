@@ -1,0 +1,26 @@
+# Call 62 video settings. All times are on the original recording clock;
+# scripts/videogen/edit-audio.mjs applies `edit` and writes the map that
+# carries them onto the edited audio.
+
+edit:
+  silence:
+    minGapSec: 2
+    keepSec: 0.75
+    thresholdDb: -40
+
+# Highlight before the preroll: Diego on why proof of work needs no bunker.
+coldOpen:
+  from: "32:06.0"
+  to: "32:23.3"
+  quote: It will not be possible to forge blocks in a proof-of-work network, even if they are able to break the elliptic curves.
+  src: coldopen-04-shelter.webp
+
+# When the quote comes round in the call, show the cold-open still.
+displays:
+  - from: "32:06.0"
+    to: "32:23.3"
+    src: coldopen-04-shelter.webp
+
+# YouTube thumbnail: no guest this call, so show all four speakers.
+thumbnail:
+  faces: all

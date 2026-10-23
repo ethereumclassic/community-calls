@@ -10,6 +10,7 @@ diego:
   displayName: Diego
   aliases: [Diego L.L., Diego L. L., Diego López León]
   avatar: diego.webp
+  github: diega
 lunar:
   displayName: Lunar
   aliases: [Lunar Warden, LW, Luna]
@@ -63,3 +64,8 @@ eddieoz:
     - "@eddieoz"
   avatar: eddieoz.webp
   github: eddieoz
+alex:
+  displayName: Alex
+  aliases: [Alex ETCMC, ETCMCv2]
+  avatar: alex.webp
+  github: Nowalski

@@ -27,6 +27,7 @@ import {
   segmentAt,
   segmentIndexAt,
   jingleVolumeAt,
+  coldOpenAudioAt,
   type Segment,
   type Timeline,
 } from "./timeline";
@@ -271,7 +272,10 @@ export function setupPreviewControls(ctx: Ctx): void {
   function onEnterSegment(seg: Segment, t: number): void {
     if (!timeline) return;
     if (seg.kind === "slide" && seg.audioFrom != null) {
-      previewAudio.currentTime = seg.audioFrom + Math.max(0, t - seg.start);
+      previewAudio.currentTime = coldOpenAudioAt(
+        timeline.coldOpenSpans,
+        t - seg.start,
+      );
       if (playing) void previewAudio.play().catch(() => {});
     } else if (seg.kind === "main") {
       // Audio plays from the trimmed-head offset, not from 0.
@@ -312,6 +316,15 @@ export function setupPreviewControls(ctx: Ctx): void {
     if (idx !== activeIdx) {
       onEnterSegment(seg, t);
       activeIdx = idx;
+    } else if (
+      seg.kind === "slide" &&
+      seg.audioFrom != null &&
+      timeline.coldOpenSpans.length > 1
+    ) {
+      // A cold open with cuts: jump over each cut as the clock reaches it.
+      const want = coldOpenAudioAt(timeline.coldOpenSpans, t - seg.start);
+      if (Math.abs(previewAudio.currentTime - want) > 0.08)
+        previewAudio.currentTime = want;
     } else if (
       seg.kind === "main" &&
       playing &&

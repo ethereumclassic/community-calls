@@ -33,6 +33,9 @@ export type ColdOpen = {
   end: number;
   src: string;
   quote?: string; // on-screen caption; default is the clip's spoken words
+  // The kept stretches of audio, in order, when the clip has cuts (fillers
+  // taken out); absent means the whole start..end plays.
+  spans?: { start: number; end: number }[];
   zoomFrom?: number;
   zoomTo?: number;
   focus?: string; // "x% y%" of the frame

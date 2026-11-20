@@ -179,6 +179,7 @@ async function init(): Promise<void> {
         mainAudioOffsetSec: number;
         coldOpenSec: number;
         coldOpenAudioFrom: number;
+        coldOpenSpans: { start: number; end: number }[];
         coldOpenFadeInSec: number;
         coldOpenFadeOutSec: number;
         introWindow: Timeline["intro"];
@@ -202,6 +203,7 @@ async function init(): Promise<void> {
     // from coldOpenAudioFrom; the intro jingle starts after it.
     coldOpenSec: timeline.coldOpenSec,
     coldOpenAudioFrom: timeline.coldOpenAudioFrom,
+    coldOpenSpans: timeline.coldOpenSpans,
     coldOpenFadeInSec: timeline.coldOpenFadeInSec,
     coldOpenFadeOutSec: timeline.coldOpenFadeOutSec,
     // The jingle windows exactly as the preview plays them (global times and

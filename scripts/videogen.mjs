@@ -499,6 +499,7 @@ async function renderRealtime(durSec) {
     // preroll): that stretch of the call plays before the intro jingle.
     coldOpenSec: startSec != null ? 0 : (timings.coldOpenSec ?? 0),
     coldOpenFrom: timings.coldOpenAudioFrom ?? 0,
+    coldOpenSpans: timings.coldOpenSpans ?? null,
     mainSec,
     postrollSec,
     coldOpenFadeInSec: timings.coldOpenFadeInSec ?? 0,
@@ -940,8 +941,32 @@ async function buildConcatAudio(outPath, opts) {
     // the jingle coming in).
     const fadeIn = Math.max(0.01, opts.coldOpenFadeInSec ?? 0.05);
     const fadeOut = Math.min(opts.coldOpenFadeOutSec ?? 0.3, coldSec / 2);
+    const spans = opts.coldOpenSpans?.length
+      ? opts.coldOpenSpans
+      : [{ start: opts.coldOpenFrom, end: opts.coldOpenFrom + coldSec }];
+    if (spans.length === 1) {
+      filters.push(
+        `[coldsrc]atrim=start=${spans[0].start}:end=${spans[0].end},asetpts=PTS-STARTPTS[coldraw]`,
+      );
+    } else {
+      // Cuts: each kept stretch with a 10ms fade at the joins (no clicks),
+      // played back to back.
+      const j = 0.01;
+      filters.push(
+        `[coldsrc]asplit=${spans.length}${spans.map((_, i) => `[cs${i}]`).join("")}`,
+      );
+      spans.forEach((s, i) => {
+        const d = s.end - s.start;
+        filters.push(
+          `[cs${i}]atrim=start=${s.start}:end=${s.end},asetpts=PTS-STARTPTS,afade=t=in:d=${j},afade=t=out:st=${Math.max(0, d - j)}:d=${j}[cp${i}]`,
+        );
+      });
+      filters.push(
+        `${spans.map((_, i) => `[cp${i}]`).join("")}concat=n=${spans.length}:v=0:a=1[coldraw]`,
+      );
+    }
     filters.push(
-      `[coldsrc]atrim=start=${opts.coldOpenFrom}:end=${opts.coldOpenFrom + coldSec},asetpts=PTS-STARTPTS,afade=t=in:d=${fadeIn},afade=t=out:st=${coldSec - fadeOut}:d=${fadeOut}[cold]`,
+      `[coldraw]atrim=duration=${coldSec},afade=t=in:d=${fadeIn},afade=t=out:st=${coldSec - fadeOut}:d=${fadeOut}[cold]`,
     );
     mixLabels.push("[cold]");
   }

@@ -96,6 +96,9 @@ export type Timeline = {
   // call audio from coldOpenAudioFrom, faded in/out over coldOpenFade*Sec.
   coldOpenSec: number;
   coldOpenAudioFrom: number;
+  // The call-audio stretches the cold open plays back to back (one unless the
+  // clip has cuts); coldOpenSec is their total length.
+  coldOpenSpans: { start: number; end: number }[];
   coldOpenFadeInSec: number;
   coldOpenFadeOutSec: number;
   // Final audio-fade / fade-to-black window: [totalDuration - endFadeSec,
@@ -158,6 +161,30 @@ const POSTROLL_KEYS: Exclude<SlideKey, "coldopen">[] = [
   "logo",
 ];
 
+// The cold open's kept audio stretches (the whole clip unless it has cuts).
+function coldOpenSpans(co: {
+  start: number;
+  end: number;
+  spans?: { start: number; end: number }[];
+}): { start: number; end: number }[] {
+  return co.spans?.length ? co.spans : [{ start: co.start, end: co.end }];
+}
+
+// Call-audio time for a moment `local` seconds into the cold open.
+export function coldOpenAudioAt(
+  spans: { start: number; end: number }[],
+  local: number,
+): number {
+  let left = Math.max(0, local);
+  for (const s of spans) {
+    const len = s.end - s.start;
+    if (left < len) return s.start + left;
+    left -= len;
+  }
+  const last = spans[spans.length - 1];
+  return last ? last.end : 0;
+}
+
 export function buildTimeline(spec: TimelineSpec): Timeline {
   const segments: Segment[] = [];
   const useSlides = spec.includeSlides && spec.meta != null;
@@ -168,7 +195,10 @@ export function buildTimeline(spec: TimelineSpec): Timeline {
   if (useSlides && meta) {
     for (const key of prerollKeys(meta)) {
       if (key === "coldopen" && meta.coldOpen) {
-        coldOpenSec = meta.coldOpen.end - meta.coldOpen.start;
+        coldOpenSec = coldOpenSpans(meta.coldOpen).reduce(
+          (s, x) => s + x.end - x.start,
+          0,
+        );
         const end = t + coldOpenSec;
         segments.push({
           kind: "slide",
@@ -302,6 +332,7 @@ export function buildTimeline(spec: TimelineSpec): Timeline {
     outro,
     coldOpenSec,
     coldOpenAudioFrom: meta?.coldOpen?.start ?? 0,
+    coldOpenSpans: meta?.coldOpen ? coldOpenSpans(meta.coldOpen) : [],
     coldOpenFadeInSec: coldOpenSec > 0 ? COLD_OPEN_FADE_IN_SEC : 0,
     coldOpenFadeOutSec: coldOpenSec > 0 ? COLD_OPEN_FADE_OUT_SEC : 0,
     endFadeSec,

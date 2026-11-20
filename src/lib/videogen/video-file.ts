@@ -35,10 +35,12 @@ const displaySchema = z.object({
 // Cold open: a short highlight from the call played before the preroll, over
 // a still. `from`/`to` pick the audio; `src` resolves like a display src;
 // `quote` is the on-screen caption (default: the words spoken in the clip);
-// zoom/focus behave as for an image display.
+// zoom/focus behave as for an image display. `cuts` drop stretches inside
+// from..to (an "um", an aside), recording clock like from/to.
 const coldOpenSchema = z.object({
   from: z.string(),
   to: z.string(),
+  cuts: z.array(z.object({ from: z.string(), to: z.string() })).optional(),
   src: z.string(),
   quote: z.string().optional(),
   zoomFrom: z.number().positive().optional(),
@@ -181,11 +183,31 @@ export function buildColdOpen(id: string): ColdOpen | undefined {
   const toEdited = loadClockMap(id, vf);
   const start = toEdited(parseClock(c.from));
   const end = toEdited(parseClock(c.to));
-  if (end <= start || end - start > COLD_OPEN_MAX_SEC)
+  // Kept spans: from..to minus the cuts, in order.
+  const spans: { start: number; end: number }[] = [];
+  let at = start;
+  const cuts = (c.cuts ?? [])
+    .map((x) => ({
+      a: toEdited(parseClock(x.from)),
+      b: toEdited(parseClock(x.to)),
+    }))
+    .sort((x, y) => x.a - y.a);
+  for (const { a, b } of cuts) {
+    if (b <= a || a < at || b > end)
+      throw new Error(
+        `coldOpen cuts must run forwards, not overlap, and sit inside ${c.from}..${c.to}`,
+      );
+    if (a > at) spans.push({ start: at, end: a });
+    at = b;
+  }
+  if (end > at) spans.push({ start: at, end });
+  const kept = spans.reduce((s, x) => s + x.end - x.start, 0);
+  if (end <= start || kept > COLD_OPEN_MAX_SEC)
     throw new Error(
       `coldOpen: "${c.from}" -> "${c.to}" must run forwards and last at most ${COLD_OPEN_MAX_SEC}s`,
     );
   const out: ColdOpen = { start, end, src: resolveSrc(id, c.src) };
+  if (cuts.length) out.spans = spans;
   if (c.quote) out.quote = c.quote;
   if (c.zoomFrom != null) out.zoomFrom = c.zoomFrom;
   if (c.zoomTo != null) out.zoomTo = c.zoomTo;

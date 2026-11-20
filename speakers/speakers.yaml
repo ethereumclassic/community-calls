@@ -48,6 +48,8 @@ jennifer:
   aliases: [Jenny]
 marek:
   displayName: Marek
+  aliases: [RegularMarek]
+  avatar: marek.webp
 lal:
   displayName: lal
   aliases: [Brolal, bro lal]
